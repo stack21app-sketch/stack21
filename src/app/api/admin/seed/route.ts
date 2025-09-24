@@ -5,6 +5,9 @@ export const dynamic = 'force-dynamic'
 export const revalidate = 0
 export const fetchCache = 'force-no-store'
 export const preferredRegion = 'iad1'
+
+// Deshabilitar este endpoint por defecto en producción para evitar ejecuciones en build
+const ADMIN_SEED_ENABLED = process.env.ADMIN_SEED_ENABLED === 'true'
 import { prisma } from '@/lib/prisma'
 
 function isAuthorized(req: NextRequest): boolean {
@@ -16,11 +19,15 @@ function isAuthorized(req: NextRequest): boolean {
 }
 
 export async function POST(req: NextRequest) {
+  if (!ADMIN_SEED_ENABLED) {
+    return NextResponse.json({ success: false, error: 'Disabled in production' }, { status: 404 })
+  }
   if (!isAuthorized(req)) {
     return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
   }
 
   try {
+    const { prisma } = await import('@/lib/prisma')
     const body = await req.json().catch(() => ({} as any))
     const adminEmail = body.email || 'admin@stack21.local'
     const adminName = body.name || 'Administrador'
@@ -66,12 +73,16 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
+  if (!ADMIN_SEED_ENABLED) {
+    return NextResponse.json({ success: false, error: 'Disabled in production' }, { status: 404 })
+  }
   if (!isAuthorized(req)) {
     return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
   }
 
   // Idempotent check
   const adminEmail = 'admin@stack21.local'
+  const { prisma } = await import('@/lib/prisma')
   const user = await prisma.user.findUnique({ where: { email: adminEmail } })
   const workspace = await prisma.workspace.findUnique({ where: { slug: 'default' } })
   return NextResponse.json({
