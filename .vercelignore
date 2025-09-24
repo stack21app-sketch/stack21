@@ -1,0 +1,36 @@
+# Exclude submodules and local-only directories from Vercel build
+stack21-mobile/
+backups/
+logs/
+ssl/
+*.backup
+*.sql
+*.sql.gz
+
+# Tests and tooling not needed at runtime
+playwright.config.ts
+tests/
+__tests__/
+.testsprite/
+testsprite_tests/
+
+# Docs and local scripts
+docs/
+README-PRODUCTION.md
+WAITLIST_README.md
+WAITLIST_IMPROVEMENTS.md
+LEGAL_COMPLIANCE_REPORT.md
+LEGAL_IMPLEMENTATION_SUMMARY.md
+SUPABASE_SETUP.md
+DEPLOY-PRIVATE.md
+TECHNICAL_DOCS.md
+SETUP.md
+SETUP_WAITLIST.md
+
+# Node and Next artifacts (Vercel builds them)
+.next/
+node_modules/
+
+# Misc
+.env*
+*.log
