@@ -1,0 +1,91 @@
+{
+  "app": {
+    "name": "Stack21",
+    "description": "A plataforma SaaS definitiva para automatizar seu negócio com IA"
+  },
+  "navigation": {
+    "dashboard": "Painel",
+    "workspaces": "Workspaces",
+    "projects": "Projetos",
+    "workflows": "Fluxos de Trabalho",
+    "aiAssistant": "Assistente IA",
+    "analytics": "Analytics",
+    "billing": "Faturamento",
+    "settings": "Configurações",
+    "support": "Suporte",
+    "logout": "Sair",
+    "members": "Membros",
+    "aiAssistantByIndustry": "Assistente de IA por Indústria",
+    "workflowBuilder": "Construtor de Workflows",
+    "workflowCopilot": "Copilot de Workflows",
+    "marketplace": "Marketplace",
+    "smartDashboard": "Dashboard Inteligente",
+    "gamification": "Gamificação",
+    "businessIntelligence": "Inteligência de Negócios",
+    "integrations": "Integrações",
+    "documentation": "Documentação",
+    "audit": "Auditoria",
+    "webhooks": "Webhooks",
+    "pricing": "Preços",
+    "whiteLabel": "Marca Branca"
+  },
+  "badges": {
+    "new": "Novo",
+    "visual": "Visual",
+    "ai": "IA",
+    "transparent": "Transparente",
+    "enterprise": "Enterprise"
+  },
+  "buttons": {
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "delete": "Excluir",
+    "edit": "Editar",
+    "create": "Criar",
+    "update": "Atualizar",
+    "confirm": "Confirmar",
+    "back": "Voltar",
+    "next": "Próximo",
+    "finish": "Finalizar",
+    "loading": "Carregando...",
+    "retry": "Tentar novamente"
+  },
+  "status": {
+    "success": "Sucesso",
+    "error": "Erro",
+    "warning": "Aviso",
+    "info": "Informação",
+    "loading": "Carregando",
+    "saved": "Salvo",
+    "deleted": "Excluído",
+    "updated": "Atualizado"
+  },
+  "messages": {
+    "welcome": "Bem-vindo",
+    "goodbye": "Até logo",
+    "success": "Operação bem-sucedida",
+    "error": "Ocorreu um erro",
+    "confirmDelete": "Tem certeza de que deseja excluir este item?",
+    "noData": "Nenhum dado disponível",
+    "search": "Pesquisar...",
+    "filter": "Filtrar",
+    "sort": "Ordenar"
+  },
+  "time": {
+    "now": "Agora",
+    "today": "Hoje",
+    "yesterday": "Ontem",
+    "tomorrow": "Amanhã",
+    "thisWeek": "Esta semana",
+    "lastWeek": "Semana passada",
+    "thisMonth": "Este mês",
+    "lastMonth": "Mês passado"
+  },
+  "ai": {
+    "title": "Assistente IA Multilíngue",
+    "placeholder": "Digite sua mensagem...",
+    "thinking": "Pensando...",
+    "error": "Desculpe, houve um erro ao processar sua mensagem.",
+    "suggestion": "Pergunte sobre workflows, automação ou conselhos de negócios"
+  }
+}

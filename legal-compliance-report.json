@@ -1,0 +1,27 @@
+{
+  "timestamp": "2025-09-23T03:32:18.201Z",
+  "overallScore": 70,
+  "details": {
+    "files": {
+      "total": 16,
+      "found": 16,
+      "missing": [],
+      "errors": []
+    },
+    "tests": {
+      "passed": 0,
+      "total": 0,
+      "percentage": 0
+    },
+    "cicd": {
+      "hasLegalTests": true,
+      "hasTestSprite": true
+    },
+    "package": {
+      "hasLegalTestScript": true
+    }
+  },
+  "recommendations": [
+    "Corregir tests de conformidad que están fallando"
+  ]
+}

@@ -1,0 +1,103 @@
+{
+  "hero": {
+    "badge": "Automatisation Intelligente",
+    "title": "Automatisez votre Entreprise avec l'IA",
+    "subtitle": "Stack21 combine l'intelligence artificielle, la facturation automatique et la gestion multi-tenant pour révolutionner votre entreprise. Automatisez les processus, augmentez la productivité et évoluez sans limites.",
+    "ctaPrimary": "Commencer Gratuitement",
+    "ctaSecondary": "Voir la Démo",
+    "ctaPricing": "Voir les Prix"
+  },
+  "features": {
+    "title": "Fonctionnalités Uniques",
+    "subtitle": "Des fonctionnalités que la concurrence n'a pas",
+    "aiAssistant": {
+      "title": "Assistant IA par Secteur",
+      "description": "IA spécialisée qui comprend votre secteur et automatise les tâches spécifiques"
+    },
+    "workflowBuilder": {
+      "title": "Constructeur de Flux Visuel",
+      "description": "Créez des flux de travail complexes avec un glisser-déposer intuitif"
+    },
+    "businessIntelligence": {
+      "title": "Intelligence d'Entreprise",
+      "description": "Insights automatiques et prédictions basées sur vos données"
+    },
+    "marketplace": {
+      "title": "Marketplace de Modules",
+      "description": "Intégrez des outils tiers et monétisez vos créations"
+    },
+    "gamification": {
+      "title": "Gamification Avancée",
+      "description": "Engagez votre équipe avec des points, niveaux et récompenses"
+    },
+    "mobileApp": {
+      "title": "App Mobile Native",
+      "description": "Accédez à toutes les fonctions depuis votre mobile"
+    }
+  },
+  "pricing": {
+    "title": "Prix Transparents",
+    "subtitle": "Choisissez le plan qui convient le mieux à votre entreprise",
+    "personal": {
+      "name": "Personnel",
+      "price": "47€",
+      "period": "/mois",
+      "description": "Parfait pour les freelances et entrepreneurs",
+      "features": [
+        "1 Utilisateur",
+        "1 Espace de travail",
+        "Assistant IA basique",
+        "Flux illimités",
+        "Support par e-mail"
+      ]
+    },
+    "pro": {
+      "name": "Pro",
+      "price": "97€",
+      "period": "/mois",
+      "description": "Idéal pour les petites entreprises",
+      "features": [
+        "1 Utilisateur",
+        "Espaces illimités",
+        "Assistant IA avancé",
+        "Intelligence d'entreprise",
+        "Support prioritaire"
+      ]
+    },
+    "starter": {
+      "name": "Starter",
+      "price": "197€",
+      "period": "/mois",
+      "description": "Pour les équipes en croissance",
+      "features": [
+        "5 Utilisateurs",
+        "Espaces illimités",
+        "Toutes les fonctions IA",
+        "Marketplace",
+        "Support 24/7"
+      ]
+    },
+    "professional": {
+      "name": "Professional",
+      "price": "397€",
+      "period": "/mois",
+      "description": "Pour les entreprises établies",
+      "features": [
+        "25 Utilisateurs",
+        "Fonctions avancées",
+        "API personnalisée",
+        "Intégrations premium",
+        "Support dédié"
+      ]
+    }
+  },
+  "testimonials": {
+    "title": "Ce que disent nos clients",
+    "subtitle": "Plus de 10 000 entreprises font confiance à Stack21"
+  },
+  "cta": {
+    "title": "Prêt à automatiser votre entreprise ?",
+    "subtitle": "Rejoignez des milliers d'entreprises qui utilisent déjà Stack21",
+    "button": "Commencer Maintenant"
+  }
+}

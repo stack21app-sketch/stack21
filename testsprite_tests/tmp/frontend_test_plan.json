@@ -1,0 +1,375 @@
+{
+  "test_plan": {
+    "project_name": "Stack21 - Frontend Testing Plan",
+    "test_type": "frontend",
+    "framework": "TestSprite + Playwright",
+    "created_date": "2024-12-19",
+    "version": "1.0",
+    "description": "Plan completo de testing para la interfaz de usuario de Stack21, incluyendo agentes de IA, dashboard, autenticación y funcionalidades principales",
+    
+    "test_categories": [
+      {
+        "category": "Authentication & Onboarding",
+        "priority": "Critical",
+        "description": "Tests para flujos de autenticación, registro y onboarding de usuarios",
+        "test_cases": [
+          {
+            "id": "AUTH-001",
+            "name": "Google OAuth Login",
+            "description": "Verificar que el login con Google funciona correctamente",
+            "steps": [
+              "1. Navegar a /auth/signin",
+              "2. Hacer clic en 'Continuar con Google'",
+              "3. Completar flujo de OAuth de Google",
+              "4. Verificar redirección a /dashboard",
+              "5. Verificar que el usuario está autenticado"
+            ],
+            "expected_result": "Usuario autenticado exitosamente y redirigido al dashboard",
+            "priority": "High"
+          },
+          {
+            "id": "AUTH-002", 
+            "name": "GitHub OAuth Login",
+            "description": "Verificar que el login con GitHub funciona correctamente",
+            "steps": [
+              "1. Navegar a /auth/signin",
+              "2. Hacer clic en 'Continuar con GitHub'",
+              "3. Completar flujo de OAuth de GitHub",
+              "4. Verificar redirección a /dashboard",
+              "5. Verificar que el usuario está autenticado"
+            ],
+            "expected_result": "Usuario autenticado exitosamente y redirigido al dashboard",
+            "priority": "High"
+          },
+          {
+            "id": "AUTH-003",
+            "name": "Logout Functionality",
+            "description": "Verificar que el logout funciona correctamente",
+            "steps": [
+              "1. Estar autenticado en el dashboard",
+              "2. Hacer clic en el menú de usuario",
+              "3. Seleccionar 'Cerrar Sesión'",
+              "4. Verificar redirección a /auth/signin",
+              "5. Verificar que la sesión se cerró correctamente"
+            ],
+            "expected_result": "Usuario desautenticado y redirigido a la página de login",
+            "priority": "High"
+          },
+          {
+            "id": "AUTH-004",
+            "name": "Protected Route Access",
+            "description": "Verificar que las rutas protegidas requieren autenticación",
+            "steps": [
+              "1. Estar desautenticado",
+              "2. Intentar acceder a /dashboard",
+              "3. Verificar redirección a /auth/signin",
+              "4. Intentar acceder a /agents",
+              "5. Verificar redirección a /auth/signin"
+            ],
+            "expected_result": "Rutas protegidas redirigen a login cuando no hay autenticación",
+            "priority": "High"
+          }
+        ]
+      },
+      {
+        "category": "AI Agents Interface",
+        "priority": "Critical", 
+        "description": "Tests para la interfaz de agentes de IA, incluyendo chat, selección de agentes y ejecución",
+        "test_cases": [
+          {
+            "id": "AGENT-001",
+            "name": "Agent Selection Interface",
+            "description": "Verificar que la interfaz de selección de agentes funciona correctamente",
+            "steps": [
+              "1. Navegar a /agents",
+              "2. Verificar que se muestran todos los agentes disponibles",
+              "3. Verificar que cada agente muestra icono, nombre y descripción",
+              "4. Hacer clic en un agente",
+              "5. Verificar que se selecciona correctamente"
+            ],
+            "expected_result": "Interfaz de agentes se carga correctamente y permite selección",
+            "priority": "Critical"
+          },
+          {
+            "id": "AGENT-002",
+            "name": "Agent Chat Interface",
+            "description": "Verificar que el chat con agentes funciona correctamente",
+            "steps": [
+              "1. Seleccionar un agente (ej: Reservas de Restaurantes)",
+              "2. Escribir una solicitud en el campo de texto",
+              "3. Hacer clic en 'Ejecutar Agente'",
+              "4. Verificar que se muestra el estado de ejecución",
+              "5. Verificar que se muestra el resultado"
+            ],
+            "expected_result": "Chat con agentes funciona correctamente y muestra resultados",
+            "priority": "Critical"
+          },
+          {
+            "id": "AGENT-003",
+            "name": "Agent Execution History",
+            "description": "Verificar que el historial de ejecuciones se muestra correctamente",
+            "steps": [
+              "1. Ejecutar varios agentes",
+              "2. Navegar a la pestaña 'Historial'",
+              "3. Verificar que se muestran todas las ejecuciones",
+              "4. Verificar que cada ejecución muestra agente, input, output y estado",
+              "5. Verificar que se puede ver el detalle de cada ejecución"
+            ],
+            "expected_result": "Historial de ejecuciones se muestra correctamente con todos los detalles",
+            "priority": "High"
+          },
+          {
+            "id": "AGENT-004",
+            "name": "Agent Usage Statistics",
+            "description": "Verificar que las estadísticas de uso se muestran correctamente",
+            "steps": [
+              "1. Navegar a /agents",
+              "2. Verificar que se muestran las estadísticas de uso",
+              "3. Verificar que se muestra el progreso de ejecuciones del mes",
+              "4. Verificar que se muestra el plan actual",
+              "5. Verificar que se muestran alertas si se acerca al límite"
+            ],
+            "expected_result": "Estadísticas de uso se muestran correctamente con información actualizada",
+            "priority": "High"
+          },
+          {
+            "id": "AGENT-005",
+            "name": "Agent Demo Functionality",
+            "description": "Verificar que la demo de agentes funciona correctamente",
+            "steps": [
+              "1. Navegar a /agents/demo",
+              "2. Verificar que se muestra la demo del agente de reservas",
+              "3. Hacer clic en 'Ejecutar Demo'",
+              "4. Verificar que se ejecutan los pasos de la demo",
+              "5. Verificar que se muestran los resultados de cada paso"
+            ],
+            "expected_result": "Demo de agentes funciona correctamente mostrando el flujo completo",
+            "priority": "Medium"
+          }
+        ]
+      },
+      {
+        "category": "Dashboard & Navigation",
+        "priority": "High",
+        "description": "Tests para el dashboard principal y navegación de la aplicación",
+        "test_cases": [
+          {
+            "id": "DASH-001",
+            "name": "Dashboard Main Page",
+            "description": "Verificar que el dashboard principal se carga correctamente",
+            "steps": [
+              "1. Autenticarse en la aplicación",
+              "2. Navegar a /dashboard",
+              "3. Verificar que se muestra el dashboard principal",
+              "4. Verificar que se muestran las métricas principales",
+              "5. Verificar que la navegación lateral funciona"
+            ],
+            "expected_result": "Dashboard principal se carga correctamente con todas las funcionalidades",
+            "priority": "High"
+          },
+          {
+            "id": "DASH-002",
+            "name": "Smart Dashboard",
+            "description": "Verificar que el dashboard inteligente funciona correctamente",
+            "steps": [
+              "1. Navegar a /smart-dashboard",
+              "2. Verificar que se muestran los insights automáticos",
+              "3. Verificar que se muestran las métricas en tiempo real",
+              "4. Verificar que se pueden filtrar los datos",
+              "5. Verificar que se pueden exportar reportes"
+            ],
+            "expected_result": "Dashboard inteligente funciona correctamente con insights y métricas",
+            "priority": "High"
+          },
+          {
+            "id": "DASH-003",
+            "name": "Analytics Dashboard",
+            "description": "Verificar que el dashboard de analytics funciona correctamente",
+            "steps": [
+              "1. Navegar a /analytics",
+              "2. Verificar que se muestran las métricas de uso",
+              "3. Verificar que se pueden cambiar los períodos de tiempo",
+              "4. Verificar que se muestran gráficos interactivos",
+              "5. Verificar que se pueden exportar datos"
+            ],
+            "expected_result": "Dashboard de analytics funciona correctamente con métricas y gráficos",
+            "priority": "High"
+          },
+          {
+            "id": "DASH-004",
+            "name": "Navigation Menu",
+            "description": "Verificar que el menú de navegación funciona correctamente",
+            "steps": [
+              "1. Verificar que el menú lateral se muestra",
+              "2. Hacer clic en cada opción del menú",
+              "3. Verificar que se navega correctamente a cada página",
+              "4. Verificar que el menú se colapsa en móviles",
+              "5. Verificar que el menú se mantiene en estado correcto"
+            ],
+            "expected_result": "Menú de navegación funciona correctamente en todas las páginas",
+            "priority": "High"
+          }
+        ]
+      },
+      {
+        "category": "Workflow Builder",
+        "priority": "High",
+        "description": "Tests para el constructor visual de workflows",
+        "test_cases": [
+          {
+            "id": "WORKFLOW-001",
+            "name": "Workflow Builder Interface",
+            "description": "Verificar que el constructor de workflows se carga correctamente",
+            "steps": [
+              "1. Navegar a /workflow-builder",
+              "2. Verificar que se muestra el canvas del workflow",
+              "3. Verificar que se muestran los nodos disponibles",
+              "4. Verificar que se puede hacer drag & drop de nodos",
+              "5. Verificar que se pueden conectar nodos"
+            ],
+            "expected_result": "Constructor de workflows se carga correctamente con todas las funcionalidades",
+            "priority": "High"
+          },
+          {
+            "id": "WORKFLOW-002",
+            "name": "Workflow Creation",
+            "description": "Verificar que se puede crear un workflow completo",
+            "steps": [
+              "1. Arrastrar un nodo trigger al canvas",
+              "2. Arrastrar un nodo de acción al canvas",
+              "3. Conectar los nodos con una línea",
+              "4. Configurar los parámetros de cada nodo",
+              "5. Guardar el workflow"
+            ],
+            "expected_result": "Workflow se crea correctamente y se guarda en la base de datos",
+            "priority": "High"
+          },
+          {
+            "id": "WORKFLOW-003",
+            "name": "Workflow Execution",
+            "description": "Verificar que se puede ejecutar un workflow",
+            "steps": [
+              "1. Crear un workflow simple",
+              "2. Hacer clic en 'Ejecutar Workflow'",
+              "3. Verificar que se muestra el estado de ejecución",
+              "4. Verificar que se ejecuta correctamente",
+              "5. Verificar que se muestran los resultados"
+            ],
+            "expected_result": "Workflow se ejecuta correctamente y muestra resultados",
+            "priority": "High"
+          }
+        ]
+      },
+      {
+        "category": "Responsive Design",
+        "priority": "Medium",
+        "description": "Tests para verificar que la aplicación funciona correctamente en diferentes dispositivos",
+        "test_cases": [
+          {
+            "id": "RESP-001",
+            "name": "Mobile Responsiveness",
+            "description": "Verificar que la aplicación funciona correctamente en móviles",
+            "steps": [
+              "1. Abrir la aplicación en un dispositivo móvil",
+              "2. Verificar que el menú se colapsa correctamente",
+              "3. Verificar que los formularios son usables",
+              "4. Verificar que los botones son accesibles",
+              "5. Verificar que el contenido se adapta correctamente"
+            ],
+            "expected_result": "Aplicación funciona correctamente en dispositivos móviles",
+            "priority": "Medium"
+          },
+          {
+            "id": "RESP-002",
+            "name": "Tablet Responsiveness",
+            "description": "Verificar que la aplicación funciona correctamente en tablets",
+            "steps": [
+              "1. Abrir la aplicación en una tablet",
+              "2. Verificar que el layout se adapta correctamente",
+              "3. Verificar que los elementos son del tamaño apropiado",
+              "4. Verificar que la navegación funciona correctamente",
+              "5. Verificar que no hay elementos cortados"
+            ],
+            "expected_result": "Aplicación funciona correctamente en tablets",
+            "priority": "Medium"
+          }
+        ]
+      },
+      {
+        "category": "Error Handling",
+        "priority": "High",
+        "description": "Tests para verificar el manejo de errores en la interfaz",
+        "test_cases": [
+          {
+            "id": "ERROR-001",
+            "name": "Network Error Handling",
+            "description": "Verificar que se manejan correctamente los errores de red",
+            "steps": [
+              "1. Simular pérdida de conexión",
+              "2. Intentar ejecutar un agente",
+              "3. Verificar que se muestra un mensaje de error apropiado",
+              "4. Restaurar la conexión",
+              "5. Verificar que se puede reintentar la operación"
+            ],
+            "expected_result": "Errores de red se manejan correctamente con mensajes apropiados",
+            "priority": "High"
+          },
+          {
+            "id": "ERROR-002",
+            "name": "API Error Handling",
+            "description": "Verificar que se manejan correctamente los errores de API",
+            "steps": [
+              "1. Simular un error 500 en una API",
+              "2. Intentar realizar una acción que use esa API",
+              "3. Verificar que se muestra un mensaje de error apropiado",
+              "4. Verificar que se puede reintentar la operación",
+              "5. Verificar que la aplicación no se rompe"
+            ],
+            "expected_result": "Errores de API se manejan correctamente sin romper la aplicación",
+            "priority": "High"
+          }
+        ]
+      }
+    ],
+    
+    "test_environment": {
+      "browsers": ["Chrome", "Firefox", "Safari", "Edge"],
+      "devices": ["Desktop", "Tablet", "Mobile"],
+      "screen_resolutions": ["1920x1080", "1366x768", "375x667", "768x1024"],
+      "test_data": {
+        "test_users": [
+          {
+            "email": "test@stack21.com",
+            "name": "Test User",
+            "plan": "pro"
+          }
+        ],
+        "test_agents": [
+          {
+            "id": "restaurant-reservations",
+            "name": "Agente de Reservas de Restaurantes"
+          },
+          {
+            "id": "marketing-automation", 
+            "name": "Agente de Marketing Automatizado"
+          }
+        ]
+      }
+    },
+    
+    "execution_strategy": {
+      "parallel_execution": true,
+      "retry_failed_tests": 2,
+      "screenshot_on_failure": true,
+      "video_recording": true,
+      "test_timeout": 30000
+    },
+    
+    "success_criteria": {
+      "pass_rate": "> 95%",
+      "critical_tests": "100% pass rate",
+      "performance": "< 3s page load time",
+      "accessibility": "WCAG 2.1 AA compliance"
+    }
+  }
+}

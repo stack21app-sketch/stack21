@@ -1,0 +1,512 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Modelo de Usuario - Base para autenticación
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relaciones
+  accounts      Account[]
+  sessions      Session[]
+  workspaces    WorkspaceMember[]
+  createdWorkspaces Workspace[] @relation("WorkspaceCreator")
+  apiKeys       ApiKey[]
+  notifications Notification[]
+  billing       Billing[]
+  analytics     Analytics[]
+  settings      UserSettings?
+  workflows     Workflow[]
+  workflowReviews WorkflowReview[]
+  // Conformidad legal
+  userConsent         UserConsent?
+  privacySettings     PrivacySettings?
+  dataDeletionRequests DataDeletionRequest[]
+  dataExportJobs       DataExportJob[]
+  // 2FA
+  twoFactorSecret     String?
+  twoFactorEnabled    Boolean @default(false)
+  twoFactorBackupCodes Json?
+
+  @@map("users")
+}
+
+// Modelo de Cuentas - Para NextAuth
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+// Modelo de Sesiones - Para NextAuth
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+// Modelo de Verificación - Para NextAuth
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// Modelo de Workspace - Espacio de trabajo multi-tenant
+model Workspace {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  creatorId   String
+
+  // Relaciones
+  creator     User              @relation("WorkspaceCreator", fields: [creatorId], references: [id])
+  members     WorkspaceMember[]
+  projects    Project[]
+  apiKeys     ApiKey[]
+  notifications Notification[]
+  billing     Billing[]
+  analytics   Analytics[]
+  workflows   Workflow[]
+  stripeCustomerId String?      @unique
+
+  @@map("workspaces")
+}
+
+// Modelo de Miembros del Workspace - Relación many-to-many
+model WorkspaceMember {
+  id          String   @id @default(cuid())
+  workspaceId String
+  userId      String
+  role        WorkspaceRole @default(MEMBER)
+  createdAt   DateTime @default(now())
+
+  // Relaciones
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+  @@map("workspace_members")
+}
+
+// Enum para roles de workspace
+enum WorkspaceRole {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+// Modelo de Proyecto - Dentro de un workspace
+model Project {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  workspaceId String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relaciones
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  modules     Module[]
+
+  @@map("projects")
+}
+
+// Modelo de Módulo - Componente de un proyecto
+model Module {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  type        ModuleType
+  config      Json?    // Configuración específica del módulo
+  projectId   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relaciones
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("modules")
+}
+
+// Enum para tipos de módulo
+enum ModuleType {
+  AI_CHAT
+  DATA_PROCESSOR
+  API_INTEGRATION
+  WORKFLOW_TRIGGER
+  CUSTOM
+}
+
+// Modelo de Workflow - Flujo de trabajo automatizado
+model Workflow {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  status      WorkflowStatus @default(DRAFT)
+  isActive    Boolean  @default(false)
+  triggerType TriggerType
+  triggerConfig Json?  // Configuración del trigger
+  nodes       Json     // Nodos del workflow (array de nodos)
+  connections Json     // Conexiones entre nodos
+  variables   Json?    // Variables del workflow
+  tags        String[] @default([])
+  industry    String?  // Industria específica
+  template    Boolean  @default(false) // Si es un template
+  public      Boolean  @default(false) // Si es público en marketplace
+  downloads   Int      @default(0) // Descargas del template
+  rating      Float?   // Rating promedio
+  price       Float?   // Precio en USD para marketplace
+  category    String?  // Categoría del marketplace
+  featured    Boolean  @default(false) // Destacado en marketplace
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relaciones
+  userId      String
+  workspaceId String
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  runLogs     RunLog[]
+  reviews     WorkflowReview[]
+
+  @@map("workflows")
+}
+
+// Modelo de Reviews de Workflows - Para marketplace
+model WorkflowReview {
+  id        String   @id @default(cuid())
+  rating    Int      // 1-5 estrellas
+  comment   String?
+  userId    String
+  workflowId String
+  createdAt DateTime @default(now())
+
+  // Relaciones
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workflow Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, workflowId])
+  @@map("workflow_reviews")
+}
+
+// Enum para estados de workflow
+enum WorkflowStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  ARCHIVED
+}
+
+// Enum para tipos de trigger
+enum TriggerType {
+  WEBHOOK
+  SCHEDULE
+  MANUAL
+  EMAIL
+  FORM_SUBMIT
+  API_CALL
+  FILE_UPLOAD
+  DATABASE_CHANGE
+}
+
+// Modelo de RunLog - Registro de ejecuciones
+model RunLog {
+  id          String   @id @default(cuid())
+  status      RunStatus
+  input       Json?    // Datos de entrada
+  output      Json?    // Datos de salida
+  error       String?  // Mensaje de error si falló
+  duration    Int?     // Duración en milisegundos
+  workflowId  String
+  startedAt   DateTime @default(now())
+  completedAt DateTime?
+
+  // Relaciones
+  workflow    Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+
+  @@map("run_logs")
+}
+
+// Enum para estados de ejecución
+enum RunStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+// Modelo de API Keys - Para autenticación de API
+model ApiKey {
+  id          String   @id @default(cuid())
+  name        String
+  key         String   @unique
+  userId      String
+  workspaceId String?
+  permissions Json?    // Permisos específicos
+  lastUsed    DateTime?
+  expiresAt   DateTime?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relaciones
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace   Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("api_keys")
+}
+
+// Modelo de Notificaciones - Sistema de notificaciones
+model Notification {
+  id          String   @id @default(cuid())
+  title       String
+  message     String
+  type        NotificationType
+  userId      String
+  workspaceId String?
+  isRead      Boolean  @default(false)
+  data        Json?    // Datos adicionales
+  createdAt   DateTime @default(now())
+  readAt      DateTime?
+
+  // Relaciones
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace   Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+// Enum para tipos de notificación
+enum NotificationType {
+  INFO
+  SUCCESS
+  WARNING
+  ERROR
+  BILLING
+  SYSTEM
+}
+
+// Modelo de Facturación - Gestión de pagos
+model Billing {
+  id                String   @id @default(cuid())
+  userId            String
+  workspaceId       String?
+  stripeCustomerId  String?  @unique
+  stripeSubscriptionId String? @unique
+  plan              String   @default("free")
+  status            BillingStatus @default(ACTIVE)
+  currentPeriodStart DateTime?
+  currentPeriodEnd   DateTime?
+  cancelAtPeriodEnd  Boolean @default(false)
+  trialEndsAt        DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relaciones
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace         Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("billing")
+}
+
+// Enum para estados de facturación
+enum BillingStatus {
+  ACTIVE
+  INACTIVE
+  CANCELLED
+  PAST_DUE
+  UNPAID
+  TRIALING
+}
+
+// Modelo de Analytics - Métricas y estadísticas
+model Analytics {
+  id          String   @id @default(cuid())
+  userId      String
+  workspaceId String?
+  event       String
+  data        Json?    // Datos del evento
+  timestamp   DateTime @default(now())
+  ipAddress   String?
+  userAgent   String?
+
+  // Relaciones
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace   Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("analytics")
+}
+
+// Modelo de Configuraciones de Usuario - Preferencias del usuario
+model UserSettings {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  preferences Json?    // Preferencias del usuario
+  theme       String   @default("dark")
+  language    String   @default("es")
+  timezone    String   @default("UTC")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relaciones
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_settings")
+}
+
+// Modelo de Waitlist - Lista de espera para prelanzamiento
+model WaitlistUser {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  name        String?
+  company     String?
+  role        String?
+  interests   String[] // Array de intereses
+  source      String?  // De dónde vino (Google, Facebook, etc.)
+  referredBy  String?  // Código de referido
+  tier        WaitlistTier @default(BASIC)
+  isVerified  Boolean  @default(false)
+  verificationToken String? @unique
+  subscribedAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("waitlist_users")
+}
+
+// Enum para tiers de waitlist
+enum WaitlistTier {
+  BASIC
+  PREMIUM
+  VIP
+  ENTERPRISE
+}
+
+// =============================
+// Conformidad Legal (GDPR/CCPA)
+// =============================
+
+// Registro de consentimiento del usuario (preferencias de cookies y procesamiento)
+model UserConsent {
+  id         String   @id @default(cuid())
+  userId     String   @unique
+  preferences Json    // Estructura: { essential, analytics, marketing, functional, timestamp }
+  ipAddress  String?
+  userAgent  String?
+  version    String   @default("1.0")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relaciones
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_consents")
+}
+
+// Configuración de privacidad del usuario
+model PrivacySettings {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  dataProcessing Json     // { analytics, marketing, profiling, automated_decision_making }
+  communications Json     // { email_notifications, marketing_emails, sms_notifications, push_notifications }
+  dataSharing    Json     // { third_parties, affiliates, research, government_requests }
+  retention      Json     // { profile_data, usage_data, technical_data, billing_data }
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relaciones
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("privacy_settings")
+}
+
+// Solicitudes de eliminación de datos (Derecho al Olvido)
+model DataDeletionRequest {
+  id                 String          @id @default(cuid())
+  userId             String
+  status             DeletionStatus  @default(PENDING)
+  reason             String?
+  dataCategories     String[]        // Categorías a eliminar
+  retentionExceptions String[]       // Excepciones legales (facturación, auditoría, etc.)
+  requestedAt        DateTime        @default(now())
+  processedAt        DateTime?
+
+  // Relaciones
+  user               User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+  @@map("data_deletion_requests")
+}
+
+enum DeletionStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+// Trabajos de exportación de datos (Portabilidad)
+model DataExportJob {
+  id                  String        @id @default(cuid())
+  userId              String
+  format              String        // json | csv | xml
+  includeTechnical    Boolean       @default(false)
+  status              ExportStatus  @default(PROCESSING)
+  createdAt           DateTime      @default(now())
+  estimatedCompletion DateTime?
+  completedAt         DateTime?
+
+  // Relaciones
+  user                User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+  @@map("data_export_jobs")
+}
+
+enum ExportStatus {
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+

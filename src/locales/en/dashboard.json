@@ -1,0 +1,40 @@
+{
+  "title": "Dashboard",
+  "welcome": "Welcome to Stack21",
+  "overview": "Overview",
+  "recentActivity": "Recent Activity",
+  "quickActions": "Quick Actions",
+  "statistics": "Statistics",
+  "workspaces": {
+    "title": "Workspaces",
+    "createNew": "Create New Workspace",
+    "switch": "Switch Workspace",
+    "settings": "Workspace Settings"
+  },
+  "ai": {
+    "title": "AI Assistant",
+    "askQuestion": "Ask a question...",
+    "suggestions": "Suggestions",
+    "history": "History",
+    "newChat": "New Conversation"
+  },
+  "workflows": {
+    "title": "Workflows",
+    "create": "Create Workflow",
+    "templates": "Templates",
+    "recent": "Recent",
+    "favorites": "Favorites"
+  },
+  "analytics": {
+    "title": "Analytics",
+    "views": "Views",
+    "conversions": "Conversions",
+    "revenue": "Revenue",
+    "users": "Users"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAllRead": "Mark all as read",
+    "empty": "No notifications"
+  }
+}

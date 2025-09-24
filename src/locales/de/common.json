@@ -1,0 +1,91 @@
+{
+  "app": {
+    "name": "Stack21",
+    "description": "Die ultimative SaaS-Plattform zur Automatisierung Ihres Unternehmens mit KI"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "workspaces": "Arbeitsbereiche",
+    "projects": "Projekte",
+    "workflows": "Arbeitsabläufe",
+    "aiAssistant": "KI-Assistent",
+    "analytics": "Analytics",
+    "billing": "Abrechnung",
+    "settings": "Einstellungen",
+    "support": "Support",
+    "logout": "Abmelden",
+    "members": "Mitglieder",
+    "aiAssistantByIndustry": "Branchen-KI-Assistent",
+    "workflowBuilder": "Workflow-Builder",
+    "workflowCopilot": "Workflow-Copilot",
+    "marketplace": "Marktplatz",
+    "smartDashboard": "Intelligentes Dashboard",
+    "gamification": "Gamifizierung",
+    "businessIntelligence": "Business Intelligence",
+    "integrations": "Integrationen",
+    "documentation": "Dokumentation",
+    "audit": "Audit",
+    "webhooks": "Webhooks",
+    "pricing": "Preise",
+    "whiteLabel": "White-Label"
+  },
+  "badges": {
+    "new": "Neu",
+    "visual": "Visual",
+    "ai": "KI",
+    "transparent": "Transparent",
+    "enterprise": "Enterprise"
+  },
+  "buttons": {
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "create": "Erstellen",
+    "update": "Aktualisieren",
+    "confirm": "Bestätigen",
+    "back": "Zurück",
+    "next": "Weiter",
+    "finish": "Beenden",
+    "loading": "Laden...",
+    "retry": "Wiederholen"
+  },
+  "status": {
+    "success": "Erfolg",
+    "error": "Fehler",
+    "warning": "Warnung",
+    "info": "Information",
+    "loading": "Laden",
+    "saved": "Gespeichert",
+    "deleted": "Gelöscht",
+    "updated": "Aktualisiert"
+  },
+  "messages": {
+    "welcome": "Willkommen",
+    "goodbye": "Auf Wiedersehen",
+    "success": "Operation erfolgreich",
+    "error": "Ein Fehler ist aufgetreten",
+    "confirmDelete": "Sind Sie sicher, dass Sie dieses Element löschen möchten?",
+    "noData": "Keine Daten verfügbar",
+    "search": "Suchen...",
+    "filter": "Filtern",
+    "sort": "Sortieren"
+  },
+  "time": {
+    "now": "Jetzt",
+    "today": "Heute",
+    "yesterday": "Gestern",
+    "tomorrow": "Morgen",
+    "thisWeek": "Diese Woche",
+    "lastWeek": "Letzte Woche",
+    "thisMonth": "Diesen Monat",
+    "lastMonth": "Letzten Monat"
+  },
+  "ai": {
+    "title": "Mehrsprachiger KI-Assistent",
+    "placeholder": "Schreiben Sie Ihre Nachricht...",
+    "thinking": "Denken...",
+    "error": "Entschuldigung, es gab einen Fehler bei der Verarbeitung Ihrer Nachricht.",
+    "suggestion": "Fragen Sie nach Workflows, Automatisierung oder Geschäftsberatung"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "title": "Tableau de bord",
+  "welcome": "Bienvenue sur Stack21",
+  "overview": "Aperçu",
+  "recentActivity": "Activité récente",
+  "quickActions": "Actions rapides",
+  "statistics": "Statistiques",
+  "workspaces": {
+    "title": "Espaces de travail",
+    "createNew": "Créer un nouvel espace",
+    "switch": "Changer d'espace",
+    "settings": "Paramètres de l'espace"
+  },
+  "ai": {
+    "title": "Assistant IA",
+    "askQuestion": "Posez une question...",
+    "suggestions": "Suggestions",
+    "history": "Historique",
+    "newChat": "Nouvelle conversation"
+  },
+  "workflows": {
+    "title": "Flux de travail",
+    "create": "Créer un flux",
+    "templates": "Modèles",
+    "recent": "Récents",
+    "favorites": "Favoris"
+  },
+  "analytics": {
+    "title": "Analytiques",
+    "views": "Vues",
+    "conversions": "Conversions",
+    "revenue": "Revenus",
+    "users": "Utilisateurs"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAllRead": "Tout marquer comme lu",
+    "empty": "Aucune notification"
+  }
+}

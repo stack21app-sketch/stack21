@@ -1,0 +1,103 @@
+{
+  "hero": {
+    "badge": "Smart Automation",
+    "title": "Automate Your Business with AI",
+    "subtitle": "Stack21 combines artificial intelligence, automatic billing and multi-tenant management to revolutionize your business. Automate processes, increase productivity and scale without limits.",
+    "ctaPrimary": "Start Free",
+    "ctaSecondary": "View Demo",
+    "ctaPricing": "View Pricing"
+  },
+  "features": {
+    "title": "Unique Features",
+    "subtitle": "Features that the competition doesn't have",
+    "aiAssistant": {
+      "title": "Industry-Specific AI Assistant",
+      "description": "Specialized AI that understands your sector and automates specific tasks"
+    },
+    "workflowBuilder": {
+      "title": "Visual Workflow Builder",
+      "description": "Create complex workflows with intuitive drag & drop"
+    },
+    "businessIntelligence": {
+      "title": "Business Intelligence",
+      "description": "Automatic insights and predictions based on your data"
+    },
+    "marketplace": {
+      "title": "Module Marketplace",
+      "description": "Integrate third-party tools and monetize your creations"
+    },
+    "gamification": {
+      "title": "Advanced Gamification",
+      "description": "Engage your team with points, levels and rewards"
+    },
+    "mobileApp": {
+      "title": "Native Mobile App",
+      "description": "Access all functions from your mobile device"
+    }
+  },
+  "pricing": {
+    "title": "Transparent Pricing",
+    "subtitle": "Choose the plan that best fits your business",
+    "personal": {
+      "name": "Personal",
+      "price": "$47",
+      "period": "/month",
+      "description": "Perfect for freelancers and entrepreneurs",
+      "features": [
+        "1 User",
+        "1 Workspace",
+        "Basic AI Assistant",
+        "Unlimited Workflows",
+        "Email Support"
+      ]
+    },
+    "pro": {
+      "name": "Pro",
+      "price": "$97",
+      "period": "/month",
+      "description": "Ideal for small businesses",
+      "features": [
+        "1 User",
+        "Unlimited Workspaces",
+        "Advanced AI Assistant",
+        "Business Intelligence",
+        "Priority Support"
+      ]
+    },
+    "starter": {
+      "name": "Starter",
+      "price": "$197",
+      "period": "/month",
+      "description": "For growing teams",
+      "features": [
+        "5 Users",
+        "Unlimited Workspaces",
+        "All AI Features",
+        "Marketplace",
+        "24/7 Support"
+      ]
+    },
+    "professional": {
+      "name": "Professional",
+      "price": "$397",
+      "period": "/month",
+      "description": "For established companies",
+      "features": [
+        "25 Users",
+        "Advanced Features",
+        "Custom API",
+        "Premium Integrations",
+        "Dedicated Support"
+      ]
+    }
+  },
+  "testimonials": {
+    "title": "What our customers say",
+    "subtitle": "Over 10,000 companies trust Stack21"
+  },
+  "cta": {
+    "title": "Ready to automate your business?",
+    "subtitle": "Join thousands of companies already using Stack21",
+    "button": "Start Now"
+  }
+}

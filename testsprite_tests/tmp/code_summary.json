@@ -1,0 +1,646 @@
+{
+  "project_name": "Stack21 - SaaS Platform with AI Agents",
+  "project_type": "fullstack",
+  "description": "Una plataforma SaaS multi-tenant completa construida con Next.js 14, TypeScript, Prisma, Stripe, NextAuth y OpenAI. Incluye sistema de agentes de IA especializados, facturación, autenticación, dashboard inteligente y automatización de workflows.",
+  
+  "tech_stack": [
+    "Next.js 14",
+    "React 18", 
+    "TypeScript",
+    "Tailwind CSS",
+    "Radix UI",
+    "Prisma ORM",
+    "PostgreSQL",
+    "NextAuth.js",
+    "Stripe",
+    "OpenAI API",
+    "Supabase",
+    "Jest",
+    "Testing Library",
+    "Framer Motion",
+    "Lucide React",
+    "Zod",
+    "i18next"
+  ],
+  
+  "features": [
+    {
+      "name": "AI Agents API",
+      "description": "Sistema completo de agentes de IA especializados que pueden ejecutar tareas complejas como reservas de restaurantes, marketing automatizado y análisis de datos empresariales",
+      "files": [
+        "src/lib/ai-agents.ts",
+        "src/app/api/agents/route.ts",
+        "src/app/api/agents/executions/route.ts",
+        "src/app/api/agents/executions/[id]/route.ts"
+      ],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "info": {
+          "title": "AI Agents API",
+          "version": "1.0.0",
+          "description": "API para gestión y ejecución de agentes de IA especializados"
+        },
+        "paths": {
+          "/api/agents": {
+            "get": {
+              "summary": "Obtener agentes disponibles",
+              "responses": {
+                "200": {
+                  "description": "Lista de agentes disponibles",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "type": "object",
+                        "properties": {
+                          "success": {"type": "boolean"},
+                          "data": {
+                            "type": "object",
+                            "properties": {
+                              "agents": {"type": "array"},
+                              "total": {"type": "number"}
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "post": {
+              "summary": "Ejecutar un agente",
+              "requestBody": {
+                "required": true,
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "agentId": {"type": "string"},
+                        "input": {"type": "string"},
+                        "context": {"type": "object"}
+                      },
+                      "required": ["agentId", "input"]
+                    }
+                  }
+                }
+              },
+              "responses": {
+                "200": {
+                  "description": "Agente ejecutado exitosamente",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "type": "object",
+                        "properties": {
+                          "success": {"type": "boolean"},
+                          "data": {
+                            "type": "object",
+                            "properties": {
+                              "execution": {"type": "object"},
+                              "agent": {"type": "object"}
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Authentication API",
+      "description": "Sistema de autenticación con OAuth (Google, GitHub) y NextAuth.js",
+      "files": [
+        "src/lib/auth.ts",
+        "src/app/api/auth/[...nextauth]/route.ts",
+        "src/middleware.ts"
+      ],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "info": {
+          "title": "Authentication API",
+          "version": "1.0.0",
+          "description": "API para autenticación y autorización de usuarios"
+        },
+        "paths": {
+          "/api/auth/signin": {
+            "post": {
+              "summary": "Iniciar sesión",
+              "requestBody": {
+                "required": true,
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "provider": {"type": "string", "enum": ["google", "github"]},
+                        "code": {"type": "string"}
+                      }
+                    }
+                  }
+                }
+              },
+              "responses": {
+                "200": {
+                  "description": "Login exitoso",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "type": "object",
+                        "properties": {
+                          "success": {"type": "boolean"},
+                          "user": {"type": "object"},
+                          "session": {"type": "object"}
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Billing API",
+      "description": "Sistema completo de facturación con Stripe, planes de suscripción y gestión de pagos",
+      "files": [
+        "src/app/api/billing/route.ts",
+        "src/lib/stripe.ts"
+      ],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "info": {
+          "title": "Billing API",
+          "version": "1.0.0",
+          "description": "API para gestión de facturación y suscripciones"
+        },
+        "paths": {
+          "/api/billing": {
+            "get": {
+              "summary": "Obtener planes de facturación",
+              "responses": {
+                "200": {
+                  "description": "Lista de planes disponibles",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {"type": "string"},
+                            "name": {"type": "string"},
+                            "price": {"type": "number"},
+                            "features": {"type": "array"}
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "post": {
+              "summary": "Crear suscripción",
+              "requestBody": {
+                "required": true,
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "planId": {"type": "string"},
+                        "paymentMethodId": {"type": "string"}
+                      }
+                    }
+                  }
+                }
+              },
+              "responses": {
+                "200": {
+                  "description": "Suscripción creada exitosamente",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "type": "object",
+                        "properties": {
+                          "success": {"type": "boolean"},
+                          "subscription": {"type": "object"}
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Workspace API",
+      "description": "Sistema de workspaces multi-tenant con gestión de miembros, roles y proyectos aislados",
+      "files": [
+        "src/app/api/workspaces/route.ts",
+        "src/lib/workspace.ts",
+        "src/hooks/use-workspace.ts"
+      ],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "info": {
+          "title": "Workspace API",
+          "version": "1.0.0",
+          "description": "API para gestión de workspaces multi-tenant"
+        },
+        "paths": {
+          "/api/workspaces": {
+            "get": {
+              "summary": "Obtener workspaces del usuario",
+              "responses": {
+                "200": {
+                  "description": "Lista de workspaces",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "type": "object",
+                        "properties": {
+                          "success": {"type": "boolean"},
+                          "workspaces": {"type": "array"}
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "post": {
+              "summary": "Crear nuevo workspace",
+              "requestBody": {
+                "required": true,
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "name": {"type": "string"},
+                        "description": {"type": "string"}
+                      }
+                    }
+                  }
+                }
+              },
+              "responses": {
+                "201": {
+                  "description": "Workspace creado exitosamente",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "type": "object",
+                        "properties": {
+                          "success": {"type": "boolean"},
+                          "workspace": {"type": "object"}
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Analytics API",
+      "description": "Sistema de analytics con tracking de eventos, métricas y reportes personalizables",
+      "files": [
+        "src/app/api/analytics/route.ts",
+        "src/lib/analytics.ts",
+        "src/components/analytics-dashboard.tsx"
+      ],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "info": {
+          "title": "Analytics API",
+          "version": "1.0.0",
+          "description": "API para métricas y analytics del dashboard"
+        },
+        "paths": {
+          "/api/analytics": {
+            "get": {
+              "summary": "Obtener datos de analytics",
+              "parameters": [
+                {
+                  "name": "period",
+                  "in": "query",
+                  "schema": {"type": "string"},
+                  "description": "Período de tiempo (7d, 30d, 90d)"
+                }
+              ],
+              "responses": {
+                "200": {
+                  "description": "Datos de analytics",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "type": "object",
+                        "properties": {
+                          "success": {"type": "boolean"},
+                          "data": {"type": "object"}
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "post": {
+              "summary": "Trackear evento",
+              "requestBody": {
+                "required": true,
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "event": {"type": "string"},
+                        "data": {"type": "object"}
+                      }
+                    }
+                  }
+                }
+              },
+              "responses": {
+                "200": {
+                  "description": "Evento trackeado exitosamente",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "type": "object",
+                        "properties": {
+                          "success": {"type": "boolean"}
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Smart Dashboard API",
+      "description": "Dashboard inteligente con insights automáticos y métricas en tiempo real",
+      "files": [
+        "src/app/api/smart-dashboard/route.ts",
+        "src/lib/smart-dashboard.ts",
+        "src/components/smart-dashboard.tsx"
+      ],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "info": {
+          "title": "Smart Dashboard API",
+          "version": "1.0.0",
+          "description": "API para dashboard inteligente con insights"
+        },
+        "paths": {
+          "/api/smart-dashboard": {
+            "get": {
+              "summary": "Obtener insights del dashboard",
+              "responses": {
+                "200": {
+                  "description": "Insights del dashboard",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "type": "object",
+                        "properties": {
+                          "success": {"type": "boolean"},
+                          "insights": {"type": "array"},
+                          "metrics": {"type": "object"}
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Workflow API",
+      "description": "Gestión de workflows automatizados con constructor visual",
+      "files": [
+        "src/app/api/workflows/route.ts",
+        "src/lib/workflow-builder.ts",
+        "src/components/workflow-builder.tsx"
+      ],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "info": {
+          "title": "Workflow API",
+          "version": "1.0.0",
+          "description": "API para gestión de workflows automatizados"
+        },
+        "paths": {
+          "/api/workflows": {
+            "get": {
+              "summary": "Obtener workflows del usuario",
+              "responses": {
+                "200": {
+                  "description": "Lista de workflows",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "type": "object",
+                        "properties": {
+                          "success": {"type": "boolean"},
+                          "workflows": {"type": "array"}
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "post": {
+              "summary": "Crear nuevo workflow",
+              "requestBody": {
+                "required": true,
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "name": {"type": "string"},
+                        "description": {"type": "string"},
+                        "nodes": {"type": "array"},
+                        "connections": {"type": "array"}
+                      }
+                    }
+                  }
+                }
+              },
+              "responses": {
+                "201": {
+                  "description": "Workflow creado exitosamente",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "type": "object",
+                        "properties": {
+                          "success": {"type": "boolean"},
+                          "workflow": {"type": "object"}
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Waitlist API",
+      "description": "Sistema de waitlist para prelanzamiento con códigos de referido y tiers de acceso",
+      "files": [
+        "src/app/api/waitlist/route.ts",
+        "src/components/waitlist-form.tsx",
+        "src/hooks/use-waitlist.ts"
+      ],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "info": {
+          "title": "Waitlist API",
+          "version": "1.0.0",
+          "description": "API para sistema de waitlist"
+        },
+        "paths": {
+          "/api/waitlist": {
+            "post": {
+              "summary": "Suscribirse a waitlist",
+              "requestBody": {
+                "required": true,
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "email": {"type": "string"},
+                        "name": {"type": "string"},
+                        "company": {"type": "string"},
+                        "referredBy": {"type": "string"}
+                      },
+                      "required": ["email"]
+                    }
+                  }
+                }
+              },
+              "responses": {
+                "200": {
+                  "description": "Suscripción exitosa",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "type": "object",
+                        "properties": {
+                          "success": {"type": "boolean"},
+                          "message": {"type": "string"}
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  
+  "pages": [
+    {
+      "path": "/",
+      "description": "Página principal que redirige a landing"
+    },
+    {
+      "path": "/landing",
+      "description": "Landing page principal con características y waitlist"
+    },
+    {
+      "path": "/dashboard",
+      "description": "Dashboard principal multi-tenant"
+    },
+    {
+      "path": "/agents",
+      "description": "Interfaz de agentes de IA"
+    },
+    {
+      "path": "/agents/demo",
+      "description": "Demo interactiva de agentes"
+    },
+    {
+      "path": "/auth/signin",
+      "description": "Página de inicio de sesión con OAuth"
+    },
+    {
+      "path": "/pricing",
+      "description": "Página de precios y planes"
+    },
+    {
+      "path": "/smart-dashboard",
+      "description": "Dashboard inteligente con insights"
+    },
+    {
+      "path": "/analytics",
+      "description": "Dashboard de analytics"
+    },
+    {
+      "path": "/workflow-builder",
+      "description": "Constructor visual de workflows"
+    }
+  ],
+  
+  "authentication": {
+    "type": "OAuth",
+    "providers": ["Google", "GitHub"],
+    "session_management": "NextAuth.js",
+    "protected_routes": ["/dashboard", "/agents", "/analytics", "/smart-dashboard"]
+  },
+  
+  "database": {
+    "type": "PostgreSQL",
+    "orm": "Prisma",
+    "models": ["User", "Workspace", "Project", "Module", "Workflow", "RunLog", "Billing", "Analytics"]
+  },
+  
+  "external_services": [
+    "OpenAI API",
+    "Stripe",
+    "Supabase",
+    "SendGrid",
+    "Google OAuth",
+    "GitHub OAuth"
+  ],
+  
+  "port": 3000,
+  "development_commands": {
+    "start": "npm run dev",
+    "build": "npm run build",
+    "test": "npm run test"
+  }
+}

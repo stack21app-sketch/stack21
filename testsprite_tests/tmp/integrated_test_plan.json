@@ -1,0 +1,341 @@
+{
+  "test_plan": {
+    "project_name": "Stack21 - Integrated Testing Plan",
+    "test_type": "e2e",
+    "framework": "TestSprite + Playwright + Jest",
+    "created_date": "2024-12-19",
+    "version": "1.0",
+    "description": "Plan integrado de testing end-to-end para Stack21, cubriendo flujos completos desde frontend hasta backend",
+    
+    "test_scenarios": [
+      {
+        "scenario_id": "E2E-001",
+        "name": "Complete Agent Execution Flow",
+        "description": "Flujo completo desde login hasta ejecución exitosa de un agente",
+        "priority": "Critical",
+        "estimated_duration": "5 minutes",
+        "steps": [
+          {
+            "step": 1,
+            "action": "Navigate to login page",
+            "expected": "Login page loads correctly"
+          },
+          {
+            "step": 2,
+            "action": "Authenticate with Google OAuth",
+            "expected": "User is redirected to dashboard"
+          },
+          {
+            "step": 3,
+            "action": "Navigate to /agents page",
+            "expected": "Agents page loads with available agents"
+          },
+          {
+            "step": 4,
+            "action": "Select 'Restaurant Reservations' agent",
+            "expected": "Agent is selected and chat interface appears"
+          },
+          {
+            "step": 5,
+            "action": "Enter reservation request: 'Reserva una mesa para 4 personas mañana a las 8pm en un restaurante italiano'",
+            "expected": "Input is accepted and 'Execute Agent' button is enabled"
+          },
+          {
+            "step": 6,
+            "action": "Click 'Execute Agent' button",
+            "expected": "Agent execution starts, loading state is shown"
+          },
+          {
+            "step": 7,
+            "action": "Wait for agent execution to complete",
+            "expected": "Agent returns results with restaurant options and reservation confirmation"
+          },
+          {
+            "step": 8,
+            "action": "Navigate to execution history",
+            "expected": "Execution appears in history with correct details"
+          }
+        ],
+        "test_data": {
+          "user": {
+            "email": "test@stack21.com",
+            "plan": "pro"
+          },
+          "agent_input": "Reserva una mesa para 4 personas mañana a las 8pm en un restaurante italiano cerca de mi oficina"
+        },
+        "success_criteria": {
+          "agent_execution_success": true,
+          "execution_appears_in_history": true,
+          "total_duration": "< 30 seconds"
+        }
+      },
+      {
+        "scenario_id": "E2E-002",
+        "name": "Billing and Subscription Management",
+        "description": "Flujo completo de gestión de facturación y suscripciones",
+        "priority": "High",
+        "estimated_duration": "8 minutes",
+        "steps": [
+          {
+            "step": 1,
+            "action": "Login as authenticated user",
+            "expected": "User is logged in successfully"
+          },
+          {
+            "step": 2,
+            "action": "Navigate to /pricing page",
+            "expected": "Pricing page loads with all plans displayed"
+          },
+          {
+            "step": 3,
+            "action": "Select 'Pro' plan and click 'Upgrade'",
+            "expected": "Stripe checkout modal opens"
+          },
+          {
+            "step": 4,
+            "action": "Complete payment with test card",
+            "expected": "Payment is processed successfully"
+          },
+          {
+            "step": 5,
+            "action": "Verify subscription is active in dashboard",
+            "expected": "Dashboard shows Pro plan with increased limits"
+          },
+          {
+            "step": 6,
+            "action": "Execute multiple agents to test new limits",
+            "expected": "Agents execute successfully within new limits"
+          },
+          {
+            "step": 7,
+            "action": "Navigate to billing history",
+            "expected": "Billing history shows the new subscription"
+          }
+        ],
+        "test_data": {
+          "user": {
+            "email": "billing-test@stack21.com",
+            "plan": "free"
+          },
+          "payment_method": {
+            "card_number": "4242424242424242",
+            "expiry": "12/25",
+            "cvc": "123"
+          }
+        },
+        "success_criteria": {
+          "subscription_created": true,
+          "payment_processed": true,
+          "limits_updated": true
+        }
+      },
+      {
+        "scenario_id": "E2E-003",
+        "name": "Workspace Management and Collaboration",
+        "description": "Flujo completo de gestión de workspaces y colaboración",
+        "priority": "High",
+        "estimated_duration": "10 minutes",
+        "steps": [
+          {
+            "step": 1,
+            "action": "Login as workspace owner",
+            "expected": "User is logged in and redirected to dashboard"
+          },
+          {
+            "step": 2,
+            "action": "Create new workspace",
+            "expected": "Workspace is created successfully"
+          },
+          {
+            "step": 3,
+            "action": "Invite team member to workspace",
+            "expected": "Invitation is sent successfully"
+          },
+          {
+            "step": 4,
+            "action": "Login as invited member",
+            "expected": "Member can access the workspace"
+          },
+          {
+            "step": 5,
+            "action": "Execute agent in shared workspace",
+            "expected": "Agent execution works in shared workspace"
+          },
+          {
+            "step": 6,
+            "action": "Verify execution appears for both users",
+            "expected": "Execution is visible to both workspace members"
+          },
+          {
+            "step": 7,
+            "action": "Test role-based permissions",
+            "expected": "Member permissions are respected"
+          }
+        ],
+        "test_data": {
+          "owner": {
+            "email": "owner@stack21.com",
+            "role": "owner"
+          },
+          "member": {
+            "email": "member@stack21.com",
+            "role": "member"
+          },
+          "workspace": {
+            "name": "Test Collaboration Workspace",
+            "description": "Workspace for testing collaboration features"
+          }
+        },
+        "success_criteria": {
+          "workspace_created": true,
+          "member_invited": true,
+          "collaboration_works": true
+        }
+      },
+      {
+        "scenario_id": "E2E-004",
+        "name": "Error Handling and Recovery",
+        "description": "Flujo de manejo de errores y recuperación",
+        "priority": "High",
+        "estimated_duration": "6 minutes",
+        "steps": [
+          {
+            "step": 1,
+            "action": "Login as authenticated user",
+            "expected": "User is logged in successfully"
+          },
+          {
+            "step": 2,
+            "action": "Simulate network disconnection",
+            "expected": "Network error is detected"
+          },
+          {
+            "step": 3,
+            "action": "Try to execute an agent",
+            "expected": "Appropriate error message is shown"
+          },
+          {
+            "step": 4,
+            "action": "Restore network connection",
+            "expected": "Network status is restored"
+          },
+          {
+            "step": 5,
+            "action": "Retry agent execution",
+            "expected": "Agent executes successfully after retry"
+          },
+          {
+            "step": 6,
+            "action": "Test rate limiting with free plan",
+            "expected": "Rate limit error is shown when limit is exceeded"
+          },
+          {
+            "step": 7,
+            "action": "Upgrade plan to continue",
+            "expected": "User can upgrade and continue using agents"
+          }
+        ],
+        "test_data": {
+          "user": {
+            "email": "error-test@stack21.com",
+            "plan": "free"
+          }
+        },
+        "success_criteria": {
+          "errors_handled_gracefully": true,
+          "recovery_works": true,
+          "user_experience_maintained": true
+        }
+      },
+      {
+        "scenario_id": "E2E-005",
+        "name": "Mobile Responsiveness",
+        "description": "Flujo completo en dispositivos móviles",
+        "priority": "Medium",
+        "estimated_duration": "8 minutes",
+        "steps": [
+          {
+            "step": 1,
+            "action": "Open app on mobile device",
+            "expected": "App loads correctly on mobile"
+          },
+          {
+            "step": 2,
+            "action": "Login on mobile",
+            "expected": "Login flow works on mobile"
+          },
+          {
+            "step": 3,
+            "action": "Navigate to agents page",
+            "expected": "Agents page is responsive on mobile"
+          },
+          {
+            "step": 4,
+            "action": "Select and execute agent on mobile",
+            "expected": "Agent execution works on mobile"
+          },
+          {
+            "step": 5,
+            "action": "Test mobile navigation",
+            "expected": "Navigation works correctly on mobile"
+          },
+          {
+            "step": 6,
+            "action": "Test mobile forms",
+            "expected": "Forms are usable on mobile"
+          }
+        ],
+        "test_data": {
+          "device": "iPhone 12",
+          "viewport": "375x667"
+        },
+        "success_criteria": {
+          "mobile_responsive": true,
+          "touch_interactions_work": true,
+          "forms_usable": true
+        }
+      }
+    ],
+    
+    "test_environment": {
+      "browsers": ["Chrome", "Firefox", "Safari"],
+      "devices": ["Desktop", "Tablet", "Mobile"],
+      "environments": ["Development", "Staging"],
+      "database": {
+        "type": "PostgreSQL",
+        "url": "postgresql://test:test@localhost:5432/stack21_test"
+      },
+      "external_services": {
+        "openai": "mock",
+        "stripe": "test_mode",
+        "oauth": "test_providers"
+      }
+    },
+    
+    "execution_strategy": {
+      "parallel_execution": true,
+      "retry_failed_tests": 2,
+      "screenshot_on_failure": true,
+      "video_recording": true,
+      "test_timeout": 600000,
+      "database_cleanup": true,
+      "mock_external_services": true
+    },
+    
+    "success_criteria": {
+      "overall_pass_rate": "> 90%",
+      "critical_scenarios": "100% pass rate",
+      "performance": "< 5s average page load",
+      "accessibility": "WCAG 2.1 AA compliance",
+      "mobile_compatibility": "> 95% pass rate"
+    },
+    
+    "reporting": {
+      "generate_html_report": true,
+      "include_screenshots": true,
+      "include_videos": true,
+      "send_notifications": true,
+      "slack_webhook": "https://hooks.slack.com/services/..."
+    }
+  }
+}

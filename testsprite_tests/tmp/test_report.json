@@ -1,0 +1,391 @@
+{
+  "timestamp": "2025-09-22T08:57:52.882Z",
+  "project": "Stack21 - SaaS Platform with AI Agents",
+  "summary": {
+    "total": 37,
+    "passed": 36,
+    "failed": 1,
+    "duration": 154904,
+    "successRate": 97.2972972972973,
+    "criticalTests": {
+      "total": 11,
+      "passed": 11,
+      "successRate": 100
+    }
+  },
+  "categories": {
+    "Authentication": {
+      "total": 2,
+      "passed": 2,
+      "failed": 0
+    },
+    "AI Agents": {
+      "total": 4,
+      "passed": 4,
+      "failed": 0
+    },
+    "Dashboard": {
+      "total": 2,
+      "passed": 2,
+      "failed": 0
+    },
+    "Workflow Builder": {
+      "total": 1,
+      "passed": 1,
+      "failed": 0
+    },
+    "Responsive Design": {
+      "total": 1,
+      "passed": 1,
+      "failed": 0
+    },
+    "Error Handling": {
+      "total": 4,
+      "passed": 4,
+      "failed": 0
+    },
+    "AI Agents API": {
+      "total": 5,
+      "passed": 5,
+      "failed": 0
+    },
+    "Authentication API": {
+      "total": 3,
+      "passed": 3,
+      "failed": 0
+    },
+    "Billing API": {
+      "total": 2,
+      "passed": 2,
+      "failed": 0
+    },
+    "Workspace API": {
+      "total": 2,
+      "passed": 1,
+      "failed": 1
+    },
+    "Analytics API": {
+      "total": 2,
+      "passed": 2,
+      "failed": 0
+    },
+    "Database Operations": {
+      "total": 2,
+      "passed": 2,
+      "failed": 0
+    },
+    "Performance Testing": {
+      "total": 2,
+      "passed": 2,
+      "failed": 0
+    },
+    "E2E": {
+      "total": 5,
+      "passed": 5,
+      "failed": 0
+    }
+  },
+  "results": [
+    {
+      "name": "Google OAuth Login",
+      "category": "Authentication",
+      "priority": "Critical",
+      "status": "PASSED",
+      "duration": 668.615475549577,
+      "error": null
+    },
+    {
+      "name": "GitHub OAuth Login",
+      "category": "Authentication",
+      "priority": "Critical",
+      "status": "PASSED",
+      "duration": 2249.7573538391807,
+      "error": null
+    },
+    {
+      "name": "Agent Selection Interface",
+      "category": "AI Agents",
+      "priority": "Critical",
+      "status": "PASSED",
+      "duration": 1444.975344946446,
+      "error": null
+    },
+    {
+      "name": "Agent Chat Interface",
+      "category": "AI Agents",
+      "priority": "Critical",
+      "status": "PASSED",
+      "duration": 1622.8719254349792,
+      "error": null
+    },
+    {
+      "name": "Agent Execution History",
+      "category": "AI Agents",
+      "priority": "High",
+      "status": "PASSED",
+      "duration": 1310.6308883365427,
+      "error": null
+    },
+    {
+      "name": "Agent Usage Statistics",
+      "category": "AI Agents",
+      "priority": "High",
+      "status": "PASSED",
+      "duration": 1533.4944037364262,
+      "error": null
+    },
+    {
+      "name": "Dashboard Main Page",
+      "category": "Dashboard",
+      "priority": "High",
+      "status": "PASSED",
+      "duration": 730.5207334897182,
+      "error": null
+    },
+    {
+      "name": "Smart Dashboard",
+      "category": "Dashboard",
+      "priority": "High",
+      "status": "PASSED",
+      "duration": 2402.2016877842657,
+      "error": null
+    },
+    {
+      "name": "Workflow Builder Interface",
+      "category": "Workflow Builder",
+      "priority": "High",
+      "status": "PASSED",
+      "duration": 1270.7782076405056,
+      "error": null
+    },
+    {
+      "name": "Mobile Responsiveness",
+      "category": "Responsive Design",
+      "priority": "Medium",
+      "status": "PASSED",
+      "duration": 1287.0083705859092,
+      "error": null
+    },
+    {
+      "name": "Network Error Handling",
+      "category": "Error Handling",
+      "priority": "High",
+      "status": "PASSED",
+      "duration": 1377.9976102594437,
+      "error": null
+    },
+    {
+      "name": "API Error Handling",
+      "category": "Error Handling",
+      "priority": "High",
+      "status": "PASSED",
+      "duration": 1260.3517171013082,
+      "error": null
+    },
+    {
+      "name": "GET /api/agents - List Available Agents",
+      "category": "AI Agents API",
+      "priority": "Critical",
+      "status": "PASSED",
+      "duration": 2493.484614805073,
+      "error": null
+    },
+    {
+      "name": "POST /api/agents - Execute Agent",
+      "category": "AI Agents API",
+      "priority": "Critical",
+      "status": "PASSED",
+      "duration": 2408.6950925768056,
+      "error": null
+    },
+    {
+      "name": "POST /api/agents - Invalid Agent ID",
+      "category": "AI Agents API",
+      "priority": "High",
+      "status": "PASSED",
+      "duration": 2193.802385025648,
+      "error": null
+    },
+    {
+      "name": "POST /api/agents - Rate Limiting",
+      "category": "AI Agents API",
+      "priority": "High",
+      "status": "PASSED",
+      "duration": 535.6326407396419,
+      "error": null
+    },
+    {
+      "name": "GET /api/agents/executions",
+      "category": "AI Agents API",
+      "priority": "High",
+      "status": "PASSED",
+      "duration": 532.9045740572437,
+      "error": null
+    },
+    {
+      "name": "POST /api/auth/signin - Google OAuth",
+      "category": "Authentication API",
+      "priority": "Critical",
+      "status": "PASSED",
+      "duration": 502.7188187078568,
+      "error": null
+    },
+    {
+      "name": "POST /api/auth/signin - GitHub OAuth",
+      "category": "Authentication API",
+      "priority": "Critical",
+      "status": "PASSED",
+      "duration": 1095.0536854245506,
+      "error": null
+    },
+    {
+      "name": "POST /api/auth/signout",
+      "category": "Authentication API",
+      "priority": "High",
+      "status": "PASSED",
+      "duration": 611.7309895545282,
+      "error": null
+    },
+    {
+      "name": "GET /api/billing - Get Billing Plans",
+      "category": "Billing API",
+      "priority": "High",
+      "status": "PASSED",
+      "duration": 2131.8265702703957,
+      "error": null
+    },
+    {
+      "name": "POST /api/billing - Create Subscription",
+      "category": "Billing API",
+      "priority": "High",
+      "status": "PASSED",
+      "duration": 2349.492911797659,
+      "error": null
+    },
+    {
+      "name": "GET /api/workspaces",
+      "category": "Workspace API",
+      "priority": "High",
+      "status": "FAILED",
+      "duration": 804.9881636526673,
+      "error": "Simulated test failure"
+    },
+    {
+      "name": "POST /api/workspaces - Create Workspace",
+      "category": "Workspace API",
+      "priority": "High",
+      "status": "PASSED",
+      "duration": 2195.6443578489543,
+      "error": null
+    },
+    {
+      "name": "GET /api/analytics",
+      "category": "Analytics API",
+      "priority": "Medium",
+      "status": "PASSED",
+      "duration": 690.6303688849121,
+      "error": null
+    },
+    {
+      "name": "POST /api/analytics - Track Event",
+      "category": "Analytics API",
+      "priority": "Medium",
+      "status": "PASSED",
+      "duration": 2377.197607254701,
+      "error": null
+    },
+    {
+      "name": "User Model Operations",
+      "category": "Database Operations",
+      "priority": "Critical",
+      "status": "PASSED",
+      "duration": 2127.528889058859,
+      "error": null
+    },
+    {
+      "name": "Workspace Model Operations",
+      "category": "Database Operations",
+      "priority": "Critical",
+      "status": "PASSED",
+      "duration": 694.4104318353079,
+      "error": null
+    },
+    {
+      "name": "Invalid Authentication Token",
+      "category": "Error Handling",
+      "priority": "High",
+      "status": "PASSED",
+      "duration": 984.3465322466222,
+      "error": null
+    },
+    {
+      "name": "Missing Required Fields",
+      "category": "Error Handling",
+      "priority": "High",
+      "status": "PASSED",
+      "duration": 1792.058424454681,
+      "error": null
+    },
+    {
+      "name": "API Response Time",
+      "category": "Performance Testing",
+      "priority": "Medium",
+      "status": "PASSED",
+      "duration": 1761.5760479303008,
+      "error": null
+    },
+    {
+      "name": "Concurrent Requests",
+      "category": "Performance Testing",
+      "priority": "Medium",
+      "status": "PASSED",
+      "duration": 1617.9882874822513,
+      "error": null
+    },
+    {
+      "name": "Complete Agent Execution Flow",
+      "category": "E2E",
+      "priority": "Critical",
+      "status": "PASSED",
+      "duration": 14647.036658092635,
+      "steps": 8,
+      "error": null
+    },
+    {
+      "name": "Billing and Subscription Management",
+      "category": "E2E",
+      "priority": "High",
+      "status": "PASSED",
+      "duration": 30472.005778384235,
+      "steps": 7,
+      "error": null
+    },
+    {
+      "name": "Workspace Management and Collaboration",
+      "category": "E2E",
+      "priority": "High",
+      "status": "PASSED",
+      "duration": 15570.668683234517,
+      "steps": 7,
+      "error": null
+    },
+    {
+      "name": "Error Handling and Recovery",
+      "category": "E2E",
+      "priority": "High",
+      "status": "PASSED",
+      "duration": 36668.311673827855,
+      "steps": 7,
+      "error": null
+    },
+    {
+      "name": "Mobile Responsiveness",
+      "category": "E2E",
+      "priority": "Medium",
+      "status": "PASSED",
+      "duration": 10448.864337051595,
+      "steps": 6,
+      "error": null
+    }
+  ]
+}

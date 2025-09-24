@@ -1,0 +1,35 @@
+{
+  "domain": "stack21app.com",
+  "records": [
+    {
+      "type": "A",
+      "name": "vacio",
+      "value": "76.76.19.61",
+      "ttl": 300
+    },
+    {
+      "type": "CNAME",
+      "name": "www",
+      "value": "vacio.stack21app.com",
+      "ttl": 300
+    },
+    {
+      "type": "TXT",
+      "name": "@",
+      "value": "v=spf1 include:_spf.vercel.com ~all",
+      "ttl": 300
+    },
+    {
+      "type": "CNAME",
+      "name": "_vercel",
+      "value": "cname.vercel-dns.com",
+      "ttl": 300
+    }
+  ],
+  "instructions": [
+    "1. Accede a tu panel de DNS del proveedor de dominio",
+    "2. Agrega los siguientes registros DNS:",
+    "3. Espera 5-10 minutos para que se propaguen",
+    "4. Verifica con: nslookup vacio.stack21app.com"
+  ]
+}

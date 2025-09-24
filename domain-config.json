@@ -1,0 +1,10 @@
+{
+  "domain": "stack21app.com",
+  "subdomain": "vacio",
+  "fullDomain": "vacio.stack21app.com",
+  "provider": "hostinger",
+  "cdn": true,
+  "ssl": true,
+  "createdAt": "2025-09-19T08:50:40.801Z",
+  "status": "pending"
+}

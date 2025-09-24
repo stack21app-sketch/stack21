@@ -1,0 +1,12 @@
+{
+  "extends": "next/core-web-vitals",
+  "rules": {
+    "react-hooks/exhaustive-deps": "warn",
+    "react-hooks/rules-of-hooks": "warn",
+    "react/no-unescaped-entities": "warn",
+    "react/jsx-no-undef": "warn",
+    "jsx-a11y/alt-text": "warn",
+    "@next/next/no-img-element": "warn",
+    "@next/next/no-assign-module-variable": "warn"
+  }
+}

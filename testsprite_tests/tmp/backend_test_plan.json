@@ -1,0 +1,667 @@
+{
+  "test_plan": {
+    "project_name": "Stack21 - Backend Testing Plan",
+    "test_type": "backend",
+    "framework": "TestSprite + Jest + Supertest",
+    "created_date": "2024-12-19",
+    "version": "1.0",
+    "description": "Plan completo de testing para las APIs y lógica de negocio de Stack21, incluyendo agentes de IA, autenticación, facturación y base de datos",
+    
+    "test_categories": [
+      {
+        "category": "AI Agents API",
+        "priority": "Critical",
+        "description": "Tests para las APIs de agentes de IA y ejecución de tareas",
+        "test_cases": [
+          {
+            "id": "API-AGENT-001",
+            "name": "GET /api/agents - List Available Agents",
+            "description": "Verificar que se pueden obtener todos los agentes disponibles",
+            "endpoint": "GET /api/agents",
+            "authentication": true,
+            "test_data": {
+              "headers": {
+                "Authorization": "Bearer valid_token"
+              }
+            },
+            "expected_response": {
+              "status": 200,
+              "body": {
+                "success": true,
+                "data": {
+                  "agents": "array",
+                  "total": "number"
+                }
+              }
+            },
+            "priority": "Critical"
+          },
+          {
+            "id": "API-AGENT-002",
+            "name": "POST /api/agents - Execute Agent",
+            "description": "Verificar que se puede ejecutar un agente con input válido",
+            "endpoint": "POST /api/agents",
+            "authentication": true,
+            "test_data": {
+              "headers": {
+                "Authorization": "Bearer valid_token",
+                "Content-Type": "application/json"
+              },
+              "body": {
+                "agentId": "restaurant-reservations",
+                "input": "Reserva una mesa para 4 personas mañana a las 8pm en un restaurante italiano"
+              }
+            },
+            "expected_response": {
+              "status": 200,
+              "body": {
+                "success": true,
+                "data": {
+                  "execution": {
+                    "id": "string",
+                    "agentId": "restaurant-reservations",
+                    "status": "completed",
+                    "output": "object"
+                  }
+                }
+              }
+            },
+            "priority": "Critical"
+          },
+          {
+            "id": "API-AGENT-003",
+            "name": "POST /api/agents - Invalid Agent ID",
+            "description": "Verificar que se maneja correctamente un ID de agente inválido",
+            "endpoint": "POST /api/agents",
+            "authentication": true,
+            "test_data": {
+              "headers": {
+                "Authorization": "Bearer valid_token",
+                "Content-Type": "application/json"
+              },
+              "body": {
+                "agentId": "invalid-agent-id",
+                "input": "Test input"
+              }
+            },
+            "expected_response": {
+              "status": 404,
+              "body": {
+                "error": "Agente no encontrado"
+              }
+            },
+            "priority": "High"
+          },
+          {
+            "id": "API-AGENT-004",
+            "name": "POST /api/agents - Rate Limiting",
+            "description": "Verificar que se respetan los límites de ejecuciones por plan",
+            "endpoint": "POST /api/agents",
+            "authentication": true,
+            "test_data": {
+              "headers": {
+                "Authorization": "Bearer free_plan_token",
+                "Content-Type": "application/json"
+              },
+              "body": {
+                "agentId": "restaurant-reservations",
+                "input": "Test input"
+              }
+            },
+            "expected_response": {
+              "status": 403,
+              "body": {
+                "error": "Has alcanzado el límite de ejecuciones de agentes para tu plan"
+              }
+            },
+            "priority": "High"
+          },
+          {
+            "id": "API-AGENT-005",
+            "name": "GET /api/agents/executions - Get User Executions",
+            "description": "Verificar que se pueden obtener las ejecuciones del usuario",
+            "endpoint": "GET /api/agents/executions",
+            "authentication": true,
+            "test_data": {
+              "headers": {
+                "Authorization": "Bearer valid_token"
+              },
+              "query_params": {
+                "limit": "10"
+              }
+            },
+            "expected_response": {
+              "status": 200,
+              "body": {
+                "success": true,
+                "data": {
+                  "executions": "array",
+                  "total": "number"
+                }
+              }
+            },
+            "priority": "High"
+          },
+          {
+            "id": "API-AGENT-006",
+            "name": "GET /api/agents/executions/{id} - Get Specific Execution",
+            "description": "Verificar que se puede obtener una ejecución específica",
+            "endpoint": "GET /api/agents/executions/execution_id",
+            "authentication": true,
+            "test_data": {
+              "headers": {
+                "Authorization": "Bearer valid_token"
+              }
+            },
+            "expected_response": {
+              "status": 200,
+              "body": {
+                "success": true,
+                "data": {
+                  "execution": "object",
+                  "agent": "object"
+                }
+              }
+            },
+            "priority": "High"
+          }
+        ]
+      },
+      {
+        "category": "Authentication API",
+        "priority": "Critical",
+        "description": "Tests para las APIs de autenticación y autorización",
+        "test_cases": [
+          {
+            "id": "API-AUTH-001",
+            "name": "POST /api/auth/signin - Google OAuth",
+            "description": "Verificar que el login con Google funciona correctamente",
+            "endpoint": "POST /api/auth/signin",
+            "authentication": false,
+            "test_data": {
+              "body": {
+                "provider": "google",
+                "code": "valid_google_code"
+              }
+            },
+            "expected_response": {
+              "status": 200,
+              "body": {
+                "success": true,
+                "user": "object",
+                "session": "object"
+              }
+            },
+            "priority": "Critical"
+          },
+          {
+            "id": "API-AUTH-002",
+            "name": "POST /api/auth/signin - GitHub OAuth",
+            "description": "Verificar que el login con GitHub funciona correctamente",
+            "endpoint": "POST /api/auth/signin",
+            "authentication": false,
+            "test_data": {
+              "body": {
+                "provider": "github",
+                "code": "valid_github_code"
+              }
+            },
+            "expected_response": {
+              "status": 200,
+              "body": {
+                "success": true,
+                "user": "object",
+                "session": "object"
+              }
+            },
+            "priority": "Critical"
+          },
+          {
+            "id": "API-AUTH-003",
+            "name": "POST /api/auth/signout - Logout",
+            "description": "Verificar que el logout funciona correctamente",
+            "endpoint": "POST /api/auth/signout",
+            "authentication": true,
+            "test_data": {
+              "headers": {
+                "Authorization": "Bearer valid_token"
+              }
+            },
+            "expected_response": {
+              "status": 200,
+              "body": {
+                "success": true,
+                "message": "Logged out successfully"
+              }
+            },
+            "priority": "High"
+          },
+          {
+            "id": "API-AUTH-004",
+            "name": "GET /api/auth/session - Get Session",
+            "description": "Verificar que se puede obtener la sesión actual",
+            "endpoint": "GET /api/auth/session",
+            "authentication": true,
+            "test_data": {
+              "headers": {
+                "Authorization": "Bearer valid_token"
+              }
+            },
+            "expected_response": {
+              "status": 200,
+              "body": {
+                "user": "object",
+                "expires": "string"
+              }
+            },
+            "priority": "High"
+          }
+        ]
+      },
+      {
+        "category": "Billing API",
+        "priority": "High",
+        "description": "Tests para las APIs de facturación y suscripciones",
+        "test_cases": [
+          {
+            "id": "API-BILLING-001",
+            "name": "GET /api/billing - Get Billing Plans",
+            "description": "Verificar que se pueden obtener los planes de facturación",
+            "endpoint": "GET /api/billing",
+            "authentication": false,
+            "test_data": {},
+            "expected_response": {
+              "status": 200,
+              "body": "array"
+            },
+            "priority": "High"
+          },
+          {
+            "id": "API-BILLING-002",
+            "name": "GET /api/billing?type=subscription - Get User Subscription",
+            "description": "Verificar que se puede obtener la suscripción del usuario",
+            "endpoint": "GET /api/billing?type=subscription",
+            "authentication": true,
+            "test_data": {
+              "headers": {
+                "Authorization": "Bearer valid_token"
+              }
+            },
+            "expected_response": {
+              "status": 200,
+              "body": {
+                "id": "string",
+                "status": "string",
+                "plan": "object"
+              }
+            },
+            "priority": "High"
+          },
+          {
+            "id": "API-BILLING-003",
+            "name": "POST /api/billing - Create Subscription",
+            "description": "Verificar que se puede crear una suscripción",
+            "endpoint": "POST /api/billing",
+            "authentication": true,
+            "test_data": {
+              "headers": {
+                "Authorization": "Bearer valid_token",
+                "Content-Type": "application/json"
+              },
+              "body": {
+                "planId": "pro",
+                "paymentMethodId": "pm_test_123"
+              }
+            },
+            "expected_response": {
+              "status": 200,
+              "body": {
+                "success": true,
+                "subscription": "object"
+              }
+            },
+            "priority": "High"
+          }
+        ]
+      },
+      {
+        "category": "Workspace API",
+        "priority": "High",
+        "description": "Tests para las APIs de gestión de workspaces",
+        "test_cases": [
+          {
+            "id": "API-WORKSPACE-001",
+            "name": "GET /api/workspaces - Get User Workspaces",
+            "description": "Verificar que se pueden obtener los workspaces del usuario",
+            "endpoint": "GET /api/workspaces",
+            "authentication": true,
+            "test_data": {
+              "headers": {
+                "Authorization": "Bearer valid_token"
+              }
+            },
+            "expected_response": {
+              "status": 200,
+              "body": {
+                "success": true,
+                "workspaces": "array"
+              }
+            },
+            "priority": "High"
+          },
+          {
+            "id": "API-WORKSPACE-002",
+            "name": "POST /api/workspaces - Create Workspace",
+            "description": "Verificar que se puede crear un nuevo workspace",
+            "endpoint": "POST /api/workspaces",
+            "authentication": true,
+            "test_data": {
+              "headers": {
+                "Authorization": "Bearer valid_token",
+                "Content-Type": "application/json"
+              },
+              "body": {
+                "name": "Test Workspace",
+                "description": "Test workspace description"
+              }
+            },
+            "expected_response": {
+              "status": 201,
+              "body": {
+                "success": true,
+                "workspace": "object"
+              }
+            },
+            "priority": "High"
+          },
+          {
+            "id": "API-WORKSPACE-003",
+            "name": "POST /api/workspaces/{id}/members - Add Member",
+            "description": "Verificar que se puede agregar un miembro al workspace",
+            "endpoint": "POST /api/workspaces/workspace_id/members",
+            "authentication": true,
+            "test_data": {
+              "headers": {
+                "Authorization": "Bearer valid_token",
+                "Content-Type": "application/json"
+              },
+              "body": {
+                "email": "member@example.com",
+                "role": "member"
+              }
+            },
+            "expected_response": {
+              "status": 200,
+              "body": {
+                "success": true,
+                "member": "object"
+              }
+            },
+            "priority": "High"
+          }
+        ]
+      },
+      {
+        "category": "Analytics API",
+        "priority": "Medium",
+        "description": "Tests para las APIs de analytics y métricas",
+        "test_cases": [
+          {
+            "id": "API-ANALYTICS-001",
+            "name": "GET /api/analytics - Get Analytics Data",
+            "description": "Verificar que se pueden obtener los datos de analytics",
+            "endpoint": "GET /api/analytics",
+            "authentication": true,
+            "test_data": {
+              "headers": {
+                "Authorization": "Bearer valid_token"
+              },
+              "query_params": {
+                "period": "30d"
+              }
+            },
+            "expected_response": {
+              "status": 200,
+              "body": {
+                "success": true,
+                "data": "object"
+              }
+            },
+            "priority": "Medium"
+          },
+          {
+            "id": "API-ANALYTICS-002",
+            "name": "POST /api/analytics - Track Event",
+            "description": "Verificar que se puede trackear un evento",
+            "endpoint": "POST /api/analytics",
+            "authentication": true,
+            "test_data": {
+              "headers": {
+                "Authorization": "Bearer valid_token",
+                "Content-Type": "application/json"
+              },
+              "body": {
+                "event": "agent_executed",
+                "data": {
+                  "agentId": "restaurant-reservations",
+                  "duration": 2500
+                }
+              }
+            },
+            "expected_response": {
+              "status": 200,
+              "body": {
+                "success": true
+              }
+            },
+            "priority": "Medium"
+          }
+        ]
+      },
+      {
+        "category": "Database Operations",
+        "priority": "Critical",
+        "description": "Tests para operaciones de base de datos y modelos",
+        "test_cases": [
+          {
+            "id": "DB-001",
+            "name": "User Model Operations",
+            "description": "Verificar que las operaciones CRUD del modelo User funcionan correctamente",
+            "test_type": "database",
+            "test_data": {
+              "user": {
+                "email": "test@example.com",
+                "name": "Test User"
+              }
+            },
+            "expected_result": "User creado, leído, actualizado y eliminado correctamente",
+            "priority": "Critical"
+          },
+          {
+            "id": "DB-002",
+            "name": "Workspace Model Operations",
+            "description": "Verificar que las operaciones CRUD del modelo Workspace funcionan correctamente",
+            "test_type": "database",
+            "test_data": {
+              "workspace": {
+                "name": "Test Workspace",
+                "description": "Test Description"
+              }
+            },
+            "expected_result": "Workspace creado, leído, actualizado y eliminado correctamente",
+            "priority": "Critical"
+          },
+          {
+            "id": "DB-003",
+            "name": "Workflow Model Operations",
+            "description": "Verificar que las operaciones CRUD del modelo Workflow funcionan correctamente",
+            "test_type": "database",
+            "test_data": {
+              "workflow": {
+                "name": "Test Workflow",
+                "description": "Test Description",
+                "nodes": "[]",
+                "connections": "[]"
+              }
+            },
+            "expected_result": "Workflow creado, leído, actualizado y eliminado correctamente",
+            "priority": "High"
+          }
+        ]
+      },
+      {
+        "category": "Error Handling",
+        "priority": "High",
+        "description": "Tests para el manejo de errores en las APIs",
+        "test_cases": [
+          {
+            "id": "ERROR-001",
+            "name": "Invalid Authentication Token",
+            "description": "Verificar que se maneja correctamente un token de autenticación inválido",
+            "endpoint": "GET /api/agents",
+            "authentication": false,
+            "test_data": {
+              "headers": {
+                "Authorization": "Bearer invalid_token"
+              }
+            },
+            "expected_response": {
+              "status": 401,
+              "body": {
+                "error": "No autorizado"
+              }
+            },
+            "priority": "High"
+          },
+          {
+            "id": "ERROR-002",
+            "name": "Missing Required Fields",
+            "description": "Verificar que se maneja correctamente la falta de campos requeridos",
+            "endpoint": "POST /api/agents",
+            "authentication": true,
+            "test_data": {
+              "headers": {
+                "Authorization": "Bearer valid_token",
+                "Content-Type": "application/json"
+              },
+              "body": {
+                "agentId": "restaurant-reservations"
+                // Missing 'input' field
+              }
+            },
+            "expected_response": {
+              "status": 400,
+              "body": {
+                "error": "Datos inválidos"
+              }
+            },
+            "priority": "High"
+          },
+          {
+            "id": "ERROR-003",
+            "name": "Database Connection Error",
+            "description": "Verificar que se maneja correctamente un error de conexión a la base de datos",
+            "test_type": "error_simulation",
+            "test_data": {
+              "simulate_error": "database_connection_failed"
+            },
+            "expected_result": "Error manejado correctamente con mensaje apropiado",
+            "priority": "High"
+          }
+        ]
+      },
+      {
+        "category": "Performance Testing",
+        "priority": "Medium",
+        "description": "Tests de rendimiento para las APIs",
+        "test_cases": [
+          {
+            "id": "PERF-001",
+            "name": "API Response Time",
+            "description": "Verificar que las APIs responden en menos de 2 segundos",
+            "endpoint": "GET /api/agents",
+            "authentication": true,
+            "test_data": {
+              "headers": {
+                "Authorization": "Bearer valid_token"
+              }
+            },
+            "expected_response": {
+              "status": 200,
+              "response_time": "< 2000ms"
+            },
+            "priority": "Medium"
+          },
+          {
+            "id": "PERF-002",
+            "name": "Concurrent Requests",
+            "description": "Verificar que las APIs manejan 100+ requests concurrentes",
+            "endpoint": "POST /api/agents",
+            "authentication": true,
+            "test_data": {
+              "concurrent_requests": 100,
+              "headers": {
+                "Authorization": "Bearer valid_token",
+                "Content-Type": "application/json"
+              },
+              "body": {
+                "agentId": "restaurant-reservations",
+                "input": "Test input"
+              }
+            },
+            "expected_response": {
+              "success_rate": "> 95%",
+              "average_response_time": "< 5000ms"
+            },
+            "priority": "Medium"
+          }
+        ]
+      }
+    ],
+    
+    "test_environment": {
+      "database": {
+        "type": "PostgreSQL",
+        "url": "postgresql://test:test@localhost:5432/stack21_test",
+        "reset_before_tests": true
+      },
+      "external_services": {
+        "openai": "mock",
+        "stripe": "test_mode",
+        "supabase": "test_instance"
+      },
+      "test_data": {
+        "users": [
+          {
+            "id": "user_1",
+            "email": "test@stack21.com",
+            "name": "Test User",
+            "plan": "pro"
+          }
+        ],
+        "workspaces": [
+          {
+            "id": "workspace_1",
+            "name": "Test Workspace",
+            "owner_id": "user_1"
+          }
+        ]
+      }
+    },
+    
+    "execution_strategy": {
+      "parallel_execution": true,
+      "retry_failed_tests": 2,
+      "test_timeout": 30000,
+      "database_cleanup": true,
+      "mock_external_services": true
+    },
+    
+    "success_criteria": {
+      "pass_rate": "> 95%",
+      "critical_tests": "100% pass rate",
+      "api_response_time": "< 2s average",
+      "error_handling": "100% coverage"
+    }
+  }
+}

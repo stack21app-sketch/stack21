@@ -1,0 +1,46 @@
+{
+  "title": "Dashboard",
+  "welcome": "Willkommen bei Stack21",
+  "welcomeMessage": "Ihre Automatisierungsplattform ist bereit zur Nutzung",
+  "overview": "Übersicht",
+  "recentActivity": "Letzte Aktivität",
+  "quickActions": "Schnellaktionen",
+  "statistics": "Statistiken",
+  "actionExecuted": "Aktion ausgeführt",
+  "actionCompleted": "wurde erfolgreich abgeschlossen",
+  "workflowStarted": "Workflow gestartet",
+  "workflowRunning": "Ihre Automatisierung läuft im Hintergrund",
+  "viewProgress": "Fortschritt anzeigen",
+  "workspaces": {
+    "title": "Arbeitsbereiche",
+    "createNew": "Neuen Arbeitsbereich erstellen",
+    "switch": "Arbeitsbereich wechseln",
+    "settings": "Arbeitsbereich-Einstellungen"
+  },
+  "ai": {
+    "title": "KI-Assistent",
+    "askQuestion": "Stellen Sie eine Frage...",
+    "suggestions": "Vorschläge",
+    "history": "Verlauf",
+    "newChat": "Neues Gespräch"
+  },
+  "workflows": {
+    "title": "Arbeitsabläufe",
+    "create": "Arbeitsablauf erstellen",
+    "templates": "Vorlagen",
+    "recent": "Kürzlich",
+    "favorites": "Favoriten"
+  },
+  "analytics": {
+    "title": "Analytics",
+    "views": "Ansichten",
+    "conversions": "Konversionen",
+    "revenue": "Umsatz",
+    "users": "Benutzer"
+  },
+  "notifications": {
+    "title": "Benachrichtigungen",
+    "markAllRead": "Alle als gelesen markieren",
+    "empty": "Keine Benachrichtigungen"
+  }
+}

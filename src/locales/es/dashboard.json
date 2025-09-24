@@ -1,0 +1,46 @@
+{
+  "title": "Dashboard",
+  "welcome": "¡Bienvenido a Stack21!",
+  "welcomeMessage": "Tu plataforma de automatización está lista para usar",
+  "overview": "Resumen",
+  "recentActivity": "Actividad Reciente",
+  "quickActions": "Acciones Rápidas",
+  "statistics": "Estadísticas",
+  "actionExecuted": "Acción ejecutada",
+  "actionCompleted": "se ha completado exitosamente",
+  "workflowStarted": "Workflow iniciado",
+  "workflowRunning": "Tu automatización está ejecutándose en segundo plano",
+  "viewProgress": "Ver progreso",
+  "workspaces": {
+    "title": "Workspaces",
+    "createNew": "Crear Nuevo Workspace",
+    "switch": "Cambiar Workspace",
+    "settings": "Configuración del Workspace"
+  },
+  "ai": {
+    "title": "Asistente IA",
+    "askQuestion": "Haz una pregunta...",
+    "suggestions": "Sugerencias",
+    "history": "Historial",
+    "newChat": "Nueva Conversación"
+  },
+  "workflows": {
+    "title": "Workflows",
+    "create": "Crear Workflow",
+    "templates": "Plantillas",
+    "recent": "Recientes",
+    "favorites": "Favoritos"
+  },
+  "analytics": {
+    "title": "Analytics",
+    "views": "Vistas",
+    "conversions": "Conversiones",
+    "revenue": "Ingresos",
+    "users": "Usuarios"
+  },
+  "notifications": {
+    "title": "Notificaciones",
+    "markAllRead": "Marcar todo como leído",
+    "empty": "No hay notificaciones"
+  }
+}

@@ -1,0 +1,83 @@
+{
+  "test_plan": {
+    "project_name": "Stack21 - Legal Compliance Testing",
+    "test_type": "legal_compliance",
+    "framework": "TestSprite (simulado)",
+    "created_date": "2025-09-22",
+    "version": "1.0",
+    "description": "Plan de pruebas de conformidad legal para GDPR (UE) y CCPA (EE.UU.)",
+    "test_categories": [
+      {
+        "category": "GDPR Compliance",
+        "priority": "Critical",
+        "description": "Verifica requisitos clave de GDPR: base legal, derechos, exportación/eliminación",
+        "test_cases": [
+          {
+            "id": "GDPR-001",
+            "name": "Exportación de datos (derecho a la portabilidad)",
+            "expected": "La plataforma ofrece exportación de datos del usuario (vía /api/settings action: export_data)"
+          },
+          {
+            "id": "GDPR-002",
+            "name": "Eliminación de cuenta (derecho al olvido)",
+            "expected": "La plataforma permite solicitar eliminación de cuenta (vía /api/settings action: delete_account)"
+          },
+          {
+            "id": "GDPR-003",
+            "name": "Cabeceras de seguridad",
+            "expected": "Se aplican X-Frame-Options, X-Content-Type-Options, Referrer-Policy y HSTS (definidas en next.config.js)"
+          },
+          {
+            "id": "GDPR-004",
+            "name": "Rate limiting básico",
+            "expected": "Existe mecanismo de rate limiting en endpoints sensibles (ver src/lib/security.ts y usos en API)"
+          }
+        ]
+      },
+      {
+        "category": "CCPA Compliance",
+        "priority": "Critical",
+        "description": "Verifica derechos CCPA: saber/eliminar y no discriminación (a nivel de capacidades)",
+        "test_cases": [
+          {
+            "id": "CCPA-001",
+            "name": "Derecho a saber / Acceso",
+            "expected": "El usuario autenticado puede acceder a sus datos (vía export_data)"
+          },
+          {
+            "id": "CCPA-002",
+            "name": "Derecho a eliminar",
+            "expected": "El usuario puede solicitar eliminación (delete_account)"
+          }
+        ]
+      },
+      {
+        "category": "Documentation & UI",
+        "priority": "High",
+        "description": "Verifica presencia de páginas/documentación legal (placeholder hasta implementación)",
+        "test_cases": [
+          {
+            "id": "DOC-001",
+            "name": "Política de Privacidad",
+            "expected": "Debe existir /privacy-policy (pendiente de implementación)"
+          },
+          {
+            "id": "DOC-002",
+            "name": "Términos de Servicio",
+            "expected": "Debe existir /terms-of-service (pendiente de implementación)"
+          },
+          {
+            "id": "DOC-003",
+            "name": "Política de Cookies",
+            "expected": "Debe existir /cookie-policy (pendiente de implementación)"
+          }
+        ]
+      }
+    ],
+    "success_criteria": {
+      "overall_success_rate": 90,
+      "critical_tests_success_rate": 100
+    }
+  }
+}
+

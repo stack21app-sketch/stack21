@@ -1,0 +1,118 @@
+{
+  "hero": {
+    "badge": "Die Premium-Alternative zu anderen Plattformen",
+    "title": "Automatisieren",
+    "subtitle": "schneller als je zuvor",
+    "description": "Erstellen Sie visuelle Workflows mit KI, integrieren Sie Ihre Tools und stellen Sie sie in wenigen Minuten bereit. Modernes Design, sofortiges Feedback und ein überlegenes Erlebnis gegenüber anderen Plattformen.",
+    "ctaPrimary": "Kostenlos starten",
+    "ctaSecondary": "Vergleich anzeigen",
+    "statsSetup": "Einrichtung",
+    "statsIntegrations": "Integrationen",
+    "statsScale": "Skalierung",
+    "statsSetupLabel": "Einrichtung",
+    "statsIntegrationsLabel": "Integrationen",
+    "statsScaleLabel": "Skalierung"
+  },
+  "navigation": {
+    "documentation": "Dokumentation",
+    "features": "Funktionen",
+    "pricing": "Preise",
+    "contact": "Kontakt"
+  },
+  "buttons": {
+    "joinWaitlist": "Warteliste beitreten"
+  },
+  "features": {
+    "title": "Einzigartige Funktionen",
+    "subtitle": "Funktionen, die die Konkurrenz nicht hat",
+    "aiAssistant": {
+      "title": "Branchenspezifischer KI-Assistent",
+      "description": "Spezialisierte KI, die Ihre Branche versteht und spezifische Aufgaben automatisiert"
+    },
+    "workflowBuilder": {
+      "title": "Visueller Workflow-Builder",
+      "description": "Erstellen Sie komplexe Arbeitsabläufe mit intuitivem Drag & Drop"
+    },
+    "businessIntelligence": {
+      "title": "Business Intelligence",
+      "description": "Automatische Einblicke und Vorhersagen basierend auf Ihren Daten"
+    },
+    "marketplace": {
+      "title": "Modul-Marketplace",
+      "description": "Integrieren Sie Drittanbieter-Tools und monetarisieren Sie Ihre Kreationen"
+    },
+    "gamification": {
+      "title": "Erweiterte Gamification",
+      "description": "Engagieren Sie Ihr Team mit Punkten, Levels und Belohnungen"
+    },
+    "mobileApp": {
+      "title": "Native Mobile App",
+      "description": "Greifen Sie von Ihrem Mobilgerät auf alle Funktionen zu"
+    }
+  },
+  "pricing": {
+    "title": "Transparente Preise",
+    "subtitle": "Wählen Sie den Plan, der am besten zu Ihrem Unternehmen passt",
+    "personal": {
+      "name": "Persönlich",
+      "price": "47€",
+      "period": "/Monat",
+      "description": "Perfekt für Freelancer und Unternehmer",
+      "features": [
+        "1 Benutzer",
+        "1 Arbeitsbereich",
+        "Grundlegender KI-Assistent",
+        "Unbegrenzte Workflows",
+        "E-Mail-Support"
+      ]
+    },
+    "pro": {
+      "name": "Pro",
+      "price": "97€",
+      "period": "/Monat",
+      "description": "Ideal für kleine Unternehmen",
+      "features": [
+        "1 Benutzer",
+        "Unbegrenzte Arbeitsbereiche",
+        "Erweiterter KI-Assistent",
+        "Business Intelligence",
+        "Prioritäts-Support"
+      ]
+    },
+    "starter": {
+      "name": "Starter",
+      "price": "197€",
+      "period": "/Monat",
+      "description": "Für wachsende Teams",
+      "features": [
+        "5 Benutzer",
+        "Unbegrenzte Arbeitsbereiche",
+        "Alle KI-Funktionen",
+        "Marketplace",
+        "24/7 Support"
+      ]
+    },
+    "professional": {
+      "name": "Professional",
+      "price": "397€",
+      "period": "/Monat",
+      "description": "Für etablierte Unternehmen",
+      "features": [
+        "25 Benutzer",
+        "Erweiterte Funktionen",
+        "Benutzerdefinierte API",
+        "Premium-Integrationen",
+        "Dedizierter Support"
+      ]
+    }
+  },
+  "testimonials": {
+    "title": "Was unsere Kunden sagen",
+    "subtitle": "Über 10.000 Unternehmen vertrauen Stack21"
+  },
+  "cta": {
+    "title": "Bereit, Ihr Unternehmen zu automatisieren?",
+    "subtitle": "Schließen Sie sich Tausenden von Unternehmen an, die bereits Stack21 nutzen",
+    "button": "Jetzt starten"
+  }
+}
