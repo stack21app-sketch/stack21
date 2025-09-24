@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 // Evitar que Next.js intente prerenderizar/recopilar datos de esta ruta en build
-export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 export const fetchCache = 'force-no-store'
+export const preferredRegion = 'iad1'
 import { prisma } from '@/lib/prisma'
 
 function isAuthorized(req: NextRequest): boolean {
