@@ -1,15 +1,6 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/next"
-    }
-  ],
-  "env": {
-    "NODE_ENV": "production",
-    "CUSTOM_DOMAIN": "vacio.stack21app.com"
-  },
+  "framework": "nextjs",
   "functions": {
     "src/app/api/**/*.ts": {
       "maxDuration": 30
@@ -18,11 +9,6 @@
   "regions": [
     "iad1"
   ],
-  "framework": "nextjs",
-  "installCommand": "npm install",
-  "buildCommand": "npm run build",
-  "outputDirectory": ".next",
-  "devCommand": "npm run dev",
   "rewrites": [
     {
       "source": "/api/(.*)",
@@ -47,8 +33,5 @@
         }
       ]
     }
-  ],
-  "domains": [
-    "vacio.stack21app.com"
   ]
 }
