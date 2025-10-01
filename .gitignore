@@ -4,7 +4,6 @@
 /node_modules
 /.pnp
 .pnp.js
-.yarn/install-state.gz
 
 # testing
 /coverage
@@ -26,8 +25,9 @@ yarn-debug.log*
 yarn-error.log*
 
 # local env files
-.env*.local
 .env
+.env*.local
+.env.local.backup
 
 # vercel
 .vercel
@@ -36,5 +36,82 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# prisma
-/prisma/migrations
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+*.bak
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Diagnostic reports
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Directory for instrumented libs
+lib-cov
+
+# Coverage directory
+coverage
+*.lcov
+.nyc_output
+
+# Testing
+.playwright/
+test-results/
+playwright-report/
+lighthouse-report.html
+
+# Temporary files
+.tmp/
+temp/
+*.tmp
+
+# Database
+*.sqlite
+*.sqlite3
+*.db
+
+# Prisma
+prisma/migrations/*_migration.sql
+
+# Sensitive data
+cookies.txt
+.env.local.backup
+secrets/
+
+# Build artifacts
+dist/
+build/
+
+# PM2
+.pm2/
+ecosystem.config.js.bak
+
+# Redis
+dump.rdb
+
+# Backup files
+backups/*.sql.gz
+backups/*.sql
+
+# Local data files (comentar si quieres commitear)
+# src/data/*.json
