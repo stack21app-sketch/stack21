@@ -100,12 +100,11 @@ export async function getUserByEmail(email: string) {
     const user = await prisma.user.findUnique({
       where: { email },
       include: {
-        subscription: true,
+        billing: true,
         workflows: true,
         _count: {
           select: {
             workflows: true
-            // integrations: true // Field doesn't exist in schema
           }
         }
       }
@@ -120,15 +119,34 @@ export async function getUserByEmail(email: string) {
 
 export async function updateUserSubscription(userId: string, status: string) {
   try {
-    const user = await prisma.user.update({
-      where: { id: userId },
-      data: {
-        // subscriptionStatus: status as any, // Field doesn't exist in schema
-        updatedAt: new Date()
-      }
+    // Buscar billing existente
+    const existingBilling = await prisma.billing.findFirst({
+      where: { userId }
     })
 
-    return { success: true, user }
+    if (existingBilling) {
+      // Actualizar billing existente
+      const billing = await prisma.billing.update({
+        where: { id: existingBilling.id },
+        data: {
+          status: status as any,
+          updatedAt: new Date()
+        }
+      })
+      return { success: true, billing }
+    } else {
+      // Crear nuevo billing
+      const billing = await prisma.billing.create({
+        data: {
+          userId,
+          status: status as any,
+          plan: 'free',
+          createdAt: new Date(),
+          updatedAt: new Date()
+        }
+      })
+      return { success: true, billing }
+    }
   } catch (error: any) {
     console.error('Error updating subscription:', error)
     return { success: false, error: error?.message || 'Unknown error' }
