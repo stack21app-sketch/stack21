@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { getToken } from 'next-auth/jwt'
 import { randomBytes } from 'crypto'
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const token = await getToken({ req: request })
     
-    if (!session?.user?.id) {
+    if (!token || !token.sub) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
 
@@ -18,7 +17,7 @@ export async function POST(request: NextRequest) {
     const apiKeyData = {
       key: apiKey,
       workspaceId: 'current-workspace', // En producción, obtener del contexto
-      userId: session.user.id,
+      userId: token.sub,
       createdAt: new Date().toISOString(),
       lastUsed: null,
       isActive: true
@@ -30,7 +29,7 @@ export async function POST(request: NextRequest) {
       data: {
         key: generatedKey,
         workspaceId: workspaceId,
-        userId: session.user.id,
+        userId: token.sub,
         name: `API Key ${new Date().toLocaleDateString()}`,
         permissions: ['read', 'write'], // Basado en el rol del usuario
         expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) // 1 año

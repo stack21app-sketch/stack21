@@ -1,0 +1,222 @@
+[
+  {
+    "id": "template_1",
+    "name": "Notificación de Nuevo Usuario",
+    "description": "Envía un email de bienvenida cuando se registra un nuevo usuario",
+    "category": "Communication",
+    "difficulty": "beginner",
+    "estimatedTime": "5 min",
+    "steps": 3,
+    "apps": [
+      "Email Service",
+      "Database"
+    ],
+    "popularity": 45,
+    "featured": true,
+    "workflow": {
+      "trigger": {
+        "type": "webhook",
+        "config": {
+          "path": "/webhook/user-registered"
+        }
+      },
+      "steps": [
+        {
+          "id": "step_1",
+          "type": "data_transform",
+          "name": "Preparar Datos",
+          "config": {
+            "transform": {
+              "email": "$.email",
+              "name": "$.name",
+              "welcome_message": "Bienvenido $.name!"
+            }
+          }
+        },
+        {
+          "id": "step_2",
+          "type": "http_request",
+          "name": "Enviar Email",
+          "config": {
+            "url": "https://api.email.com/send",
+            "method": "POST",
+            "body": {
+              "to": "$.email",
+              "subject": "Bienvenido a nuestra plataforma",
+              "body": "$.welcome_message"
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "template_2",
+    "name": "Sincronización de Inventario",
+    "description": "Sincroniza el inventario entre múltiples tiendas online",
+    "category": "E-commerce",
+    "difficulty": "intermediate",
+    "estimatedTime": "15 min",
+    "steps": 5,
+    "apps": [
+      "Shopify",
+      "WooCommerce",
+      "Database"
+    ],
+    "popularity": 32,
+    "featured": true,
+    "workflow": {
+      "trigger": {
+        "type": "schedule",
+        "config": {
+          "cron": "0 */2 * * *"
+        }
+      },
+      "steps": [
+        {
+          "id": "step_1",
+          "type": "http_request",
+          "name": "Obtener Inventario Principal",
+          "config": {
+            "url": "https://api.main-store.com/inventory",
+            "method": "GET"
+          }
+        },
+        {
+          "id": "step_2",
+          "type": "data_transform",
+          "name": "Transformar Datos",
+          "config": {
+            "transform": {
+              "products": "$.products",
+              "timestamp": "$."
+            }
+          }
+        },
+        {
+          "id": "step_3",
+          "type": "http_request",
+          "name": "Actualizar Tienda 1",
+          "config": {
+            "url": "https://api.store1.com/sync",
+            "method": "POST",
+            "body": "$."
+          }
+        },
+        {
+          "id": "step_4",
+          "type": "http_request",
+          "name": "Actualizar Tienda 2",
+          "config": {
+            "url": "https://api.store2.com/sync",
+            "method": "POST",
+            "body": "$."
+          }
+        },
+        {
+          "id": "step_5",
+          "type": "log",
+          "name": "Registrar Sincronización",
+          "config": {
+            "message": "Inventario sincronizado exitosamente",
+            "level": "info"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "template_3",
+    "name": "Backup Automático de Base de Datos",
+    "description": "Crea backups automáticos de la base de datos y los sube a cloud storage",
+    "category": "Data Processing",
+    "difficulty": "advanced",
+    "estimatedTime": "30 min",
+    "steps": 6,
+    "apps": [
+      "Database",
+      "AWS S3",
+      "Email Service"
+    ],
+    "popularity": 28,
+    "featured": false,
+    "workflow": {
+      "trigger": {
+        "type": "schedule",
+        "config": {
+          "cron": "0 2 * * *"
+        }
+      },
+      "steps": [
+        {
+          "id": "step_1",
+          "type": "log",
+          "name": "Iniciar Backup",
+          "config": {
+            "message": "Iniciando proceso de backup",
+            "level": "info"
+          }
+        },
+        {
+          "id": "step_2",
+          "type": "http_request",
+          "name": "Crear Dump de BD",
+          "config": {
+            "url": "https://api.database.com/backup",
+            "method": "POST",
+            "body": {
+              "tables": [
+                "users",
+                "orders",
+                "products",
+                "settings"
+              ],
+              "format": "sql"
+            }
+          }
+        },
+        {
+          "id": "step_3",
+          "type": "delay",
+          "name": "Esperar Procesamiento",
+          "config": {
+            "duration": 10000
+          }
+        },
+        {
+          "id": "step_4",
+          "type": "http_request",
+          "name": "Subir a S3",
+          "config": {
+            "url": "https://api.aws.com/s3/upload",
+            "method": "POST",
+            "body": "$."
+          }
+        },
+        {
+          "id": "step_5",
+          "type": "http_request",
+          "name": "Notificar Administrador",
+          "config": {
+            "url": "https://api.email.com/send",
+            "method": "POST",
+            "body": {
+              "to": "admin@company.com",
+              "subject": "Backup completado",
+              "body": "El backup se completó exitosamente"
+            }
+          }
+        },
+        {
+          "id": "step_6",
+          "type": "log",
+          "name": "Finalizar Proceso",
+          "config": {
+            "message": "Backup completado exitosamente",
+            "level": "info"
+          }
+        }
+      ]
+    }
+  }
+]

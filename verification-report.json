@@ -1,0 +1,263 @@
+{
+  "timestamp": "2025-09-30T08:34:43.852Z",
+  "summary": {
+    "totalTests": 48,
+    "passedTests": 48,
+    "failedTests": 0,
+    "successRate": 100
+  },
+  "results": {
+    "pages": [
+      {
+        "name": "Página de inicio",
+        "url": "/",
+        "status": "PASS"
+      },
+      {
+        "name": "Dashboard principal",
+        "url": "/dashboard",
+        "status": "PASS"
+      },
+      {
+        "name": "Página de workflows",
+        "url": "/dashboard/workflows",
+        "status": "PASS"
+      },
+      {
+        "name": "Página de chatbots",
+        "url": "/dashboard/chatbot",
+        "status": "PASS"
+      },
+      {
+        "name": "Página de emails",
+        "url": "/dashboard/emails",
+        "status": "PASS"
+      },
+      {
+        "name": "Página de facturación",
+        "url": "/dashboard/billing",
+        "status": "PASS"
+      },
+      {
+        "name": "Página de analytics",
+        "url": "/dashboard/analytics",
+        "status": "PASS"
+      },
+      {
+        "name": "Panel de administración",
+        "url": "/dashboard/admin",
+        "status": "PASS"
+      },
+      {
+        "name": "Constructor de workflows",
+        "url": "/workflow-builder",
+        "status": "PASS"
+      },
+      {
+        "name": "Marketplace",
+        "url": "/marketplace",
+        "status": "PASS"
+      }
+    ],
+    "apis": [
+      {
+        "name": "API de salud",
+        "url": "/api/health",
+        "status": "PASS"
+      },
+      {
+        "name": "API de workflows",
+        "url": "/api/workflows",
+        "status": "PASS"
+      },
+      {
+        "name": "API de chatbots",
+        "url": "/api/chatbots",
+        "status": "PASS"
+      },
+      {
+        "name": "API de emails",
+        "url": "/api/emails",
+        "status": "PASS"
+      },
+      {
+        "name": "API de facturación",
+        "url": "/api/billing",
+        "status": "PASS"
+      },
+      {
+        "name": "API de analytics",
+        "url": "/api/analytics",
+        "status": "PASS"
+      },
+      {
+        "name": "API de monitoreo",
+        "url": "/api/monitoring",
+        "status": "PASS"
+      },
+      {
+        "name": "API de respaldos",
+        "url": "/api/backups",
+        "status": "PASS"
+      },
+      {
+        "name": "API de notificaciones",
+        "url": "/api/notifications",
+        "status": "PASS"
+      }
+    ],
+    "components": [
+      {
+        "name": "Sidebar",
+        "file": "src/components/Sidebar.tsx",
+        "status": "PASS"
+      },
+      {
+        "name": "NoSSR",
+        "file": "src/components/NoSSR.tsx",
+        "status": "PASS"
+      },
+      {
+        "name": "WorkflowBuilder",
+        "file": "src/components/workflow/WorkflowBuilder.tsx",
+        "status": "PASS"
+      },
+      {
+        "name": "QuantumWorkflowEngine",
+        "file": "src/components/ai/QuantumWorkflowEngine.tsx",
+        "status": "PASS"
+      },
+      {
+        "name": "PredictiveIntelligence",
+        "file": "src/components/ai/PredictiveIntelligence.tsx",
+        "status": "PASS"
+      },
+      {
+        "name": "UniversalMultimodalInterface",
+        "file": "src/components/ai/UniversalMultimodalInterface.tsx",
+        "status": "PASS"
+      },
+      {
+        "name": "SelfOptimizationSystem",
+        "file": "src/components/ai/SelfOptimizationSystem.tsx",
+        "status": "PASS"
+      },
+      {
+        "name": "AdaptiveLearningSystem",
+        "file": "src/components/ai/AdaptiveLearningSystem.tsx",
+        "status": "PASS"
+      }
+    ],
+    "systems": [
+      {
+        "name": "Motor de Workflows",
+        "file": "src/lib/workflow-engine.ts",
+        "status": "PASS"
+      },
+      {
+        "name": "Motor de Chatbots",
+        "file": "src/lib/chatbot-engine.ts",
+        "status": "PASS"
+      },
+      {
+        "name": "Motor de Emails",
+        "file": "src/lib/email-engine.ts",
+        "status": "PASS"
+      },
+      {
+        "name": "Motor de Pagos",
+        "file": "src/lib/payment-engine.ts",
+        "status": "PASS"
+      },
+      {
+        "name": "Motor de Monitoreo",
+        "file": "src/lib/monitoring-engine.ts",
+        "status": "PASS"
+      },
+      {
+        "name": "Motor de Respaldos",
+        "file": "src/lib/backup-engine.ts",
+        "status": "PASS"
+      },
+      {
+        "name": "Configuración de Next.js",
+        "file": "next.config.js",
+        "status": "PASS"
+      },
+      {
+        "name": "Configuración de Tailwind",
+        "file": "tailwind.config.js",
+        "status": "PASS"
+      },
+      {
+        "name": "Configuración de dependencias",
+        "file": "package.json",
+        "status": "PASS"
+      },
+      {
+        "name": "Middleware de Next.js",
+        "file": "middleware.ts",
+        "status": "PASS"
+      },
+      {
+        "name": "Configuración de Vercel",
+        "file": "vercel.json",
+        "status": "PASS"
+      }
+    ],
+    "scripts": [
+      {
+        "name": "Script de despliegue a producción",
+        "file": "scripts/deploy-production.sh",
+        "status": "PASS"
+      },
+      {
+        "name": "Script de despliegue a Vercel",
+        "file": "scripts/deploy-vercel-production.sh",
+        "status": "PASS"
+      },
+      {
+        "name": "Script de optimización",
+        "file": "scripts/optimize-performance.js",
+        "status": "PASS"
+      },
+      {
+        "name": "Script de configuración de Supabase",
+        "file": "scripts/setup-supabase.js",
+        "status": "PASS"
+      },
+      {
+        "name": "Script de configuración de OAuth",
+        "file": "scripts/setup-oauth.js",
+        "status": "PASS"
+      }
+    ],
+    "documentation": [
+      {
+        "name": "Documentación completa",
+        "file": "docs/COMPLETE_DOCUMENTATION.md",
+        "status": "PASS"
+      },
+      {
+        "name": "Guía de usuario",
+        "file": "docs/USER_GUIDE.md",
+        "status": "PASS"
+      },
+      {
+        "name": "README principal",
+        "file": "README.md",
+        "status": "PASS"
+      },
+      {
+        "name": "Documentación de APIs",
+        "file": "docs/API_DOCUMENTATION.md",
+        "status": "PASS"
+      },
+      {
+        "name": "Resumen de la plataforma",
+        "file": "docs/PLATFORM_SUMMARY.md",
+        "status": "PASS"
+      }
+    ]
+  }
+}

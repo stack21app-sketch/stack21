@@ -148,7 +148,7 @@ export default function BillingPage() {
     setPlans(mockPlans)
     setCurrentPlan(mockPlans[0]) // Plan gratuito actual
     setBillingHistory(mockBillingHistory)
-  }, [])
+  }, [mockPlans, mockBillingHistory])
 
   const handleUpgrade = async (planId: string) => {
     setLoading(true)

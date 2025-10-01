@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useSession } from 'next-auth/react'
 
 // Definir WorkspaceRole localmente para evitar dependencia de Prisma
@@ -28,12 +28,12 @@ export function useWorkspace(): UseWorkspaceReturn {
   const [loading, setLoading] = useState(true)
 
   // En modo demo, usar workspaces simulados
-  const workspaces: Workspace[] = (session?.user as any)?.workspaces || [{
+  const workspaces: Workspace[] = useMemo(() => (session?.user as any)?.workspaces || [{
     id: 'demo-workspace-id',
     name: 'Demo Workspace',
     slug: 'demo-workspace',
     role: 'OWNER' as const,
-  }]
+  }], [session?.user])
 
   // Cargar workspace desde localStorage al inicializar
   useEffect(() => {

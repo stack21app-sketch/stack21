@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { getToken } from 'next-auth/jwt'
 import { PrismaClient, ExportStatus } from '@prisma/client'
 
 const prisma = new PrismaClient()
@@ -50,9 +49,9 @@ interface UserData {
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const token = await getToken({ req: request })
     
-    if (!session?.user?.id) {
+    if (!token || !token.sub) {
       return NextResponse.json(
         { error: 'No autorizado' },
         { status: 401 }
@@ -63,10 +62,10 @@ export async function GET(request: NextRequest) {
     // En producción, esto vendría de la base de datos real
     const userData: UserData = {
       profile: {
-        id: session.user.id,
-        email: session.user.email || '',
-        name: session.user.name || '',
-        image: session.user.image || undefined,
+        id: token.sub,
+        email: 'user@example.com',
+        name: 'User',
+        image: undefined,
         created_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 días atrás
         updated_at: new Date().toISOString()
       },
@@ -132,7 +131,7 @@ export async function GET(request: NextRequest) {
     // Crear metadatos de exportación
     const exportMetadata = {
       export_id: `export_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      user_id: session.user.id,
+      user_id: token.sub,
       export_date: new Date().toISOString(),
       format_version: '1.0',
       gdpr_compliant: true,
@@ -173,7 +172,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Log de auditoría
-    console.log(`Exportación de datos solicitada por usuario ${session.user.id}:`, {
+    console.log(`Exportación de datos solicitada por usuario ${token.sub}:`, {
       export_id: exportMetadata.export_id,
       timestamp: new Date().toISOString(),
       ip_address: request.headers.get('x-forwarded-for') || 'unknown'
@@ -202,9 +201,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const token = await getToken({ req: request })
     
-    if (!session?.user?.id) {
+    if (!token || !token.sub) {
       return NextResponse.json(
         { error: 'No autorizado' },
         { status: 401 }
@@ -225,7 +224,7 @@ export async function POST(request: NextRequest) {
     // Simular procesamiento de exportación
     const exportJob = await prisma.dataExportJob.create({
       data: {
-        userId: session.user.id,
+        userId: token.sub,
         format,
         includeTechnical: include_technical,
         status: ExportStatus.PROCESSING,

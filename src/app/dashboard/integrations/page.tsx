@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useContext } from 'react'
+import { useState, useEffect, useContext, useCallback } from 'react'
 import { I18nContext } from '@/lib/i18n'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
@@ -85,30 +85,7 @@ export default function IntegrationsPage() {
     headers: ''
   })
 
-  if (status === 'unauthenticated') {
-    router.push('/auth/signin')
-    return null
-  }
-
-  if (status === 'loading') {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Cargando...</p>
-        </div>
-      </div>
-    )
-  }
-
-  useEffect(() => {
-    if (currentWorkspace) {
-      fetchIntegrations()
-      fetchLogs()
-    }
-  }, [currentWorkspace])
-
-  const fetchIntegrations = async () => {
+  const fetchIntegrations = useCallback(async () => {
     if (!currentWorkspace) return
 
     setLoading(true)
@@ -130,9 +107,9 @@ export default function IntegrationsPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [currentWorkspace])
 
-  const fetchLogs = async () => {
+  const fetchLogs = useCallback(async () => {
     if (!currentWorkspace) return
 
     try {
@@ -144,6 +121,29 @@ export default function IntegrationsPage() {
     } catch (error) {
       console.error('Error al cargar logs:', error)
     }
+  }, [currentWorkspace])
+
+  useEffect(() => {
+    if (currentWorkspace) {
+      fetchIntegrations()
+      fetchLogs()
+    }
+  }, [currentWorkspace, fetchIntegrations, fetchLogs])
+
+  if (status === 'unauthenticated') {
+    router.push('/auth/signin')
+    return null
+  }
+
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Cargando...</p>
+        </div>
+      </div>
+    )
   }
 
   const handleConnect = (integration: Integration) => {

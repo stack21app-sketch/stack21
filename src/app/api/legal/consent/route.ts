@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { getToken } from 'next-auth/jwt'
 import { PrismaClient } from '@prisma/client'
 
 interface ConsentPreferences {
@@ -17,9 +16,9 @@ const prisma = new PrismaClient()
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const token = await getToken({ req: request })
     
-    if (!session?.user?.id) {
+    if (!token || !token.sub) {
       return NextResponse.json(
         { error: 'No autorizado' },
         { status: 401 }
@@ -28,7 +27,7 @@ export async function GET(request: NextRequest) {
 
     // Buscar consentimiento del usuario (DB)
     const userConsent = await prisma.userConsent.findUnique({
-      where: { userId: session.user.id },
+      where: { userId: token.sub },
     })
 
     if (!userConsent) {
@@ -59,9 +58,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const token = await getToken({ req: request })
     
-    if (!session?.user?.id) {
+    if (!token || !token.sub) {
       return NextResponse.json(
         { error: 'No autorizado' },
         { status: 401 }
@@ -112,7 +111,7 @@ export async function POST(request: NextRequest) {
 
     // Upsert en DB
     const consentRecord = await prisma.userConsent.upsert({
-      where: { userId: session.user.id },
+      where: { userId: token.sub },
       update: {
         preferences: consentData as any,
         ipAddress: ip_address,
@@ -120,7 +119,7 @@ export async function POST(request: NextRequest) {
         version: '1.0',
       },
       create: {
-        userId: session.user.id,
+        userId: token.sub,
         preferences: consentData as any,
         ipAddress: ip_address,
         userAgent: user_agent,
@@ -132,7 +131,7 @@ export async function POST(request: NextRequest) {
     await applyConsentChanges(consentData)
 
     // Log de auditoría
-    console.log(`Consentimiento actualizado para usuario ${session.user.id}:`, {
+    console.log(`Consentimiento actualizado para usuario ${token.sub}:`, {
       preferences: consentData,
       ip_address,
       user_agent,
@@ -162,9 +161,9 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const token = await getToken({ req: request })
     
-    if (!session?.user?.id) {
+    if (!token || !token.sub) {
       return NextResponse.json(
         { error: 'No autorizado' },
         { status: 401 }
@@ -173,7 +172,7 @@ export async function DELETE(request: NextRequest) {
 
     // Eliminar consentimiento del usuario en DB
     await prisma.userConsent.delete({
-      where: { userId: session.user.id },
+      where: { userId: token.sub },
     }).catch(() => null)
 
     // Aplicar consentimiento mínimo (solo esenciales)
@@ -186,7 +185,7 @@ export async function DELETE(request: NextRequest) {
     })
 
     // Log de auditoría
-    console.log(`Consentimiento eliminado para usuario ${session.user.id}:`, {
+    console.log(`Consentimiento eliminado para usuario ${token.sub}:`, {
       timestamp: new Date().toISOString()
     })
 

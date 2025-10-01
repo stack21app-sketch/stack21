@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -10,7 +11,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { 
-  Image, 
+  Image as ImageIcon, 
   Wand2, 
   Download, 
   RefreshCw, 
@@ -102,7 +103,7 @@ export default function GenerateImagePage() {
       <div className="bg-black/20 backdrop-blur-lg border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center">
-            <Image className="h-8 w-8 text-cyan-400 mr-3" />
+            <ImageIcon className="h-8 w-8 text-cyan-400 mr-3" />
             <div>
               <h1 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
                 Generador de Imágenes IA
@@ -218,7 +219,7 @@ export default function GenerateImagePage() {
             <CardContent>
               {generatedImages.length === 0 ? (
                 <div className="text-center py-12">
-                  <Image className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                  <ImageIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
                   <p className="text-gray-400">Aún no has generado ninguna imagen</p>
                   <p className="text-sm text-gray-500">Usa el panel de la izquierda para crear tu primera imagen</p>
                 </div>
@@ -226,10 +227,13 @@ export default function GenerateImagePage() {
                 <div className="grid grid-cols-1 gap-4">
                   {generatedImages.map((imageUrl, index) => (
                     <div key={index} className="relative group">
-                      <img 
-                        src={imageUrl} 
+                      <Image
+                        src={imageUrl}
                         alt={`Imagen generada ${index + 1}`}
+                        width={800}
+                        height={600}
                         className="w-full rounded-lg border border-white/20"
+                        loading="lazy"
                       />
                       <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
                         <Button size="sm" className="bg-white/20 hover:bg-white/30">

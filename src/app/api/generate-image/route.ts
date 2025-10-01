@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { getToken } from 'next-auth/jwt'
 import { generateImage } from '@/lib/openai'
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const token = await getToken({ req: request })
 
-    if (!session?.user?.id) {
+    if (!token || !token.sub) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
 
@@ -54,7 +53,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log(`🎨 Generando imagen para usuario ${session.user.email}: "${prompt}"`)
+    console.log(`🎨 Generando imagen para usuario: "${prompt}"`)
 
     // Generar imagen usando OpenAI
     const imageUrl = await generateImage(prompt, size || '1024x1024', quality || 'standard')

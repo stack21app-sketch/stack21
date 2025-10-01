@@ -4,13 +4,15 @@ import './globals.css'
 import { Providers } from './providers'
 import CookieBanner from '@/components/legal/cookie-banner'
 import I18nProvider from './i18n-provider'
-import LanguageSwitcher from '@/components/LanguageSwitcher'
+import TopHeader from '@/components/layout/TopHeader'
+import AppLayout from '@/components/layout/AppLayout'
 
-const inter = Inter({ subsets: ['latin'] })
+// Usamos la variante con variable CSS para que tailwind "font-sans" funcione correctamente
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
 export const metadata: Metadata = {
-  title: 'Stack21',
-  description: 'La plataforma SaaS definitiva para automatizar tu negocio con IA, facturación inteligente y gestión multi-tenant',
+  title: 'Stack21 - Automatización Inteligente',
+  description: 'La plataforma de automatización más potente. Conecta aplicaciones, crea workflows visuales y automatiza tareas repetitivas con IA.',
 }
 
 export default function RootLayout({
@@ -19,14 +21,17 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="es">
-      <body className={inter.className}>
+    <html lang="es" suppressHydrationWarning>
+      <body className={`${inter.variable} min-h-screen font-sans antialiased`}>
         <Providers>
           <I18nProvider>
-            <header style={{display:'flex',justifyContent:'flex-end',padding:'8px 12px'}}>
-              <LanguageSwitcher />
-            </header>
-            {children}
+            {/* Contenedor principal limpio */}
+            <div className="min-h-screen">
+              <TopHeader />
+              <AppLayout>
+                {children}
+              </AppLayout>
+            </div>
             <CookieBanner />
           </I18nProvider>
         </Providers>

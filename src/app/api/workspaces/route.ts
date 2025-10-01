@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { getToken } from 'next-auth/jwt'
 
 // Configuración de base de datos
 const { PrismaClient } = require('@prisma/client')
@@ -32,9 +31,9 @@ const workspaceMembers: any[] = []
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const token = await getToken({ req: request })
     
-    if (!session?.user?.id) {
+    if (!token || !token.sub) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
 
@@ -67,14 +66,14 @@ export async function POST(request: NextRequest) {
           name,
           slug,
           description,
-          creatorId: session.user.id,
+          creatorId: token.sub,
         },
       })
 
       await prisma.workspaceMember.create({
         data: {
           workspaceId: workspace.id,
-          userId: session.user.id,
+          userId: token.sub,
           role: 'OWNER',
         },
       })
@@ -94,7 +93,7 @@ export async function POST(request: NextRequest) {
         name,
         slug,
         description,
-        creatorId: session.user.id,
+        creatorId: token.sub,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       }
@@ -104,7 +103,7 @@ export async function POST(request: NextRequest) {
       const member = {
         id: `member_${Date.now()}`,
         workspaceId: workspace.id,
-        userId: session.user.id,
+        userId: token.sub,
         role: 'OWNER',
         createdAt: new Date().toISOString(),
       }
@@ -125,21 +124,21 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const token = await getToken({ req: request })
     
-    if (!session?.user?.id) {
+    if (!token || !token.sub) {
       console.log('❌ GET /api/workspaces: No autorizado')
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
 
-    console.log(`📋 GET /api/workspaces: Obteniendo workspaces para usuario ${session.user.id}`)
+    console.log(`📋 GET /api/workspaces: Obteniendo workspaces para usuario ${token.sub}`)
 
     let userWorkspaces: any[]
 
     if (useDatabase && prisma) {
       // Usar base de datos real
       userWorkspaces = await prisma.workspaceMember.findMany({
-        where: { userId: session.user.id },
+        where: { userId: token.sub },
         include: {
           workspace: true,
         },
@@ -147,7 +146,7 @@ export async function GET(request: NextRequest) {
       console.log(`✅ Base de datos: ${userWorkspaces.length} workspaces encontrados`)
     } else {
       // Usar simulación
-      const userMembers = workspaceMembers.filter(m => m.userId === session.user.id)
+      const userMembers = workspaceMembers.filter(m => m.userId === token.sub)
       userWorkspaces = userMembers.map(member => {
         const workspace = workspaces.find(w => w.id === member.workspaceId)
         return {
@@ -182,9 +181,9 @@ export async function GET(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const token = await getToken({ req: request })
     
-    if (!session?.user?.id) {
+    if (!token || !token.sub) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
 
@@ -204,7 +203,7 @@ export async function PUT(request: NextRequest) {
       const member = await prisma.workspaceMember.findFirst({
         where: { 
           workspaceId: id, 
-          userId: session.user.id,
+          userId: token.sub,
           role: { in: ['OWNER', 'ADMIN'] }
         }
       })
@@ -248,7 +247,7 @@ export async function PUT(request: NextRequest) {
       // Verificar permisos
       const member = workspaceMembers.find(m => 
         m.workspaceId === id && 
-        m.userId === session.user.id &&
+        m.userId === token.sub &&
         ['OWNER', 'ADMIN'].includes(m.role)
       )
 
@@ -292,9 +291,9 @@ export async function PUT(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const token = await getToken({ req: request })
     
-    if (!session?.user?.id) {
+    if (!token || !token.sub) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
 
@@ -313,7 +312,7 @@ export async function DELETE(request: NextRequest) {
       const member = await prisma.workspaceMember.findFirst({
         where: { 
           workspaceId: id, 
-          userId: session.user.id,
+          userId: token.sub,
           role: 'OWNER'
         }
       })
@@ -346,7 +345,7 @@ export async function DELETE(request: NextRequest) {
       // Verificar permisos
       const member = workspaceMembers.find(m => 
         m.workspaceId === id && 
-        m.userId === session.user.id &&
+        m.userId === token.sub &&
         m.role === 'OWNER'
       )
 

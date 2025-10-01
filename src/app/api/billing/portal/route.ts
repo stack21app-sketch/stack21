@@ -1,29 +1,35 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { createBillingPortalSession } from '@/lib/stripe'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { NextRequest, NextResponse } from 'next/server';
+import { getToken } from 'next-auth/jwt';
+import { stripe, createPortalSession } from '@/lib/stripe';
+import { prisma } from '@/lib/prisma';
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+    const token = await getToken({ req: request });
+    if (!token || !token.sub) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
-    
-    const { url } = await createBillingPortalSession({
-      customerId: session.user.email, // En producción, usar customer ID de Stripe
-      returnUrl: `${baseUrl}/dashboard/billing`
-    })
+    const user = await prisma.user.findUnique({
+      where: { id: token.sub },
+    });
 
-    return NextResponse.json({ url })
+    if (!user) {
+      return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
+    }
+
+    // Crear sesión del portal de facturación
+    const session = await createPortalSession(
+      'mock-customer-id',
+      `${process.env.NEXTAUTH_URL}/billing`
+    );
+
+    return NextResponse.json({ url: session.url });
   } catch (error) {
-    console.error('Error creating billing portal session:', error)
+    console.error('Error creando portal session:', error);
     return NextResponse.json(
       { error: 'Error interno del servidor' },
       { status: 500 }
-    )
+    );
   }
 }

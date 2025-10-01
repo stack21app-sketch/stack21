@@ -18,9 +18,9 @@ export async function GET(
       )
     }
 
-    const module = getModuleById(id)
+    const moduleData = getModuleById(id)
     
-    if (!module) {
+    if (!moduleData) {
       return NextResponse.json(
         { 
           success: false, 
@@ -32,7 +32,7 @@ export async function GET(
 
     return NextResponse.json({
       success: true,
-      data: module
+      data: moduleData
     })
   } catch (error) {
     console.error('Error fetching module details:', error)
@@ -65,9 +65,9 @@ export async function POST(
       )
     }
 
-    const module = getModuleById(id)
+    const moduleData = getModuleById(id)
     
-    if (!module) {
+    if (!moduleData) {
       return NextResponse.json(
         { 
           success: false, 
@@ -90,16 +90,16 @@ export async function POST(
         
         return NextResponse.json({
           success: true,
-          message: `Módulo ${module.name} instalado correctamente`,
+          message: `Módulo ${moduleData.name} instalado correctamente`,
           data: {
             moduleId: id,
-            moduleName: module.name,
-            version: module.version,
+            moduleName: moduleData.name,
+            version: moduleData.version,
             installedAt: new Date().toISOString(),
             status: 'active',
             configuration: {
               enabled: true,
-              settings: module.requirements
+              settings: moduleData.requirements
             }
           }
         })
@@ -110,10 +110,10 @@ export async function POST(
         
         return NextResponse.json({
           success: true,
-          message: `Módulo ${module.name} desinstalado correctamente`,
+          message: `Módulo ${moduleData.name} desinstalado correctamente`,
           data: {
             moduleId: id,
-            moduleName: module.name,
+            moduleName: moduleData.name,
             uninstalledAt: new Date().toISOString(),
             status: 'inactive'
           }
@@ -125,12 +125,12 @@ export async function POST(
         
         return NextResponse.json({
           success: true,
-          message: `Módulo ${module.name} actualizado correctamente`,
+          message: `Módulo ${moduleData.name} actualizado correctamente`,
           data: {
             moduleId: id,
-            moduleName: module.name,
+            moduleName: moduleData.name,
             previousVersion: data?.previousVersion || '1.0.0',
-            newVersion: module.version,
+            newVersion: moduleData.version,
             updatedAt: new Date().toISOString(),
             status: 'active'
           }
@@ -142,10 +142,10 @@ export async function POST(
         
         return NextResponse.json({
           success: true,
-          message: `Configuración del módulo ${module.name} guardada`,
+          message: `Configuración del módulo ${moduleData.name} guardada`,
           data: {
             moduleId: id,
-            moduleName: module.name,
+            moduleName: moduleData.name,
             configuration: data?.configuration || {},
             configuredAt: new Date().toISOString(),
             status: 'configured'
@@ -163,7 +163,7 @@ export async function POST(
           message: 'Calificación enviada correctamente',
           data: {
             moduleId: id,
-            moduleName: module.name,
+            moduleName: moduleData.name,
             rating,
             review,
             title,
@@ -183,7 +183,7 @@ export async function POST(
           message: 'Reporte enviado correctamente',
           data: {
             moduleId: id,
-            moduleName: module.name,
+            moduleName: moduleData.name,
             reason,
             description,
             reportedAt: new Date().toISOString(),

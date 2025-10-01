@@ -41,6 +41,8 @@ model User {
   twoFactorSecret     String?
   twoFactorEnabled    Boolean @default(false)
   twoFactorBackupCodes Json?
+  // Campos adicionales para Stripe
+  stripeCustomerId    String?
 
   @@map("users")
 }
@@ -147,6 +149,10 @@ model Project {
   // Relaciones
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   modules     Module[]
+  workflows   Workflow[]
+  connections Connection[]
+  dataStores  DataStore[]
+  webhooks    Webhook[]
 
   @@map("projects")
 }
@@ -177,6 +183,48 @@ enum ModuleType {
   CUSTOM
 }
 
+// Modelo de App - Conectores disponibles
+model App {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  description String?
+  category    String?
+  logoUrl     String?
+  docsUrl     String?
+  oauthType   String?  // oauth2, api_key, basic_auth, etc.
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relaciones
+  connections Connection[]
+  steps       Step[]
+  triggers    Trigger[]
+
+  @@map("apps")
+}
+
+// Modelo de Connection - Conexiones OAuth/API
+model Connection {
+  id          String   @id @default(cuid())
+  name        String
+  appId       String
+  projectId   String
+  authType    String   // oauth2, api_key, basic_auth
+  oauthJson   String?  // Datos OAuth cifrados
+  apiKeyEnc   String?  // API key cifrada
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relaciones
+  app         App      @relation(fields: [appId], references: [id])
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("connections")
+}
+
 // Modelo de Workflow - Flujo de trabajo automatizado
 model Workflow {
   id          String   @id @default(cuid())
@@ -184,32 +232,185 @@ model Workflow {
   description String?
   status      WorkflowStatus @default(DRAFT)
   isActive    Boolean  @default(false)
-  triggerType TriggerType
-  triggerConfig Json?  // Configuración del trigger
-  nodes       Json     // Nodos del workflow (array de nodos)
-  connections Json     // Conexiones entre nodos
-  variables   Json?    // Variables del workflow
-  tags        String[] @default([])
-  industry    String?  // Industria específica
-  template    Boolean  @default(false) // Si es un template
-  public      Boolean  @default(false) // Si es público en marketplace
-  downloads   Int      @default(0) // Descargas del template
-  rating      Float?   // Rating promedio
-  price       Float?   // Precio en USD para marketplace
-  category    String?  // Categoría del marketplace
-  featured    Boolean  @default(false) // Destacado en marketplace
+  definitionJson Json  // Definición completa del workflow
+  version     Int      @default(1)
+  projectId   String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   // Relaciones
-  userId      String
-  workspaceId String
-  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  runLogs     RunLog[]
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  triggers    Trigger[]
+  steps       Step[]
+  runs        Run[]
   reviews     WorkflowReview[]
+  runLogs     RunLog[]
+  user        User?    @relation(fields: [userId], references: [id])
+  userId      String?
+  workspace   Workspace? @relation(fields: [workspaceId], references: [id])
+  workspaceId String?
 
   @@map("workflows")
+}
+
+// Modelo de Trigger - Disparadores de workflows
+model Trigger {
+  id          String   @id @default(cuid())
+  workflowId  String
+  type        String   // http_webhook, schedule, app_event, manual
+  config      Json     // Configuración específica del trigger
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relaciones
+  workflow    Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  app         App?     @relation(fields: [appId], references: [id])
+  appId       String?
+
+  @@map("triggers")
+}
+
+// Modelo de Step - Pasos de un workflow
+model Step {
+  id          String   @id @default(cuid())
+  workflowId  String
+  order       Int
+  type        String   // app_action, code_step, condition, loop, delay
+  appId       String?
+  actionKey   String?  // Clave de la acción en el app
+  codeLang    String?  // js, python
+  code        String?  // Código del step
+  config      Json?    // Configuración del step
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relaciones
+  workflow    Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  app         App?     @relation(fields: [appId], references: [id])
+
+  @@map("steps")
+}
+
+// Modelo de Run - Ejecución de un workflow
+model Run {
+  id          String   @id @default(cuid())
+  workflowId  String
+  status      RunStatus @default(PENDING)
+  input       Json?    // Datos de entrada
+  output      Json?    // Datos de salida
+  error       String?  // Error si falló
+  costCents   Int      @default(0) // Costo en centavos
+  logsUrl     String?  // URL de logs comprimidos
+  startedAt   DateTime @default(now())
+  finishedAt  DateTime?
+
+  // Relaciones
+  workflow    Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  runSteps    RunStep[]
+
+  @@map("runs")
+}
+
+// Modelo de RunStep - Ejecución de un paso específico
+model RunStep {
+  id          String   @id @default(cuid())
+  runId       String
+  stepId      String?
+  name        String
+  status      RunStatus @default(PENDING)
+  input       Json?    // Input del paso
+  output      Json?    // Output del paso
+  error       String?  // Error si falló
+  startedAt   DateTime @default(now())
+  finishedAt  DateTime?
+
+  // Relaciones
+  run         Run      @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  @@map("run_steps")
+}
+
+// Modelo de DataStore - Almacenamiento de datos
+model DataStore {
+  id          String   @id @default(cuid())
+  name        String
+  type        String   @default("kv") // kv, file, sql
+  projectId   String
+  config      Json?    // Configuración del store
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relaciones
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  kvData      KV[]
+
+  @@map("data_stores")
+}
+
+// Modelo de KV - Key-Value storage
+model KV {
+  id          String   @id @default(cuid())
+  storeId     String
+  key         String
+  value       Json
+  ttl         Int?     // Time to live en segundos
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relaciones
+  store       DataStore @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@unique([storeId, key])
+  @@map("kv_data")
+}
+
+// Modelo de Webhook - Webhooks registrados
+model Webhook {
+  id          String   @id @default(cuid())
+  projectId   String
+  path        String   @unique
+  secretHash  String   // Hash del secret para validación
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  // Relaciones
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("webhooks")
+}
+
+// Modelo de Template - Plantillas de workflows
+model Template {
+  id          String   @id @default(cuid())
+  title       String
+  summary     String
+  description String?
+  definitionJson Json  // Definición del workflow
+  category    String?
+  featured    Boolean @default(false)
+  downloads   Int     @default(0)
+  rating      Float?
+  tags        String[] @default([])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("templates")
+}
+
+// Modelo de Audit - Auditoría de acciones
+model Audit {
+  id          String   @id @default(cuid())
+  orgId       String?
+  userId      String?
+  action      String
+  resource    String?
+  meta        Json?
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+
+  @@map("audit_logs")
 }
 
 // Modelo de Reviews de Workflows - Para marketplace
@@ -509,4 +710,6 @@ enum ExportStatus {
   COMPLETED
   FAILED
 }
+
+
 

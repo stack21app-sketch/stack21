@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { getToken } from 'next-auth/jwt'
 
 // Configuración de base de datos
 const { PrismaClient } = require('@prisma/client')
@@ -81,9 +80,9 @@ const mockTickets: any[] = [
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const token = await getToken({ req: request })
     
-    if (!session?.user?.id) {
+    if (!token || !token.sub) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
 
@@ -97,7 +96,7 @@ export async function GET(request: NextRequest) {
 
         if (useDatabase && prisma) {
           tickets = await prisma.supportTicket.findMany({
-            where: { userId: session.user.id },
+            where: { userId: token.sub },
             orderBy: { updatedAt: 'desc' },
             include: {
               workspace: true,
@@ -108,7 +107,7 @@ export async function GET(request: NextRequest) {
           })
         } else {
           // Usar simulación
-          tickets = mockTickets.filter(ticket => ticket.userId === session.user.id)
+          tickets = mockTickets.filter(ticket => ticket.userId === token.sub)
         }
 
         return NextResponse.json(tickets)
@@ -127,7 +126,7 @@ export async function GET(request: NextRequest) {
           ticket = await prisma.supportTicket.findFirst({
             where: { 
               id: ticketId,
-              userId: session.user.id 
+              userId: token.sub 
             },
             include: {
               workspace: true,
@@ -138,7 +137,7 @@ export async function GET(request: NextRequest) {
           })
         } else {
           // Usar simulación
-          ticket = mockTickets.find(t => t.id === ticketId && t.userId === session.user.id)
+          ticket = mockTickets.find(t => t.id === ticketId && t.userId === token.sub)
         }
 
         if (!ticket) {
@@ -155,16 +154,16 @@ export async function GET(request: NextRequest) {
 
         if (useDatabase && prisma) {
           const [total, open, resolved, inProgress] = await Promise.all([
-            prisma.supportTicket.count({ where: { userId: session.user.id } }),
-            prisma.supportTicket.count({ where: { userId: session.user.id, status: 'OPEN' } }),
-            prisma.supportTicket.count({ where: { userId: session.user.id, status: 'RESOLVED' } }),
-            prisma.supportTicket.count({ where: { userId: session.user.id, status: 'IN_PROGRESS' } })
+            prisma.supportTicket.count({ where: { userId: token.sub } }),
+            prisma.supportTicket.count({ where: { userId: token.sub, status: 'OPEN' } }),
+            prisma.supportTicket.count({ where: { userId: token.sub, status: 'RESOLVED' } }),
+            prisma.supportTicket.count({ where: { userId: token.sub, status: 'IN_PROGRESS' } })
           ])
 
           stats = { total, open, resolved, inProgress }
         } else {
           // Simulación
-          const userTickets = mockTickets.filter(t => t.userId === session.user.id)
+          const userTickets = mockTickets.filter(t => t.userId === token.sub)
           stats = {
             total: userTickets.length,
             open: userTickets.filter(t => t.status === 'OPEN').length,
@@ -189,9 +188,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const token = await getToken({ req: request })
     
-    if (!session?.user?.id) {
+    if (!token || !token.sub) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
 
@@ -223,7 +222,7 @@ export async function POST(request: NextRequest) {
               category,
               priority: priority || 'MEDIUM',
               status: 'OPEN',
-              userId: session.user.id,
+              userId: token.sub,
               workspaceId: null, // Se puede asociar a un workspace específico
               messages: {
                 create: {
@@ -246,7 +245,7 @@ export async function POST(request: NextRequest) {
             status: 'OPEN',
             priority: priority || 'MEDIUM',
             category,
-            userId: session.user.id,
+            userId: token.sub,
             workspaceId: null,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
@@ -279,7 +278,7 @@ export async function POST(request: NextRequest) {
           const ticket = await prisma.supportTicket.findFirst({
             where: { 
               id: ticketId,
-              userId: session.user.id 
+              userId: token.sub 
             }
           })
 
@@ -312,7 +311,7 @@ export async function POST(request: NextRequest) {
           })
         } else {
           // Simulación
-          const ticketIndex = mockTickets.findIndex(t => t.id === ticketId && t.userId === session.user.id)
+          const ticketIndex = mockTickets.findIndex(t => t.id === ticketId && t.userId === token.sub)
           if (ticketIndex === -1) {
             return NextResponse.json(
               { error: 'Ticket no encontrado' },
@@ -346,7 +345,7 @@ export async function POST(request: NextRequest) {
           const ticket = await prisma.supportTicket.findFirst({
             where: { 
               id: ticketId,
-              userId: session.user.id 
+              userId: token.sub 
             }
           })
 
@@ -366,7 +365,7 @@ export async function POST(request: NextRequest) {
           })
         } else {
           // Simulación
-          const ticketIndex = mockTickets.findIndex(t => t.id === ticketId && t.userId === session.user.id)
+          const ticketIndex = mockTickets.findIndex(t => t.id === ticketId && t.userId === token.sub)
           if (ticketIndex === -1) {
             return NextResponse.json(
               { error: 'Ticket no encontrado' },

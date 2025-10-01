@@ -34,49 +34,42 @@ export default function WorkspaceDashboard() {
 
   if (!session) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <div className="min-h-screen flex items-center justify-center bg-[var(--bg)]">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-white">Acceso Denegado</h2>
-          <p className="text-gray-300">Debes iniciar sesión para acceder a este workspace</p>
+          <h2 className="text-2xl font-bold text-[var(--text)]">Acceso Denegado</h2>
+          <p className="text-[var(--muted)]">Debes iniciar sesión para acceder a este workspace</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      {/* Animated Background */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-        <div className="absolute top-40 left-1/2 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-      </div>
-
+    <div className="min-h-screen bg-[var(--bg)]">
       {/* Header */}
-      <div className="relative bg-black/20 backdrop-blur-lg border-b border-white/10">
+      <div className="relative bg-[var(--surface)] border-b border-[var(--border)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center">
               <div className="relative">
-                <Brain className="h-10 w-10 text-cyan-400 mr-4 animate-pulse" />
+                <Brain className="h-10 w-10 text-[var(--brand)] mr-4" />
                 <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-ping"></div>
               </div>
               <div>
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
+                <h1 className="text-3xl font-bold text-[var(--text)]">
                   {slug}
                 </h1>
-                <p className="text-sm text-gray-300 flex items-center">
-                  <Zap className="h-4 w-4 mr-1 text-yellow-400" />
+                <p className="text-sm text-[var(--muted)] flex items-center">
+                  <Zap className="h-4 w-4 mr-1 text-[var(--warning)]" />
                   Workspace de Inteligencia Artificial
                 </p>
               </div>
             </div>
             <div className="flex gap-3">
-              <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 border-0">
+              <Button className="bg-[var(--brand)] hover:bg-[var(--brand-hover)] text-white border-0">
                 <Wand2 className="h-4 w-4 mr-2" />
                 Crear IA
               </Button>
-              <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+              <Button variant="outline" className="border-[var(--border)] text-[var(--text)] hover:bg-gray-100">
                 <Settings className="h-4 w-4 mr-2" />
                 Configurar
               </Button>
@@ -278,7 +271,7 @@ export default function WorkspaceDashboard() {
               ¡Bienvenido al futuro de la IA!
             </CardTitle>
             <CardDescription className="text-gray-300 text-lg">
-              Tu workspace "{slug}" está equipado con las últimas tecnologías de inteligencia artificial. 
+              Tu workspace &quot;{slug}&quot; está equipado con las últimas tecnologías de inteligencia artificial. 
               Comienza creando tu primer modelo de IA.
             </CardDescription>
           </CardHeader>

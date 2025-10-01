@@ -11,14 +11,9 @@ import { UniqueFeatures } from '@/components/unique-features'
 export default function LandingPage() {
   const { t } = useContext(I18nContext)
   const [showWaitlist, setShowWaitlist] = useState(false)
-  const [isLoaded, setIsLoaded] = useState(false)
-
-  useEffect(() => {
-    setIsLoaded(true)
-  }, [])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 overflow-hidden relative">
+    <div className="min-h-screen overflow-hidden relative bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900" role="main">
       {/* Enhanced Animated Background */}
       <div className="absolute inset-0 overflow-hidden">
         {/* Floating orbs with enhanced animations */}
@@ -54,14 +49,14 @@ export default function LandingPage() {
       </div>
 
       {/* Header */}
-      <header className="relative border-b border-white/10 bg-black/20 backdrop-blur-sm">
+      <header className="relative border-b border-white/5 bg-black/30 backdrop-blur-md">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3 group">
-              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
+              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg border-gradient">
                 <Zap className="h-7 w-7 text-white" />
               </div>
-              <span className="text-3xl font-bold text-white bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">{t('app_title')}</span>
+              <span className="text-3xl font-bold text-white bg-gradient-to-r from-violet-200 to-amber-200 bg-clip-text text-transparent tracking-tight">{t('app_title')}</span>
             </div>
             <div className="flex items-center space-x-4">
                 {/* <SimpleLanguageSelector /> */}
@@ -85,7 +80,7 @@ export default function LandingPage() {
       </header>
 
       {/* Enhanced Hero Section */}
-      <section className="relative py-32">
+      <section className="relative py-28">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             {/* Left: Copy + CTAs */}
@@ -96,26 +91,27 @@ export default function LandingPage() {
                     {t('premium_badge')}
                   </span>
                 </div>
-              <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-white mb-8 leading-tight">
-                <span className="bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent animate-pulse">
+              <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-white mb-8 leading-tight tracking-tight">
+                <span className="bg-gradient-to-r from-violet-200 to-amber-200 bg-clip-text text-transparent">
                   {t('automate')}
                 </span>
                 <br />
-                <span className="bg-gradient-to-r from-blue-300 via-purple-300 to-pink-300 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-slate-100 to-slate-300 bg-clip-text text-transparent">
                   {t('faster')}
                 </span>
                 <br />
-                <span className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl bg-gradient-to-r from-cyan-300 to-blue-300 bg-clip-text text-transparent">
+                <span className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl bg-gradient-to-r from-violet-200 to-amber-200 bg-clip-text text-transparent">
                   {t('than_ever')}
                 </span>
               </h1>
               <p className="text-xl md:text-2xl text-gray-300 mb-10 max-w-2xl leading-relaxed">{t('hero_subtitle')}</p>
               <div className="flex flex-col sm:flex-row gap-6">
-                <Button
-                  size="lg"
-                  className="group relative text-xl px-12 py-6 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 text-white font-bold rounded-2xl shadow-2xl hover:shadow-purple-500/50 transition-all duration-500 transform hover:scale-110 overflow-hidden"
-                  onClick={() => setShowWaitlist(true)}
-                >
+              <Button
+                size="lg"
+                className="group relative text-xl px-12 py-6 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 text-white font-bold rounded-2xl shadow-2xl hover:shadow-purple-500/50 transition-all duration-500 transform hover:scale-110 overflow-hidden"
+                onClick={() => setShowWaitlist(true)}
+                aria-label="Empezar gratis con Stack21"
+              >
                   <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-purple-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                   <Rocket className="h-6 w-6 mr-3 group-hover:rotate-12 transition-transform duration-300" />
                   <span className="relative z-10">Empezar gratis</span>
@@ -125,6 +121,7 @@ export default function LandingPage() {
                   variant="outline"
                   size="lg"
                   className="group text-xl px-12 py-6 border-2 border-white/40 text-white hover:bg-white/20 hover:border-white/60 rounded-2xl transition-all duration-500 hover:scale-105 backdrop-blur-sm"
+                  onClick={() => setShowWaitlist(true)}
                 >
                   <Play className="h-6 w-6 mr-3 group-hover:scale-125 transition-transform duration-300" />
                   <span className="font-semibold">Ver comparativa</span>
@@ -164,7 +161,7 @@ export default function LandingPage() {
 
             {/* Right: Enhanced Feature Grid */}
             <div className="relative">
-              <div className="relative bg-white/5 backdrop-blur-2xl rounded-3xl p-10 border border-white/20 shadow-2xl overflow-hidden">
+              <div className="relative glass-surface border-gradient rounded-3xl p-10 shadow-2xl overflow-hidden">
                 {/* Animated background gradient */}
                 <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-blue-500/10 to-pink-500/10 animate-pulse"></div>
                 
@@ -205,7 +202,7 @@ export default function LandingPage() {
       </section>
 
       {/* Problem/Solution Section */}
-      <section className="relative py-24 bg-gradient-to-b from-slate-900 to-slate-800">
+      <section className="relative py-24">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
@@ -259,7 +256,7 @@ export default function LandingPage() {
           </div>
 
           <div className="text-center mt-16">
-            <div className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-green-500/20 to-blue-500/20 rounded-2xl border border-green-500/30">
+                <div className="inline-flex items-center px-8 py-4 glass-surface border-gradient rounded-2xl">
               <span className="text-2xl mr-3">🎯</span>
               <span className="text-white font-semibold text-lg">
                 Stack21 resuelve todos estos problemas con una solución elegante y potente
@@ -270,7 +267,7 @@ export default function LandingPage() {
       </section>
 
       {/* Demo Section */}
-      <section className="relative py-24 bg-gradient-to-b from-slate-800 to-slate-900">
+      <section className="relative py-24">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
@@ -284,7 +281,7 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* Demo Video/Image */}
             <div className="relative">
-              <div className="relative bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-3xl p-8 border border-white/20 shadow-2xl">
+              <div className="relative glass-surface border-gradient rounded-3xl p-8 shadow-2xl">
                 <div className="aspect-video bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl flex items-center justify-center border border-white/10">
                   <div className="text-center">
                     <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
@@ -330,7 +327,7 @@ export default function LandingPage() {
                     color: "from-orange-500/20 to-red-500/20"
                   }
                 ].map((feature, index) => (
-                  <div key={index} className={`p-6 bg-gradient-to-r ${feature.color} rounded-2xl border border-white/10 hover:scale-105 transition-transform duration-300`}>
+                  <div key={index} className={`p-6 glass-surface border-gradient rounded-2xl hover:scale-105 transition-transform duration-300`}>
                     <div className="flex items-start space-x-4">
                       <span className="text-3xl">{feature.icon}</span>
                       <div>
@@ -348,6 +345,7 @@ export default function LandingPage() {
             <Button
               size="lg"
               className="group text-xl px-12 py-6 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 text-white font-bold rounded-2xl shadow-2xl hover:shadow-purple-500/50 transition-all duration-500 transform hover:scale-110"
+              onClick={() => setShowWaitlist(true)}
             >
               <Play className="h-6 w-6 mr-3 group-hover:scale-125 transition-transform duration-300" />
               Ver Demo Completo
@@ -358,7 +356,7 @@ export default function LandingPage() {
       </section>
 
       {/* Pricing Section */}
-      <section className="relative py-24 bg-gradient-to-b from-slate-900 to-slate-800">
+      <section className="relative py-24">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
@@ -371,7 +369,7 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {/* Freemium Plan */}
-            <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/10 hover:scale-105 transition-transform duration-300">
+            <div className="glass-surface border-gradient rounded-3xl p-8 hover:scale-105 transition-transform duration-300">
               <div className="text-center mb-8">
                 <h3 className="text-2xl font-bold text-white mb-2">Freemium</h3>
                 <p className="text-gray-400 mb-4">Perfecto para empezar</p>
@@ -392,13 +390,16 @@ export default function LandingPage() {
                   </li>
                 ))}
               </ul>
-              <Button className="w-full bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white font-semibold py-3 rounded-xl">
+              <Button 
+                className="w-full bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white font-semibold py-3 rounded-xl"
+                onClick={() => setShowWaitlist(true)}
+              >
                 Empezar gratis
               </Button>
             </div>
 
             {/* Growth Plan - Featured */}
-            <div className="bg-gradient-to-br from-blue-500/20 to-purple-500/20 backdrop-blur-xl rounded-3xl p-8 border-2 border-blue-500/50 hover:scale-105 transition-transform duration-300 relative">
+            <div className="glass-surface border-gradient rounded-3xl p-8 hover:scale-105 transition-transform duration-300 relative">
               <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                 <div className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-2 rounded-full text-sm font-semibold">
                   Más Popular
@@ -426,13 +427,16 @@ export default function LandingPage() {
                   </li>
                 ))}
               </ul>
-              <Button className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-semibold py-3 rounded-xl">
+              <Button 
+                className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-semibold py-3 rounded-xl"
+                onClick={() => setShowWaitlist(true)}
+              >
                 Empezar ahora
               </Button>
             </div>
 
             {/* Enterprise Plan */}
-            <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/10 hover:scale-105 transition-transform duration-300">
+            <div className="glass-surface border-gradient rounded-3xl p-8 hover:scale-105 transition-transform duration-300">
               <div className="text-center mb-8">
                 <h3 className="text-2xl font-bold text-white mb-2">Enterprise</h3>
                 <p className="text-gray-400 mb-4">Para grandes organizaciones</p>
@@ -455,7 +459,10 @@ export default function LandingPage() {
                   </li>
                 ))}
               </ul>
-              <Button className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold py-3 rounded-xl">
+              <Button 
+                className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold py-3 rounded-xl"
+                onClick={() => setShowWaitlist(true)}
+              >
                 Contactar ventas
               </Button>
             </div>
@@ -473,7 +480,7 @@ export default function LandingPage() {
       </section>
 
       {/* Enhanced Testimonials */}
-      <section className="relative py-24 bg-gradient-to-b from-slate-800 to-slate-900">
+      <section className="relative py-24">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
@@ -547,7 +554,7 @@ export default function LandingPage() {
                 metric: "0 desarrolladores extra"
               }
             ].map((testimonial, index) => (
-              <div key={index} className="bg-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/10 hover:scale-105 transition-transform duration-300 group">
+              <div key={index} className="glass-surface border-gradient rounded-3xl p-8 hover:scale-105 transition-transform duration-300 group">
                 <div className="flex items-center mb-6">
                   <div className={`w-16 h-16 bg-gradient-to-r ${testimonial.gradient} rounded-full flex items-center justify-center text-white font-bold text-xl group-hover:scale-110 transition-transform duration-300`}>
                     {testimonial.avatar}
@@ -699,9 +706,18 @@ export default function LandingPage() {
 
       {/* Waitlist Modal */}
       {showWaitlist && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl p-8 max-w-md w-full">
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">Únete a la lista de espera</h3>
+        <div 
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={() => setShowWaitlist(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="waitlist-title"
+        >
+          <div 
+            className="bg-white rounded-2xl p-8 max-w-md w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 id="waitlist-title" className="text-2xl font-bold text-gray-900 mb-4">Únete a la lista de espera</h3>
             <p className="text-gray-600 mb-6">
               Sé el primero en conocer las nuevas características y obtener acceso prioritario.
             </p>
@@ -710,6 +726,8 @@ export default function LandingPage() {
                 type="email"
                 placeholder="Tu email"
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                aria-label="Dirección de correo electrónico"
+                required
               />
               <Button className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-semibold py-3 rounded-xl">
                 Unirse a la lista

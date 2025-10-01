@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { getToken } from 'next-auth/jwt'
 import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
@@ -41,9 +40,9 @@ const privacySettings: PrivacySettings[] = []
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const token = await getToken({ req: request })
     
-    if (!session?.user?.id) {
+    if (!token || !token.sub) {
       return NextResponse.json(
         { error: 'No autorizado' },
         { status: 401 }
@@ -52,7 +51,7 @@ export async function GET(request: NextRequest) {
 
     // Buscar configuración del usuario (DB)
     const userSettings = await prisma.privacySettings.findUnique({
-      where: { userId: session.user.id },
+      where: { userId: token.sub },
     })
 
     if (!userSettings) {
@@ -110,9 +109,9 @@ export async function GET(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const token = await getToken({ req: request })
     
-    if (!session?.user?.id) {
+    if (!token || !token.sub) {
       return NextResponse.json(
         { error: 'No autorizado' },
         { status: 401 }
@@ -152,7 +151,7 @@ export async function PUT(request: NextRequest) {
 
     // Buscar configuración existente
     const privacySettingsData = await prisma.privacySettings.upsert({
-      where: { userId: session.user.id },
+      where: { userId: token.sub },
       update: {
         dataProcessing: settings.data_processing as any,
         communications: settings.communications as any,
@@ -160,7 +159,7 @@ export async function PUT(request: NextRequest) {
         retention: settings.retention as any,
       },
       create: {
-        userId: session.user.id,
+        userId: token.sub,
         dataProcessing: settings.data_processing as any,
         communications: settings.communications as any,
         dataSharing: settings.data_sharing as any,
@@ -181,7 +180,7 @@ export async function PUT(request: NextRequest) {
     } as any)
 
     // Log de auditoría
-    console.log(`Configuración de privacidad actualizada para usuario ${session.user.id}:`, {
+    console.log(`Configuración de privacidad actualizada para usuario ${token.sub}:`, {
       settings: privacySettingsData,
       timestamp: new Date().toISOString(),
       ip_address: request.headers.get('x-forwarded-for') || 'unknown'
@@ -209,9 +208,9 @@ export async function PUT(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const token = await getToken({ req: request })
     
-    if (!session?.user?.id) {
+    if (!token || !token.sub) {
       return NextResponse.json(
         { error: 'No autorizado' },
         { status: 401 }
@@ -219,13 +218,13 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Eliminar configuración del usuario en DB
-    await prisma.privacySettings.delete({ where: { userId: session.user.id } }).catch(() => null)
+    await prisma.privacySettings.delete({ where: { userId: token.sub } }).catch(() => null)
 
     // Aplicar configuración por defecto (más restrictiva)
-    await applyDefaultPrivacySettings(session.user.id)
+    await applyDefaultPrivacySettings(token.sub)
 
     // Log de auditoría
-    console.log(`Configuración de privacidad eliminada para usuario ${session.user.id}:`, {
+    console.log(`Configuración de privacidad eliminada para usuario ${token.sub}:`, {
       timestamp: new Date().toISOString()
     })
 

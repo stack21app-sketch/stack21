@@ -1,0 +1,187 @@
+[
+  {
+    "id": "wf_sample_1",
+    "name": "Procesar Datos de Formulario",
+    "description": "Procesa datos de formulario y envía notificación por email",
+    "status": "active",
+    "trigger": {
+      "type": "webhook",
+      "config": {
+        "path": "/webhook/form-submit",
+        "method": "POST"
+      }
+    },
+    "steps": [
+      {
+        "id": "step_1",
+        "type": "data_transform",
+        "name": "Transformar Datos",
+        "config": {
+          "transform": {
+            "email": "$.email",
+            "name": "$.name",
+            "message": "$.message",
+            "timestamp": "$.timestamp",
+            "processed_at": "$."
+          }
+        },
+        "next": "step_2"
+      },
+      {
+        "id": "step_2",
+        "type": "log",
+        "name": "Registrar Datos",
+        "config": {
+          "message": "Datos de formulario procesados",
+          "level": "info"
+        },
+        "next": "step_3"
+      },
+      {
+        "id": "step_3",
+        "type": "http_request",
+        "name": "Enviar Notificación",
+        "config": {
+          "url": "https://api.emailservice.com/send",
+          "method": "POST",
+          "headers": {
+            "Authorization": "Bearer demo_token",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "to": "$.email",
+            "subject": "Formulario recibido",
+            "body": "Hola $.name, hemos recibido tu mensaje: $.message"
+          }
+        }
+      }
+    ],
+    "createdAt": "2025-09-22T12:40:51.360Z",
+    "updatedAt": "2025-09-29T12:40:51.360Z"
+  },
+  {
+    "id": "wf_sample_2",
+    "name": "Sincronizar Datos CRM",
+    "description": "Sincroniza datos entre sistemas CRM cada 6 horas",
+    "status": "active",
+    "trigger": {
+      "type": "schedule",
+      "config": {
+        "cron": "0 */6 * * *",
+        "timezone": "UTC"
+      }
+    },
+    "steps": [
+      {
+        "id": "step_1",
+        "type": "http_request",
+        "name": "Obtener Datos Fuente",
+        "config": {
+          "url": "https://api.source-crm.com/contacts",
+          "method": "GET",
+          "headers": {
+            "Authorization": "Bearer source_token"
+          }
+        },
+        "next": "step_2"
+      },
+      {
+        "id": "step_2",
+        "type": "condition",
+        "name": "Verificar Datos",
+        "config": {
+          "condition": "input.length > 0",
+          "trueValue": "$.",
+          "falseValue": null
+        },
+        "next": "step_3"
+      },
+      {
+        "id": "step_3",
+        "type": "http_request",
+        "name": "Enviar a Destino",
+        "config": {
+          "url": "https://api.dest-crm.com/sync",
+          "method": "POST",
+          "headers": {
+            "Authorization": "Bearer dest_token",
+            "Content-Type": "application/json"
+          },
+          "body": "$."
+        }
+      }
+    ],
+    "createdAt": "2025-09-15T12:40:51.360Z",
+    "updatedAt": "2025-09-29T12:40:51.360Z"
+  },
+  {
+    "id": "wf_sample_3",
+    "name": "Backup Automático",
+    "description": "Crea backup de datos importantes diariamente",
+    "status": "active",
+    "trigger": {
+      "type": "schedule",
+      "config": {
+        "cron": "0 2 * * *",
+        "timezone": "UTC"
+      }
+    },
+    "steps": [
+      {
+        "id": "step_1",
+        "type": "log",
+        "name": "Iniciar Backup",
+        "config": {
+          "message": "Iniciando proceso de backup",
+          "level": "info"
+        },
+        "next": "step_2"
+      },
+      {
+        "id": "step_2",
+        "type": "http_request",
+        "name": "Exportar Datos",
+        "config": {
+          "url": "https://api.database.com/export",
+          "method": "POST",
+          "headers": {
+            "Authorization": "Bearer db_token"
+          },
+          "body": {
+            "tables": [
+              "users",
+              "orders",
+              "products"
+            ],
+            "format": "json"
+          }
+        },
+        "next": "step_3"
+      },
+      {
+        "id": "step_3",
+        "type": "delay",
+        "name": "Esperar Procesamiento",
+        "config": {
+          "duration": 5000
+        },
+        "next": "step_4"
+      },
+      {
+        "id": "step_4",
+        "type": "http_request",
+        "name": "Subir a Storage",
+        "config": {
+          "url": "https://api.storage.com/upload",
+          "method": "POST",
+          "headers": {
+            "Authorization": "Bearer storage_token"
+          },
+          "body": "$."
+        }
+      }
+    ],
+    "createdAt": "2025-08-30T12:40:51.360Z",
+    "updatedAt": "2025-09-29T12:40:51.360Z"
+  }
+]

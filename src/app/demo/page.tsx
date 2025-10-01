@@ -252,7 +252,7 @@ export default function DemoPage() {
                         </div>
                         <div className="bg-gray-50 rounded-lg p-4">
                           <p className="text-sm text-gray-600 mb-2">Prompt sugerido:</p>
-                          <p className="text-sm font-medium">"Optimiza mi estrategia de SEO para productos"</p>
+                          <p className="text-sm font-medium">&quot;Optimiza mi estrategia de SEO para productos&quot;</p>
                         </div>
                       </div>
                     </CardContent>

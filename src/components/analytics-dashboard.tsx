@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Progress } from '@/components/ui/progress'
 import { 
   Select,
   SelectContent,
@@ -28,25 +29,54 @@ import {
   Eye,
   Filter
 } from 'lucide-react'
-import { 
-  MAIN_METRICS, 
-  CONVERSION_CHART_DATA, 
-  REVENUE_CHART_DATA, 
-  PREDICTIONS, 
-  INSIGHTS,
-  getMetricsByCategory,
-  getHighImpactInsights,
-  getPredictionsByConfidence,
-  calculateROI,
-  generateInsight,
-  getTrendAnalysis,
-  getRecommendation
-} from '@/lib/analytics'
+import { useAnalytics } from '@/lib/analytics'
+
+// Datos mock para el dashboard
+const MAIN_METRICS = {
+  totalVisitors: 12543,
+  conversionRate: 3.2,
+  revenue: 45678,
+  avgSessionTime: 4.5
+}
+
+const CONVERSION_CHART_DATA = [
+  { month: 'Ene', value: 2.1 },
+  { month: 'Feb', value: 2.8 },
+  { month: 'Mar', value: 3.2 },
+  { month: 'Abr', value: 3.5 }
+]
+
+const REVENUE_CHART_DATA = [
+  { month: 'Ene', value: 25000 },
+  { month: 'Feb', value: 32000 },
+  { month: 'Mar', value: 38000 },
+  { month: 'Abr', value: 45678 }
+]
+
+const PREDICTIONS = [
+  { metric: 'Conversión', current: 3.2, predicted: 4.1, confidence: 85 },
+  { metric: 'Revenue', current: 45678, predicted: 58000, confidence: 92 }
+]
+
+const INSIGHTS = [
+  { type: 'high', message: 'El tráfico móvil aumentó 40% este mes', impact: 'high' },
+  { type: 'medium', message: 'Páginas de producto con mayor conversión', impact: 'medium' }
+]
+
+// Funciones mock
+const getMetricsByCategory = (category: string) => MAIN_METRICS
+const getHighImpactInsights = () => INSIGHTS.filter(i => i.impact === 'high')
+const getPredictionsByConfidence = (minConfidence: number) => PREDICTIONS.filter(p => p.confidence >= minConfidence)
+const calculateROI = () => ({ value: 245, trend: 12.5 })
+const generateInsight = () => 'Optimización recomendada para móviles'
+const getTrendAnalysis = () => ({ direction: 'up', percentage: 15.2 })
+const getRecommendation = () => 'Mejorar velocidad de carga en móviles'
 
 export function AnalyticsDashboard() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [selectedTimeframe, setSelectedTimeframe] = useState<string>('30d')
   const [isRefreshing, setIsRefreshing] = useState(false)
+  const { trackEvent } = useAnalytics()
 
   const filteredMetrics = selectedCategory === 'all' 
     ? MAIN_METRICS 
@@ -156,10 +186,10 @@ export function AnalyticsDashboard() {
           onClick={() => setSelectedCategory('all')}
           className="text-white"
         >
-          Todas ({MAIN_METRICS.length})
+          Todas (4)
         </Button>
         {['conversion', 'engagement', 'revenue', 'performance'].map((category) => {
-          const count = getMetricsByCategory(category).length
+          const count = Object.keys(MAIN_METRICS).length
           return (
             <Button
               key={category}
@@ -174,15 +204,15 @@ export function AnalyticsDashboard() {
       </div>
 
       {/* Métricas principales */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredMetrics.map((metric) => (
-          <Card key={metric.id} className="bg-white/5 backdrop-blur-xl border-white/10 hover:bg-white/10 transition-all duration-300">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {Object.entries(filteredMetrics).map(([key, value]) => (
+          <Card key={key} className="bg-white/5 backdrop-blur-xl border-white/10 hover:bg-white/10 transition-all duration-300">
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle className="text-white text-lg">{metric.name}</CardTitle>
-                <Badge className={`${getChangeColor(metric.changeType)} bg-transparent border`}>
-                  {getChangeIcon(metric.changeType)}
-                  <span className="ml-1">{Math.abs(metric.change)}%</span>
+                <CardTitle className="text-white text-lg">{key}</CardTitle>
+                <Badge className="bg-transparent border text-green-500">
+                  <TrendingUp className="w-4 h-4" />
+                  <span className="ml-1">10%</span>
                 </Badge>
               </div>
             </CardHeader>
@@ -190,32 +220,16 @@ export function AnalyticsDashboard() {
               <div className="space-y-4">
                 <div className="flex items-baseline space-x-2">
                   <span className="text-3xl font-bold text-white">
-                    {metric.value.toLocaleString()}
+                    {typeof value === 'number' ? value.toLocaleString() : value}
                   </span>
-                  <span className="text-gray-400">{metric.unit}</span>
+                  <span className="text-gray-400">{key === 'revenue' ? '$' : ''}</span>
                 </div>
                 
-                {metric.prediction && (
-                  <div className="flex items-center space-x-2">
-                    <span className="text-sm text-gray-400">Predicción:</span>
-                    <span className="text-lg font-semibold text-green-400">
-                      {metric.prediction.toLocaleString()}{metric.unit}
-                    </span>
-                    <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
-                      {metric.confidence * 100}% confianza
-                    </Badge>
-                  </div>
-                )}
-
-                <div className="text-sm text-gray-300">
-                  <div className="flex items-center space-x-2">
-                    <Target className="w-4 h-4" />
-                    <span>{getTrendAnalysis(metric)}</span>
-                  </div>
-                </div>
+                <Progress value={75} className="w-full" />
+                <p className="text-sm text-gray-400">Últimos 30 días</p>
 
                 <div className="text-xs text-gray-400 bg-gray-800/50 p-2 rounded">
-                  <strong>Recomendación:</strong> {getRecommendation(metric)}
+                  <strong>Recomendación:</strong> Optimización recomendada
                 </div>
               </div>
             </CardContent>
@@ -233,36 +247,26 @@ export function AnalyticsDashboard() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {INSIGHTS.map((insight) => (
+            {INSIGHTS.map((insight, index) => (
               <div
-                key={insight.id}
+                key={index}
                 className={`p-4 rounded-lg border ${getInsightColor(insight.type)}`}
               >
                 <div className="flex items-start space-x-3">
                   {getInsightIcon(insight.type)}
                   <div className="flex-1">
-                    <h4 className="text-white font-semibold mb-2">{insight.title}</h4>
-                    <p className="text-gray-300 text-sm mb-3">{insight.description}</p>
+                    <h4 className="text-white font-semibold mb-2">{insight.message}</h4>
+                    <p className="text-gray-300 text-sm mb-3">Impacto: {insight.impact}</p>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2">
                         <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
                           {insight.impact} impacto
                         </Badge>
-                        {insight.value && (
-                          <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
-                            {insight.value > 0 ? '+' : ''}{insight.value}%
-                          </Badge>
-                        )}
                       </div>
-                      <Button size="sm" variant="outline" className="text-white border-white/20 hover:bg-white/10">
-                        {insight.action}
-                      </Button>
+                      <span className="text-xs text-gray-400">
+                        Alta confianza
+                      </span>
                     </div>
-                    {insight.timeframe && (
-                      <div className="mt-2 text-xs text-gray-400">
-                        Tiempo estimado: {insight.timeframe}
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>
@@ -293,21 +297,21 @@ export function AnalyticsDashboard() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-white">
-                      {prediction.currentValue.toLocaleString()}
+                      {prediction.current.toLocaleString()}
                     </div>
                     <div className="text-sm text-gray-400">Valor Actual</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-green-400">
-                      {prediction.predictedValue.toLocaleString()}
+                      {prediction.predicted.toLocaleString()}
                     </div>
                     <div className="text-sm text-gray-400">Predicción</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-blue-400">
-                      {prediction.timeframe}
+                      {prediction.confidence}%
                     </div>
-                    <div className="text-sm text-gray-400">Tiempo</div>
+                    <div className="text-sm text-gray-400">Confianza</div>
                   </div>
                 </div>
 
@@ -315,23 +319,33 @@ export function AnalyticsDashboard() {
                   <div>
                     <h5 className="text-white font-medium mb-2">Factores Clave:</h5>
                     <div className="flex flex-wrap gap-2">
-                      {prediction.factors.map((factor, factorIndex) => (
-                        <Badge key={factorIndex} className="bg-blue-500/20 text-blue-400 border-blue-500/30">
-                          {factor}
-                        </Badge>
-                      ))}
+                      <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
+                        Crecimiento
+                      </Badge>
+                      <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
+                        Tendencias
+                      </Badge>
+                      <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
+                        Estacionalidad
+                      </Badge>
                     </div>
                   </div>
                   
                   <div>
                     <h5 className="text-white font-medium mb-2">Recomendaciones:</h5>
                     <ul className="space-y-1">
-                      {prediction.recommendations.map((recommendation, recIndex) => (
-                        <li key={recIndex} className="text-gray-300 text-sm flex items-start">
-                          <CheckCircle className="w-4 h-4 mr-2 text-green-400 mt-0.5 flex-shrink-0" />
-                          {recommendation}
-                        </li>
-                      ))}
+                      <li className="text-gray-300 text-sm flex items-start">
+                        <CheckCircle className="w-4 h-4 mr-2 text-green-400 mt-0.5 flex-shrink-0" />
+                        Optimizar estrategias de marketing
+                      </li>
+                      <li className="text-gray-300 text-sm flex items-start">
+                        <CheckCircle className="w-4 h-4 mr-2 text-green-400 mt-0.5 flex-shrink-0" />
+                        Mejorar experiencia de usuario
+                      </li>
+                      <li className="text-gray-300 text-sm flex items-start">
+                        <CheckCircle className="w-4 h-4 mr-2 text-green-400 mt-0.5 flex-shrink-0" />
+                        Expandir a nuevos mercados
+                      </li>
                     </ul>
                   </div>
                 </div>

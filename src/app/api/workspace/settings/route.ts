@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { getToken } from 'next-auth/jwt'
 
 export async function PUT(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const token = await getToken({ req: request })
     
-    if (!session?.user?.id) {
+    if (!token || !token.sub) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
 
@@ -24,7 +23,7 @@ export async function PUT(request: NextRequest) {
     const updatedSettings = {
       ...settings,
       updatedAt: new Date().toISOString(),
-      updatedBy: session.user.id
+      updatedBy: token.sub
     }
 
     // En producción, aquí guardarías en la base de datos:
@@ -34,7 +33,7 @@ export async function PUT(request: NextRequest) {
         slug: workspaceSlug,
         members: {
           some: {
-            userId: session.user.id,
+            userId: token.sub,
             role: { in: ['OWNER', 'ADMIN'] }
           }
         }
@@ -70,9 +69,9 @@ export async function PUT(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const token = await getToken({ req: request })
     
-    if (!session?.user?.id) {
+    if (!token || !token.sub) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
 
@@ -112,7 +111,7 @@ export async function GET(request: NextRequest) {
         slug: workspaceSlug,
         members: {
           some: {
-            userId: session.user.id
+            userId: token.sub
           }
         }
       },

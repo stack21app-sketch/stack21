@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { getToken } from 'next-auth/jwt'
 import OpenAI from 'openai'
 
 // Configuración de OpenAI
@@ -34,9 +33,8 @@ const mockAIResponses = {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    
-    if (!session?.user?.id) {
+    const token = await getToken({ req: request });
+    if (!token || !token.sub) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
 
@@ -53,7 +51,7 @@ export async function POST(request: NextRequest) {
     if (useDatabase && prisma) {
       const userUsage = await prisma.analytics.count({
         where: {
-          userId: session.user.id,
+          userId: token.sub,
           event: 'ai_request',
           timestamp: {
             gte: new Date(Date.now() - 24 * 60 * 60 * 1000) // Últimas 24 horas
@@ -111,7 +109,7 @@ export async function POST(request: NextRequest) {
     if (useDatabase && prisma) {
       await prisma.analytics.create({
         data: {
-          userId: session.user.id,
+          userId: token.sub,
           workspaceId: workspaceId || null,
           event: 'ai_request',
           data: {
@@ -124,7 +122,7 @@ export async function POST(request: NextRequest) {
       })
     } else {
       console.log(`🤖 AI Request: ${action}`, {
-        userId: session.user.id,
+        userId: token.sub,
         workspaceId,
         promptLength: prompt.length,
         responseLength: response.length
@@ -236,9 +234,9 @@ function getSystemPrompt(action: string, context?: any): string {
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const token = await getToken({ req: request })
     
-    if (!session?.user?.id) {
+    if (!token || !token.sub) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
 
@@ -298,7 +296,7 @@ export async function GET(request: NextRequest) {
         if (useDatabase && prisma) {
           const usage = await prisma.analytics.findMany({
             where: {
-              userId: session.user.id,
+              userId: token.sub,
               event: 'ai_request',
               timestamp: {
                 gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) // Últimos 30 días

@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { 
   Brain, 
   Zap, 
@@ -120,13 +121,13 @@ export function UniqueFeatures() {
             Únete a miles de empresas que ya eligieron la plataforma más avanzada
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-semibold rounded-xl shadow-2xl hover:shadow-purple-500/25 transition-all duration-300 transform hover:scale-105">
+            <Button className="px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-semibold rounded-xl shadow-2xl hover:shadow-purple-500/25 transition-all duration-300 transform hover:scale-105">
               <Rocket className="h-5 w-5 mr-2 inline" />
               Empezar gratis
-            </button>
-            <button className="px-8 py-4 border border-white/30 text-white hover:bg-white/10 rounded-xl transition-all duration-300 hover:scale-105">
+            </Button>
+            <Button variant="outline" className="px-8 py-4 border border-white/30 text-white hover:bg-white/10 rounded-xl transition-all duration-300 hover:scale-105">
               Ver demo
-            </button>
+            </Button>
           </div>
         </div>
       </div>

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { getToken } from 'next-auth/jwt'
 
 // Configuración de base de datos
 const { PrismaClient } = require('@prisma/client')
@@ -22,9 +21,9 @@ const projects: any[] = []
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const token = await getToken({ req: request })
     
-    if (!session?.user?.id) {
+    if (!token || !token.sub) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
 
@@ -44,7 +43,7 @@ export async function POST(request: NextRequest) {
       const member = await prisma.workspaceMember.findFirst({
         where: { 
           workspaceId, 
-          userId: session.user.id 
+          userId: token.sub 
         }
       })
 
@@ -89,9 +88,9 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const token = await getToken({ req: request })
     
-    if (!session?.user?.id) {
+    if (!token || !token.sub) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
 
@@ -108,7 +107,7 @@ export async function GET(request: NextRequest) {
       } else {
         // Obtener workspaces del usuario
         const userWorkspaces = await prisma.workspaceMember.findMany({
-          where: { userId: session.user.id },
+          where: { userId: token.sub },
           select: { workspaceId: true }
         })
         whereClause.workspaceId = { in: userWorkspaces.map((w: any) => w.workspaceId) }
@@ -142,9 +141,9 @@ export async function GET(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const token = await getToken({ req: request })
     
-    if (!session?.user?.id) {
+    if (!token || !token.sub) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
 
@@ -167,7 +166,7 @@ export async function PUT(request: NextRequest) {
           workspace: {
             include: {
               members: {
-                where: { userId: session.user.id }
+                where: { userId: token.sub }
               }
             }
           }
@@ -225,9 +224,9 @@ export async function PUT(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const token = await getToken({ req: request })
     
-    if (!session?.user?.id) {
+    if (!token || !token.sub) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
 
@@ -250,7 +249,7 @@ export async function DELETE(request: NextRequest) {
             include: {
               members: {
                 where: { 
-                  userId: session.user.id,
+                  userId: token.sub,
                   role: { in: ['OWNER', 'ADMIN'] }
                 }
               }

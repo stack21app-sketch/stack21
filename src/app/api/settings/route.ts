@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { getToken } from 'next-auth/jwt'
 
 // Configuración de base de datos
 const { PrismaClient } = require('@prisma/client')
@@ -22,9 +21,9 @@ const userSettings: { [userId: string]: any } = {}
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const token = await getToken({ req: request })
     
-    if (!session?.user?.id) {
+    if (!token || !token.sub) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
 
@@ -32,14 +31,14 @@ export async function GET(request: NextRequest) {
 
     if (useDatabase && prisma) {
       settings = await prisma.userSettings.findUnique({
-        where: { userId: session.user.id }
+        where: { userId: token.sub }
       })
 
       if (!settings) {
         // Crear configuración por defecto
         settings = await prisma.userSettings.create({
           data: {
-            userId: session.user.id,
+            userId: token.sub,
             preferences: {
               theme: 'dark',
               language: 'es',
@@ -59,9 +58,9 @@ export async function GET(request: NextRequest) {
       }
     } else {
       // Usar simulación
-      settings = userSettings[session.user.id] || {
-        id: `settings_${session.user.id}`,
-        userId: session.user.id,
+      settings = userSettings[token.sub] || {
+        id: `settings_${token.sub}`,
+        userId: token.sub,
         preferences: {
           theme: 'dark',
           language: 'es',
@@ -93,9 +92,9 @@ export async function GET(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const token = await getToken({ req: request })
     
-    if (!session?.user?.id) {
+    if (!token || !token.sub) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
 
@@ -113,7 +112,7 @@ export async function PUT(request: NextRequest) {
     if (useDatabase && prisma) {
       // Obtener configuración actual
       const currentSettings = await prisma.userSettings.findUnique({
-        where: { userId: session.user.id }
+        where: { userId: token.sub }
       })
 
       const newPreferences = {
@@ -127,21 +126,21 @@ export async function PUT(request: NextRequest) {
       }
 
       updatedSettings = await prisma.userSettings.upsert({
-        where: { userId: session.user.id },
+        where: { userId: token.sub },
         update: {
           preferences: newPreferences,
           updatedAt: new Date()
         },
         create: {
-          userId: session.user.id,
+          userId: token.sub,
           preferences: newPreferences
         }
       })
     } else {
       // Usar simulación
-      const currentSettings = userSettings[session.user.id] || {
-        id: `settings_${session.user.id}`,
-        userId: session.user.id,
+      const currentSettings = userSettings[token.sub] || {
+        id: `settings_${token.sub}`,
+        userId: token.sub,
         preferences: {}
       }
 
@@ -161,10 +160,10 @@ export async function PUT(request: NextRequest) {
         updatedAt: new Date().toISOString()
       }
 
-      userSettings[session.user.id] = updatedSettings
+      userSettings[token.sub] = updatedSettings
     }
 
-    console.log(`✅ Configuración actualizada para usuario: ${session.user.id}`)
+    console.log(`✅ Configuración actualizada para usuario: ${token.sub}`)
     return NextResponse.json(updatedSettings)
   } catch (error) {
     console.error('Error al actualizar configuración:', error)
@@ -177,9 +176,9 @@ export async function PUT(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const token = await getToken({ req: request })
     
-    if (!session?.user?.id) {
+    if (!token || !token.sub) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
 
@@ -212,20 +211,20 @@ export async function POST(request: NextRequest) {
 
         if (useDatabase && prisma) {
           await prisma.userSettings.upsert({
-            where: { userId: session.user.id },
+            where: { userId: token.sub },
             update: {
               preferences: defaultPreferences,
               updatedAt: new Date()
             },
             create: {
-              userId: session.user.id,
+              userId: token.sub,
               preferences: defaultPreferences
             }
           })
         } else {
-          userSettings[session.user.id] = {
-            id: `settings_${session.user.id}`,
-            userId: session.user.id,
+          userSettings[token.sub] = {
+            id: `settings_${token.sub}`,
+            userId: token.sub,
             preferences: defaultPreferences,
             updatedAt: new Date().toISOString()
           }
@@ -237,7 +236,7 @@ export async function POST(request: NextRequest) {
         // Exportar datos del usuario
         if (useDatabase && prisma) {
           const userData = await prisma.user.findUnique({
-            where: { id: session.user.id },
+            where: { id: token.sub },
             include: {
               workspaces: {
                 include: {
@@ -259,11 +258,11 @@ export async function POST(request: NextRequest) {
             success: true,
             data: {
               user: {
-                id: session.user.id,
-                name: session.user.name,
-                email: session.user.email
+                id: token.sub,
+                name: 'User',
+                email: 'user@example.com'
               },
-              settings: userSettings[session.user.id] || {}
+              settings: userSettings[token.sub] || {}
             },
             exportedAt: new Date().toISOString()
           })
@@ -274,11 +273,11 @@ export async function POST(request: NextRequest) {
         if (useDatabase && prisma) {
           // Eliminar en cascada todos los datos del usuario
           await prisma.user.delete({
-            where: { id: session.user.id }
+            where: { id: token.sub }
           })
         } else {
           // Simulación de eliminación
-          delete userSettings[session.user.id]
+          delete userSettings[token.sub]
         }
 
         return NextResponse.json({ 

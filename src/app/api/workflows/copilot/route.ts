@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { getToken } from 'next-auth/jwt'
 import { workflowCopilot, GeneratedWorkflow } from '@/lib/workflow-copilot'
 import { PrismaClient } from '@prisma/client'
 
@@ -8,9 +7,9 @@ const prisma = new PrismaClient()
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const token = await getToken({ req: request })
     
-    if (!session?.user?.id) {
+    if (!token || !token.sub) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
 
@@ -18,16 +17,16 @@ export async function POST(request: NextRequest) {
 
     switch (action) {
       case 'generate':
-        return await generateWorkflow(description, industry, context, session.user.id)
+        return await generateWorkflow(description, industry, context, token.sub)
       
       case 'suggest_improvements':
-        return await suggestImprovements(workflowId, session.user.id)
+        return await suggestImprovements(workflowId, token.sub)
       
       case 'get_templates':
         return await getIndustryTemplates(industry)
       
       case 'validate':
-        return await validateWorkflow(workflowId, session.user.id)
+        return await validateWorkflow(workflowId, token.sub)
       
       default:
         return NextResponse.json({ error: 'Acción no válida' }, { status: 400 })
@@ -89,15 +88,17 @@ async function generateWorkflow(
       data: {
         name: generatedWorkflow.name,
         description: generatedWorkflow.description,
-        triggerType: generatedWorkflow.triggerType,
-        triggerConfig: generatedWorkflow.triggerConfig,
-        nodes: generatedWorkflow.nodes as any,
-        connections: generatedWorkflow.connections as any,
-        variables: generatedWorkflow.variables as any,
-        industry: generatedWorkflow.industry,
-        tags: generatedWorkflow.tags,
+        definitionJson: {
+          triggerType: generatedWorkflow.triggerType,
+          triggerConfig: generatedWorkflow.triggerConfig,
+          nodes: generatedWorkflow.nodes as any,
+          connections: generatedWorkflow.connections as any,
+          variables: generatedWorkflow.variables as any,
+          industry: generatedWorkflow.industry,
+          tags: generatedWorkflow.tags,
+        } as any,
         userId,
-        workspaceId: userWorkspace.workspace.id,
+        projectId: userWorkspace.workspace.id, // Usar workspaceId como projectId temporalmente
         status: 'DRAFT'
       }
     })
@@ -118,17 +119,19 @@ async function generateWorkflow(
       }
     })
 
+    const definition = workflow.definitionJson as any;
+    
     return NextResponse.json({
       success: true,
       workflow: {
         id: workflow.id,
         name: workflow.name,
         description: workflow.description,
-        triggerType: workflow.triggerType,
-        nodes: workflow.nodes,
-        connections: workflow.connections,
-        industry: workflow.industry,
-        tags: workflow.tags
+        triggerType: definition?.triggerType,
+        nodes: definition?.nodes,
+        connections: definition?.connections,
+        industry: definition?.industry,
+        tags: definition?.tags
       }
     })
   } catch (error) {
@@ -169,18 +172,20 @@ async function suggestImprovements(workflowId: string, userId: string) {
       averageDuration: runs.reduce((acc, r) => acc + (r.duration || 0), 0) / runs.length
     }
 
+    const definition = workflow.definitionJson as any;
+    
     // Generar sugerencias con IA
     const suggestions = await workflowCopilot.suggestImprovements(
       {
         name: workflow.name,
         description: workflow.description || '',
-        triggerType: workflow.triggerType as any,
-        triggerConfig: workflow.triggerConfig as any,
-        nodes: workflow.nodes as any,
-        connections: workflow.connections as any,
-        variables: workflow.variables as any,
-        industry: workflow.industry || undefined,
-        tags: workflow.tags
+        triggerType: definition?.triggerType,
+        triggerConfig: definition?.triggerConfig,
+        nodes: definition?.nodes,
+        connections: definition?.connections,
+        variables: definition?.variables,
+        industry: definition?.industry || undefined,
+        tags: definition?.tags
       },
       metrics
     )
@@ -239,16 +244,18 @@ async function validateWorkflow(workflowId: string, userId: string) {
       )
     }
 
+    const definition = workflow.definitionJson as any;
+    
     const validation = workflowCopilot.validateWorkflow({
       name: workflow.name,
       description: workflow.description || '',
-      triggerType: workflow.triggerType as any,
-      triggerConfig: workflow.triggerConfig as any,
-      nodes: workflow.nodes as any,
-      connections: workflow.connections as any,
-      variables: workflow.variables as any,
-      industry: workflow.industry || undefined,
-      tags: workflow.tags
+      triggerType: definition?.triggerType,
+      triggerConfig: definition?.triggerConfig,
+      nodes: definition?.nodes,
+      connections: definition?.connections,
+      variables: definition?.variables,
+      industry: definition?.industry || undefined,
+      tags: definition?.tags
     })
 
     return NextResponse.json({

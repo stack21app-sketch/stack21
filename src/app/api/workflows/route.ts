@@ -1,177 +1,235 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { 
-  createWorkflow, 
-  addNodeToWorkflow, 
-  connectNodes, 
-  validateWorkflow, 
-  executeWorkflow,
-  WORKFLOW_TEMPLATES,
-  type Workflow 
-} from '@/lib/workflow-builder'
+import { NextRequest, NextResponse } from 'next/server';
+import { getToken } from 'next-auth/jwt';
+// import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { prisma } from '@/lib/prisma';
+import { WorkflowDefinition } from '@/types/automation';
+import { z } from 'zod';
 
-// Simular base de datos en memoria
-let workflows: Workflow[] = []
+// Schema de validación para crear/actualizar workflows
+const CreateWorkflowSchema = z.object({
+  name: z.string().min(1).max(100),
+  description: z.string().optional(),
+  projectId: z.string().cuid(),
+  definitionJson: z.object({
+    triggers: z.array(z.any()),
+    steps: z.array(z.any()),
+    variables: z.record(z.any()).optional(),
+    tags: z.array(z.string()).optional(),
+  }),
+});
 
-// GET /api/workflows - Obtener workflows
+const UpdateWorkflowSchema = CreateWorkflowSchema.partial().omit({ projectId: true });
+
+// GET /api/workflows - Listar workflows del usuario
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
-    const industry = searchParams.get('industry')
-    const status = searchParams.get('status')
+    const token = await getToken({ req: request });
+    if (!token || !token.sub) {
+      // Modo demo: devolver datos mock si no hay token
+      const mockWorkflows = [
+        {
+          id: 'wf_mock_1',
+          name: 'Demo: Bienvenida de usuarios',
+          description: 'Envía email de bienvenida y crea tarjeta en CRM',
+          status: 'draft',
+          isActive: false,
+          version: 1,
+          projectId: 'project_demo',
+          projectName: 'Demo Project',
+          triggerCount: 1,
+          stepCount: 3,
+          runCount: 0,
+          lastRun: null,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+        {
+          id: 'wf_mock_2',
+          name: 'Demo: Alerta de uso alto',
+          description: 'Notifica por Slack cuando se supera el umbral',
+          status: 'active',
+          isActive: true,
+          version: 2,
+          projectId: 'project_demo',
+          projectName: 'Demo Project',
+          triggerCount: 2,
+          stepCount: 4,
+          runCount: 12,
+          lastRun: null,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+      ];
+      return NextResponse.json({
+        workflows: mockWorkflows,
+        pagination: { page: 1, limit: 20, total: mockWorkflows.length, pages: 1 },
+      });
+    }
 
-    let filteredWorkflows = workflows
+    const { searchParams } = new URL(request.url);
+    const projectId = searchParams.get('projectId');
+    const status = searchParams.get('status');
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '20');
 
-    if (industry) {
-      filteredWorkflows = filteredWorkflows.filter(workflow => workflow.industry === industry)
+    // Obtener workspace del usuario
+    const userWorkspace = await prisma.workspaceMember.findFirst({
+      where: { userId: token.sub },
+      include: { workspace: true },
+    });
+
+    if (!userWorkspace) {
+      return NextResponse.json({ error: 'Workspace no encontrado' }, { status: 404 });
+    }
+
+    // Construir filtros
+    const where: any = {
+      project: {
+        workspaceId: userWorkspace.workspaceId,
+      },
+    };
+
+    if (projectId) {
+      where.projectId = projectId;
     }
 
     if (status) {
-      filteredWorkflows = filteredWorkflows.filter(workflow => workflow.status === status)
+      where.status = status.toUpperCase();
     }
 
+    // Obtener workflows con paginación
+    const [workflows, total] = await Promise.all([
+      prisma.workflow.findMany({
+        where,
+        include: {
+          project: true,
+          triggers: true,
+          steps: true,
+          runs: {
+            take: 1,
+            orderBy: { startedAt: 'desc' },
+          },
+          _count: {
+            select: {
+              runs: true,
+            },
+          },
+        },
+        orderBy: { updatedAt: 'desc' },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      prisma.workflow.count({ where }),
+    ]);
+
     return NextResponse.json({
-      success: true,
-      data: filteredWorkflows,
-      total: filteredWorkflows.length
-    })
+      workflows: workflows.map(workflow => ({
+        id: workflow.id,
+        name: workflow.name,
+        description: workflow.description,
+        status: workflow.status.toLowerCase(),
+        isActive: workflow.isActive,
+        version: workflow.version,
+        projectId: workflow.projectId,
+        projectName: workflow.project.name,
+        triggerCount: workflow.triggers.length,
+        stepCount: workflow.steps.length,
+        runCount: workflow._count.runs,
+        lastRun: workflow.runs[0] ? {
+          id: workflow.runs[0].id,
+          status: workflow.runs[0].status.toLowerCase(),
+          startedAt: workflow.runs[0].startedAt,
+        } : null,
+        createdAt: workflow.createdAt,
+        updatedAt: workflow.updatedAt,
+      })),
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit),
+      },
+    });
   } catch (error) {
-    console.error('Error fetching workflows:', error)
+    console.error('Error obteniendo workflows:', error);
     return NextResponse.json(
-      { success: false, message: 'Error al obtener workflows' },
+      { error: 'Error interno del servidor' },
       { status: 500 }
-    )
+    );
   }
 }
 
 // POST /api/workflows - Crear nuevo workflow
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
-    const { name, industry, description } = body
-
-    if (!name || !industry) {
-      return NextResponse.json(
-        { success: false, message: 'Nombre e industria requeridos' },
-        { status: 400 }
-      )
+    const token = await getToken({ req: request });
+    if (!token || !token.sub) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const newWorkflow = createWorkflow(name, industry)
-    if (description) {
-      newWorkflow.description = description
-    }
+    const body = await request.json();
+    const validatedData = CreateWorkflowSchema.parse(body);
 
-    workflows.push(newWorkflow)
-
-    return NextResponse.json({
-      success: true,
-      data: newWorkflow,
-      message: 'Workflow creado exitosamente'
-    })
-  } catch (error) {
-    console.error('Error creating workflow:', error)
-    return NextResponse.json(
-      { success: false, message: 'Error al crear workflow' },
-      { status: 500 }
-    )
-  }
-}
-
-// PUT /api/workflows - Actualizar workflow
-export async function PUT(request: NextRequest) {
-  try {
-    const body = await request.json()
-    const { id, name, description, nodes, connections, status } = body
-
-    if (!id) {
-      return NextResponse.json(
-        { success: false, message: 'ID de workflow requerido' },
-        { status: 400 }
-      )
-    }
-
-    const workflowIndex = workflows.findIndex(w => w.id === id)
-    if (workflowIndex === -1) {
-      return NextResponse.json(
-        { success: false, message: 'Workflow no encontrado' },
-        { status: 404 }
-      )
-    }
-
-    const updatedWorkflow = {
-      ...workflows[workflowIndex],
-      name: name || workflows[workflowIndex].name,
-      description: description || workflows[workflowIndex].description,
-      nodes: nodes || workflows[workflowIndex].nodes,
-      connections: connections || workflows[workflowIndex].connections,
-      status: status || workflows[workflowIndex].status,
-      updatedAt: new Date()
-    }
-
-    // Validar workflow si tiene nodos y conexiones
-    if (updatedWorkflow.nodes.length > 0) {
-      const validation = validateWorkflow(updatedWorkflow)
-      if (!validation.valid) {
-        return NextResponse.json(
-          { 
-            success: false, 
-            message: 'Workflow inválido', 
-            errors: validation.errors 
+    // Verificar que el proyecto pertenece al usuario
+    const project = await prisma.project.findFirst({
+      where: {
+        id: validatedData.projectId,
+        workspace: {
+          members: {
+            some: { userId: token.sub },
           },
-          { status: 400 }
-        )
-      }
+        },
+      },
+    });
+
+    if (!project) {
+      return NextResponse.json({ error: 'Proyecto no encontrado' }, { status: 404 });
     }
 
-    workflows[workflowIndex] = updatedWorkflow
+    // Crear workflow
+    const workflow = await prisma.workflow.create({
+      data: {
+        name: validatedData.name,
+        description: validatedData.description,
+        projectId: validatedData.projectId,
+        definitionJson: validatedData.definitionJson,
+        status: 'DRAFT',
+        isActive: false,
+        version: 1,
+      },
+      include: {
+        project: true,
+        triggers: true,
+        steps: true,
+      },
+    });
 
     return NextResponse.json({
-      success: true,
-      data: updatedWorkflow,
-      message: 'Workflow actualizado exitosamente'
-    })
+      id: workflow.id,
+      name: workflow.name,
+      description: workflow.description,
+      status: workflow.status.toLowerCase(),
+      isActive: workflow.isActive,
+      version: workflow.version,
+      projectId: workflow.projectId,
+      projectName: workflow.project.name,
+      triggerCount: workflow.triggers.length,
+      stepCount: workflow.steps.length,
+      createdAt: workflow.createdAt,
+      updatedAt: workflow.updatedAt,
+    });
   } catch (error) {
-    console.error('Error updating workflow:', error)
-    return NextResponse.json(
-      { success: false, message: 'Error al actualizar workflow' },
-      { status: 500 }
-    )
-  }
-}
-
-// DELETE /api/workflows - Eliminar workflow
-export async function DELETE(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url)
-    const id = searchParams.get('id')
-
-    if (!id) {
+    if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { success: false, message: 'ID de workflow requerido' },
+        { error: 'Datos inválidos', details: error.errors },
         { status: 400 }
-      )
+      );
     }
 
-    const workflowIndex = workflows.findIndex(w => w.id === id)
-    if (workflowIndex === -1) {
-      return NextResponse.json(
-        { success: false, message: 'Workflow no encontrado' },
-        { status: 404 }
-      )
-    }
-
-    const deletedWorkflow = workflows.splice(workflowIndex, 1)[0]
-
-    return NextResponse.json({
-      success: true,
-      data: deletedWorkflow,
-      message: 'Workflow eliminado exitosamente'
-    })
-  } catch (error) {
-    console.error('Error deleting workflow:', error)
+    console.error('Error creando workflow:', error);
     return NextResponse.json(
-      { success: false, message: 'Error al eliminar workflow' },
+      { error: 'Error interno del servidor' },
       { status: 500 }
-    )
+    );
   }
 }

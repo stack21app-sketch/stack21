@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { DashboardLayout } from '@/components/layout/dashboard-layout'
@@ -63,11 +63,42 @@ export default function AIPage() {
     timestamp: string
   }>>([])
 
-  if (status === 'unauthenticated') {
-    router.push('/auth/signin')
-    return null
-  }
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/auth/signin')
+    }
+  }, [status, router])
 
+  const fetchCapabilities = useCallback(async () => {
+    try {
+      const response = await fetch('/api/ai?type=capabilities')
+      const data = await response.json()
+      if (response.ok) {
+        setCapabilities(data.capabilities)
+      }
+    } catch (error) {
+      console.error('Error al cargar capacidades:', error)
+    }
+  }, [])
+
+  const fetchUsage = useCallback(async () => {
+    try {
+      const response = await fetch('/api/ai?type=usage')
+      const data = await response.json()
+      if (response.ok) {
+        setUsage(data)
+      }
+    } catch (error) {
+      console.error('Error al cargar uso:', error)
+    }
+  }, [])
+
+  useEffect(() => {
+    void fetchCapabilities()
+    void fetchUsage()
+  }, [fetchCapabilities, fetchUsage])
+
+  
   if (status === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -79,33 +110,8 @@ export default function AIPage() {
     )
   }
 
-  useEffect(() => {
-    fetchCapabilities()
-    fetchUsage()
-  }, [])
-
-  const fetchCapabilities = async () => {
-    try {
-      const response = await fetch('/api/ai?type=capabilities')
-      const data = await response.json()
-      if (response.ok) {
-        setCapabilities(data.capabilities)
-      }
-    } catch (error) {
-      console.error('Error al cargar capacidades:', error)
-    }
-  }
-
-  const fetchUsage = async () => {
-    try {
-      const response = await fetch('/api/ai?type=usage')
-      const data = await response.json()
-      if (response.ok) {
-        setUsage(data)
-      }
-    } catch (error) {
-      console.error('Error al cargar uso:', error)
-    }
+  if (status === 'unauthenticated') {
+    return null
   }
 
   const handleSubmit = async (e: React.FormEvent) => {

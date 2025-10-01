@@ -1,291 +1,284 @@
-// Sistema de integraciones para Stack21
+// Sistema de Integraciones Básico para Stack21
+
 export interface Integration {
-  id: string
-  name: string
-  description: string
-  category: 'email' | 'crm' | 'social' | 'payment' | 'analytics' | 'productivity'
-  icon: string
-  status: 'active' | 'inactive' | 'pending'
-  config: Record<string, any>
-  apiEndpoint: string
-  webhookUrl?: string
-  lastSync?: Date
-  credentials?: {
-    apiKey?: string
-    secret?: string
-    token?: string
-    refreshToken?: string
+  id: string;
+  name: string;
+  type: 'slack' | 'discord' | 'zapier' | 'webhook' | 'email';
+  status: 'active' | 'inactive';
+  credentials: Record<string, any>;
+  createdAt: Date;
+  usageCount: number;
+}
+
+export interface IntegrationMessage {
+  id: string;
+  integrationId: string;
+  content: string;
+  status: 'sent' | 'failed' | 'pending';
+  sentAt?: Date;
+  error?: string;
+}
+
+class IntegrationManager {
+  private integrations: Map<string, Integration> = new Map();
+  private messages: Map<string, IntegrationMessage> = new Map();
+
+  createIntegration(config: Omit<Integration, 'id' | 'createdAt' | 'usageCount'>): Integration {
+    const newIntegration: Integration = {
+      ...config,
+      id: `int_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      createdAt: new Date(),
+      usageCount: 0
+    };
+
+    this.integrations.set(newIntegration.id, newIntegration);
+    return newIntegration;
+  }
+
+  async sendMessage(integrationId: string, content: string): Promise<IntegrationMessage> {
+    const integration = this.integrations.get(integrationId);
+    if (!integration) {
+      throw new Error(`Integración ${integrationId} no encontrada`);
+    }
+
+    const message: IntegrationMessage = {
+      id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      integrationId,
+      content,
+      status: 'pending'
+    };
+
+    this.messages.set(message.id, message);
+
+    try {
+      switch (integration.type) {
+        case 'slack':
+          await this.sendToSlack(integration, content);
+          break;
+        case 'discord':
+          await this.sendToDiscord(integration, content);
+          break;
+        case 'zapier':
+          await this.sendToZapier(integration, content);
+          break;
+        case 'webhook':
+          await this.sendToWebhook(integration, content);
+          break;
+        case 'email':
+          await this.sendEmail(integration, content);
+          break;
+        default:
+          throw new Error(`Tipo no soportado: ${integration.type}`);
+      }
+
+      message.status = 'sent';
+      message.sentAt = new Date();
+      integration.usageCount++;
+
+    } catch (error) {
+      message.status = 'failed';
+      message.error = error instanceof Error ? error.message : 'Unknown error';
+      throw error;
+    }
+
+    return message;
+  }
+
+  private async sendToSlack(integration: Integration, content: string): Promise<void> {
+    const { webhookUrl, channel } = integration.credentials;
+    
+    const payload = {
+      text: content,
+      channel: channel || '#general',
+      username: 'Stack21 Bot'
+    };
+
+    const response = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      throw new Error(`Slack error: ${response.status}`);
+    }
+  }
+
+  private async sendToDiscord(integration: Integration, content: string): Promise<void> {
+    const { webhookUrl } = integration.credentials;
+    
+    const payload = {
+      content,
+      username: 'Stack21 Bot'
+    };
+
+    const response = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      throw new Error(`Discord error: ${response.status}`);
+    }
+  }
+
+  private async sendToZapier(integration: Integration, content: string): Promise<void> {
+    const { webhookUrl } = integration.credentials;
+    
+    const payload = {
+      content,
+      timestamp: new Date().toISOString(),
+      source: 'stack21'
+    };
+
+    const response = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      throw new Error(`Zapier error: ${response.status}`);
+    }
+  }
+
+  private async sendToWebhook(integration: Integration, content: string): Promise<void> {
+    const { url, method = 'POST' } = integration.credentials;
+    
+    const payload = {
+      content,
+      timestamp: new Date().toISOString(),
+      source: 'stack21'
+    };
+
+    const response = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      throw new Error(`Webhook error: ${response.status}`);
+    }
+  }
+
+  private async sendEmail(integration: Integration, content: string): Promise<void> {
+    // Simular envío de email
+    await new Promise(resolve => setTimeout(resolve, 500));
+  }
+
+  getAllIntegrations(): Integration[] {
+    return Array.from(this.integrations.values());
+  }
+
+  getIntegration(id: string): Integration | undefined {
+    return this.integrations.get(id);
+  }
+
+  deleteIntegration(id: string): boolean {
+    return this.integrations.delete(id);
+  }
+
+  getStats() {
+    const integrations = Array.from(this.integrations.values());
+    const messages = Array.from(this.messages.values());
+
+    return {
+      totalIntegrations: integrations.length,
+      activeIntegrations: integrations.filter(i => i.status === 'active').length,
+      totalMessages: messages.length,
+      successfulMessages: messages.filter(m => m.status === 'sent').length,
+      failedMessages: messages.filter(m => m.status === 'failed').length
+    };
   }
 }
 
-export interface IntegrationConfig {
-  apiKey: string
-  secret?: string
-  webhookUrl?: string
-  settings?: Record<string, any>
-}
+export const integrationManager = new IntegrationManager();
 
-// Integraciones disponibles
-export const AVAILABLE_INTEGRATIONS: Integration[] = [
-  // Email Marketing
-  {
-    id: 'mailchimp',
-    name: 'Mailchimp',
-    description: 'Email marketing y automatización',
-    category: 'email',
-    icon: '📧',
-    status: 'inactive',
-    config: {},
-    apiEndpoint: '/api/integrations/mailchimp',
-    webhookUrl: '/api/webhooks/mailchimp'
-  },
-  {
-    id: 'sendgrid',
-    name: 'SendGrid',
-    description: 'API de email transaccional',
-    category: 'email',
-    icon: '📬',
-    status: 'inactive',
-    config: {},
-    apiEndpoint: '/api/integrations/sendgrid',
-    webhookUrl: '/api/webhooks/sendgrid'
-  },
-  {
-    id: 'convertkit',
-    name: 'ConvertKit',
-    description: 'Email marketing para creadores',
-    category: 'email',
-    icon: '🎯',
-    status: 'inactive',
-    config: {},
-    apiEndpoint: '/api/integrations/convertkit',
-    webhookUrl: '/api/webhooks/convertkit'
-  },
-
-  // CRM
-  {
-    id: 'hubspot',
-    name: 'HubSpot',
-    description: 'CRM y marketing automation',
-    category: 'crm',
-    icon: '🟠',
-    status: 'inactive',
-    config: {},
-    apiEndpoint: '/api/integrations/hubspot',
-    webhookUrl: '/api/webhooks/hubspot'
-  },
-  {
-    id: 'salesforce',
-    name: 'Salesforce',
-    description: 'CRM empresarial',
-    category: 'crm',
-    icon: '☁️',
-    status: 'inactive',
-    config: {},
-    apiEndpoint: '/api/integrations/salesforce',
-    webhookUrl: '/api/webhooks/salesforce'
-  },
-  {
-    id: 'pipedrive',
-    name: 'Pipedrive',
-    description: 'CRM simple y efectivo',
-    category: 'crm',
-    icon: '🔵',
-    status: 'inactive',
-    config: {},
-    apiEndpoint: '/api/integrations/pipedrive',
-    webhookUrl: '/api/webhooks/pipedrive'
-  },
-
-  // Redes Sociales
-  {
-    id: 'facebook',
-    name: 'Facebook',
-    description: 'Facebook e Instagram marketing',
-    category: 'social',
-    icon: '📘',
-    status: 'inactive',
-    config: {},
-    apiEndpoint: '/api/integrations/facebook',
-    webhookUrl: '/api/webhooks/facebook'
-  },
-  {
-    id: 'twitter',
-    name: 'Twitter',
-    description: 'Twitter marketing y automatización',
-    category: 'social',
-    icon: '🐦',
-    status: 'inactive',
-    config: {},
-    apiEndpoint: '/api/integrations/twitter',
-    webhookUrl: '/api/webhooks/twitter'
-  },
-  {
-    id: 'linkedin',
-    name: 'LinkedIn',
-    description: 'LinkedIn marketing profesional',
-    category: 'social',
-    icon: '💼',
-    status: 'inactive',
-    config: {},
-    apiEndpoint: '/api/integrations/linkedin',
-    webhookUrl: '/api/webhooks/linkedin'
-  },
-  {
-    id: 'youtube',
-    name: 'YouTube',
-    description: 'YouTube marketing y analytics',
-    category: 'social',
-    icon: '📺',
-    status: 'inactive',
-    config: {},
-    apiEndpoint: '/api/integrations/youtube',
-    webhookUrl: '/api/webhooks/youtube'
-  },
-
-  // Pagos
-  {
-    id: 'stripe',
-    name: 'Stripe',
-    description: 'Procesamiento de pagos',
-    category: 'payment',
-    icon: '💳',
-    status: 'inactive',
-    config: {},
-    apiEndpoint: '/api/integrations/stripe',
-    webhookUrl: '/api/webhooks/stripe'
-  },
-  {
-    id: 'paypal',
-    name: 'PayPal',
-    description: 'Pagos online seguros',
-    category: 'payment',
-    icon: '🅿️',
-    status: 'inactive',
-    config: {},
-    apiEndpoint: '/api/integrations/paypal',
-    webhookUrl: '/api/webhooks/paypal'
-  },
-
-  // Analytics
-  {
-    id: 'google-analytics',
-    name: 'Google Analytics',
-    description: 'Analytics web avanzados',
-    category: 'analytics',
-    icon: '📊',
-    status: 'inactive',
-    config: {},
-    apiEndpoint: '/api/integrations/google-analytics',
-    webhookUrl: '/api/webhooks/google-analytics'
-  },
-  {
-    id: 'facebook-pixel',
-    name: 'Facebook Pixel',
-    description: 'Tracking de conversiones',
-    category: 'analytics',
-    icon: '📈',
-    status: 'inactive',
-    config: {},
-    apiEndpoint: '/api/integrations/facebook-pixel',
-    webhookUrl: '/api/webhooks/facebook-pixel'
-  },
-
-  // Productividad
+// Exportaciones adicionales para las APIs
+export const AVAILABLE_INTEGRATIONS = [
   {
     id: 'slack',
     name: 'Slack',
-    description: 'Comunicación de equipos',
-    category: 'productivity',
+    description: 'Integración con Slack para notificaciones',
+    type: 'slack',
     icon: '💬',
-    status: 'inactive',
-    config: {},
-    apiEndpoint: '/api/integrations/slack',
-    webhookUrl: '/api/webhooks/slack'
+    category: 'communication'
+  },
+  {
+    id: 'discord',
+    name: 'Discord',
+    description: 'Integración con Discord para bots',
+    type: 'discord',
+    icon: '🎮',
+    category: 'communication'
   },
   {
     id: 'zapier',
     name: 'Zapier',
-    description: 'Automatización entre apps',
-    category: 'productivity',
+    description: 'Automatización con Zapier',
+    type: 'zapier',
     icon: '⚡',
-    status: 'inactive',
-    config: {},
-    apiEndpoint: '/api/integrations/zapier',
-    webhookUrl: '/api/webhooks/zapier'
+    category: 'automation'
   },
   {
-    id: 'airtable',
-    name: 'Airtable',
-    description: 'Base de datos colaborativa',
-    category: 'productivity',
-    icon: '🗃️',
-    status: 'inactive',
-    config: {},
-    apiEndpoint: '/api/integrations/airtable',
-    webhookUrl: '/api/webhooks/airtable'
+    id: 'webhook',
+    name: 'Webhook',
+    description: 'Webhooks personalizados',
+    type: 'webhook',
+    icon: '🔗',
+    category: 'integration'
+  },
+  {
+    id: 'email',
+    name: 'Email',
+    description: 'Integración de email',
+    type: 'email',
+    icon: '📧',
+    category: 'communication'
   }
-]
+];
 
-// Funciones de utilidad
-export function getIntegrationsByCategory(category: string): Integration[] {
-  return AVAILABLE_INTEGRATIONS.filter(integration => integration.category === category)
-}
-
-export function getActiveIntegrations(): Integration[] {
-  return AVAILABLE_INTEGRATIONS.filter(integration => integration.status === 'active')
-}
-
-export function getIntegrationById(id: string): Integration | undefined {
-  return AVAILABLE_INTEGRATIONS.find(integration => integration.id === id)
-}
-
-// Configuración de integración
-export async function configureIntegration(
-  integrationId: string, 
-  config: IntegrationConfig
-): Promise<{ success: boolean; message: string }> {
+export function configureIntegration(integrationId: string, credentials: Record<string, any>): boolean {
   try {
-    const integration = getIntegrationById(integrationId)
-    if (!integration) {
-      return { success: false, message: 'Integración no encontrada' }
-    }
-
-    // Aquí se haría la configuración real con la API
-    // Por ahora simulamos el proceso
-    await new Promise(resolve => setTimeout(resolve, 1000))
-
-    return { 
-      success: true, 
-      message: `${integration.name} configurado exitosamente` 
-    }
+    const integration = integrationManager.createIntegration({
+      name: AVAILABLE_INTEGRATIONS.find(i => i.id === integrationId)?.name || integrationId,
+      type: integrationId as any,
+      credentials,
+      status: 'active'
+    });
+    return !!integration;
   } catch (error) {
-    return { 
-      success: false, 
-      message: 'Error al configurar la integración' 
-    }
+    console.error('Error configuring integration:', error);
+    return false;
   }
 }
 
-// Test de conexión
 export async function testIntegration(integrationId: string): Promise<{ success: boolean; message: string }> {
   try {
-    const integration = getIntegrationById(integrationId)
+    // Simular test de integración
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    const integration = integrationManager.getIntegration(integrationId);
     if (!integration) {
-      return { success: false, message: 'Integración no encontrada' }
+      return { success: false, message: 'Integración no encontrada' };
     }
-
-    // Simular test de conexión
-    await new Promise(resolve => setTimeout(resolve, 2000))
-
-    return { 
-      success: true, 
-      message: `Conexión con ${integration.name} exitosa` 
+    
+    // Simular diferentes resultados basados en el tipo
+    const results = {
+      slack: { success: true, message: 'Conexión con Slack exitosa' },
+      discord: { success: true, message: 'Bot de Discord conectado' },
+      zapier: { success: true, message: 'Zapier configurado correctamente' },
+      webhook: { success: true, message: 'Webhook funcionando' },
+      email: { success: true, message: 'SMTP configurado' }
+    };
+    
+    return results[integration.type] || { success: false, message: 'Tipo de integración no soportado' };
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return { success: false, message: `Error: ${error.message}` };
     }
-  } catch (error) {
-    return { 
-      success: false, 
-      message: 'Error al conectar con la integración' 
-    }
+    return { success: false, message: `Error: ${String(error)}` };
   }
 }

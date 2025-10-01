@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { DashboardLayout } from '@/components/layout/dashboard-layout'
@@ -90,28 +90,13 @@ export default function AuditPage() {
     hasMore: false
   })
 
-  if (status === 'unauthenticated') {
-    router.push('/auth/signin')
-    return null
-  }
-
-  if (status === 'loading') {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Cargando...</p>
-        </div>
-      </div>
-    )
-  }
-
   useEffect(() => {
-    fetchLogs()
-    fetchStats()
-  }, [currentWorkspace, filters, pagination.page])
+    if (status === 'unauthenticated') {
+      router.push('/auth/signin')
+    }
+  }, [status, router])
 
-  const fetchLogs = async () => {
+  const fetchLogs = useCallback(async () => {
     setLoading(true)
     try {
       const params = new URLSearchParams({
@@ -141,9 +126,9 @@ export default function AuditPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [currentWorkspace, filters.action, filters.endDate, filters.severity, filters.startDate, pagination.limit, pagination.page])
 
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     try {
       const params = new URLSearchParams({
         type: 'stats',
@@ -159,6 +144,25 @@ export default function AuditPage() {
     } catch (error) {
       console.error('Error al cargar estadísticas:', error)
     }
+  }, [currentWorkspace])
+
+  useEffect(() => {
+    void fetchLogs()
+    void fetchStats()
+  }, [fetchLogs, fetchStats])
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Cargando...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (status === 'unauthenticated') {
+    return null
   }
 
   const handleExport = async () => {

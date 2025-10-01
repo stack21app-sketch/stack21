@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { WorkspaceSelector } from '@/components/workspace-selector'
 import { NotificationCenter } from '@/components/ui/notification-center'
+import { RealTimeNotifications } from '@/components/notifications/RealTimeNotifications'
 import { ThemeSelector } from '@/components/theme-selector'
 import { LanguageSelector } from '@/components/ui/language-selector'
 import { useTranslation } from '@/hooks/useTranslation'
@@ -32,7 +33,9 @@ import {
   BarChart3,
   ShoppingCart,
   Trophy,
-  Database
+  Database,
+  FileText,
+  Store
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -50,9 +53,9 @@ export function Sidebar({ className }: SidebarProps) {
   
   const bottomNavigation = [
     {
-      name: t('settings', 'Configuración'),
-      href: '/dashboard/settings',
-      icon: Settings,
+      name: t('help', 'Ayuda'),
+      href: '/dashboard/help',
+      icon: HelpCircle,
     },
   ]
 
@@ -63,24 +66,21 @@ export function Sidebar({ className }: SidebarProps) {
       icon: LayoutDashboard,
     },
     {
-      name: t('navigation.workspaces', 'Workspaces'),
-      href: '/dashboard/workspaces',
-      icon: Building2,
-    },
-    {
-      name: t('navigation.projects', 'Proyectos'),
-      href: '/dashboard/projects',
-      icon: FolderOpen,
-    },
-    {
       name: t('navigation.workflows', 'Workflows'),
       href: '/dashboard/workflows',
       icon: Workflow,
     },
     {
-      name: t('navigation.members', 'Miembros'),
-      href: '/dashboard/members',
-      icon: Users,
+      name: t('navigation.chatbot', 'Chatbot'),
+      href: '/dashboard/chatbot',
+      icon: Brain,
+      badge: t('badges.new', 'Nuevo'),
+    },
+    {
+      name: t('navigation.emails', 'Emails'),
+      href: '/dashboard/emails',
+      icon: Bell,
+      badge: t('badges.new', 'Nuevo'),
     },
     {
       name: t('navigation.analytics', 'Analytics'),
@@ -88,107 +88,21 @@ export function Sidebar({ className }: SidebarProps) {
       icon: BarChart3,
     },
     {
-      name: t('navigation.aiAssistant', 'IA Assistant'),
-      href: '/dashboard/ai',
-      icon: Brain,
-    },
-    {
-      name: t('navigation.aiAssistantByIndustry', 'Asistente IA por Industria'),
-      href: '/dashboard/ai-assistant',
-      icon: Brain,
+      name: t('navigation.templates', 'Plantillas'),
+      href: '/dashboard/templates',
+      icon: FileText,
       badge: t('badges.new', 'Nuevo'),
-      exclusive: true,
-    },
-    {
-      name: t('navigation.workflowBuilder', 'Constructor Workflows'),
-      href: '/dashboard/workflow-builder',
-      icon: Workflow,
-      badge: t('badges.visual', 'Visual'),
-      exclusive: true,
-    },
-    {
-      name: t('navigation.workflowCopilot', 'Copilot de Workflows'),
-      href: '/dashboard/workflow-copilot',
-      icon: Brain,
-      badge: t('badges.ai', 'IA'),
-      exclusive: true,
     },
     {
       name: t('navigation.marketplace', 'Marketplace'),
-      href: '/marketplace',
-      icon: ShoppingCart,
-      badge: t('badges.new', 'Nuevo'),
-      exclusive: true,
-    },
-    {
-      name: t('navigation.smartDashboard', 'Dashboard Inteligente'),
-      href: '/dashboard/smart-dashboard',
-      icon: Brain,
-      badge: t('badges.ai', 'IA'),
-      exclusive: true,
-    },
-    {
-      name: t('navigation.gamification', 'Gamificación'),
-      href: '/dashboard/gamification',
-      icon: Trophy,
-      badge: t('badges.new', 'Nuevo'),
-      exclusive: true,
-    },
-    {
-      name: t('navigation.businessIntelligence', 'Inteligencia de Negocio'),
-      href: '/dashboard/business-intelligence',
-      icon: BarChart3,
-      badge: t('badges.ai', 'IA'),
-      exclusive: true,
-    },
-    {
-      name: t('navigation.integrations', 'Integraciones'),
-      href: '/integrations',
-      icon: Plug,
-    },
-    {
-      name: t('navigation.documentation', 'Documentación'),
-      href: '/dashboard/docs',
-      icon: BookOpen,
-    },
-    {
-      name: t('navigation.support', 'Soporte'),
-      href: '/dashboard/support',
-      icon: HelpCircle,
-    },
-    {
-      name: t('navigation.audit', 'Auditoría'),
-      href: '/dashboard/audit',
-      icon: Shield,
-    },
-    {
-      name: t('navigation.webhooks', 'Webhooks'),
-      href: '/webhooks',
-      icon: Webhook,
+      href: '/dashboard/marketplace',
+      icon: Store,
       badge: t('badges.new', 'Nuevo'),
     },
     {
-      name: t('navigation.backups', 'Respaldo y Restauración'),
-      href: '/backups',
-      icon: Database,
-      badge: t('badges.new', 'Nuevo'),
-    },
-    {
-      name: t('navigation.billing', 'Facturación'),
-      href: '/dashboard/billing',
-      icon: CreditCard,
-    },
-    {
-      name: t('navigation.pricing', 'Precios'),
-      href: '/pricing',
-      icon: CreditCard,
-      badge: t('badges.transparent', 'Transparente'),
-    },
-    {
-      name: t('navigation.whiteLabel', 'White-Label'),
-      href: '/white-label',
-      icon: Shield,
-      badge: t('badges.enterprise', 'Enterprise'),
+      name: t('navigation.settings', 'Configuración'),
+      href: '/dashboard/settings',
+      icon: Settings,
     },
   ]
 
@@ -225,10 +139,7 @@ export function Sidebar({ className }: SidebarProps) {
             </div>
             <div className="flex items-center gap-2">
               <LanguageSelector />
-              <NotificationCenter 
-                isOpen={showNotifications} 
-                onClose={() => setShowNotifications(false)} 
-              />
+              <RealTimeNotifications />
             </div>
           </div>
 
@@ -266,7 +177,7 @@ export function Sidebar({ className }: SidebarProps) {
                   <span className="flex-1">{item.name}</span>
                   {item.badge && (
                     <Badge 
-                      variant={item.exclusive ? "default" : "secondary"} 
+                      variant="secondary" 
                       className={cn(
                         "ml-2 text-xs transition-all duration-300",
                         isActive ? "bg-white/20 text-white" : ""
@@ -274,12 +185,6 @@ export function Sidebar({ className }: SidebarProps) {
                     >
                       {item.badge}
                     </Badge>
-                  )}
-                  {item.exclusive && (
-                    <span className={cn(
-                      "ml-1 text-xs transition-colors duration-300",
-                      isActive ? "text-white" : "text-blue-600"
-                    )}>✨</span>
                   )}
                 </Link>
               )
@@ -294,17 +199,6 @@ export function Sidebar({ className }: SidebarProps) {
               <ThemeSelector />
             </div>
             
-            <Button
-              variant="ghost"
-              className="group w-full justify-start text-gray-700 hover:bg-white/50 hover:text-gray-900 transition-all duration-300 hover:scale-105"
-              onClick={() => setShowNotifications(true)}
-            >
-              <div className="p-1.5 rounded-lg mr-3 group-hover:bg-red-100 group-hover:scale-110 transition-all duration-300">
-                <Bell className="h-4 w-4 text-gray-600 group-hover:text-red-600 transition-colors duration-300" />
-              </div>
-              {t('notifications', 'Notificaciones')}
-              <Badge variant="destructive" className="ml-auto group-hover:scale-110 transition-transform duration-300">3</Badge>
-            </Button>
             
             {bottomNavigation.map((item) => {
               const isActive = pathname === item.href
@@ -357,11 +251,6 @@ export function Sidebar({ className }: SidebarProps) {
         />
       )}
 
-      {/* Notification Center */}
-      <NotificationCenter 
-        isOpen={showNotifications} 
-        onClose={() => setShowNotifications(false)} 
-      />
     </>
   )
 }

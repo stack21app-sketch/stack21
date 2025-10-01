@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { getToken } from 'next-auth/jwt'
 
 // Configuración de base de datos
 const { PrismaClient } = require('@prisma/client')
@@ -120,9 +119,9 @@ const mockAuditLogs = [
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const token = await getToken({ req: request })
     
-    if (!session?.user?.id) {
+    if (!token || !token.sub) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
 
@@ -141,7 +140,7 @@ export async function GET(request: NextRequest) {
         let logs: any[]
 
         if (useDatabase && prisma) {
-          const whereClause: any = { userId: session.user.id }
+          const whereClause: any = { userId: token.sub }
           
           if (workspaceId) whereClause.workspaceId = workspaceId
           if (action) whereClause.action = action
@@ -176,7 +175,7 @@ export async function GET(request: NextRequest) {
         } else {
           // Usar simulación
           logs = mockAuditLogs
-            .filter(log => log.userId === session.user.id)
+            .filter(log => log.userId === token.sub)
             .filter(log => !workspaceId || log.workspaceId === workspaceId)
             .filter(log => !action || log.action === action)
             .filter(log => !severity || log.severity === severity)
@@ -197,7 +196,7 @@ export async function GET(request: NextRequest) {
         let stats: any
 
         if (useDatabase && prisma) {
-          const whereClause: any = { userId: session.user.id }
+          const whereClause: any = { userId: token.sub }
           if (workspaceId) whereClause.workspaceId = workspaceId
 
           const [
@@ -263,7 +262,7 @@ export async function GET(request: NextRequest) {
           }
         } else {
           // Simulación
-          const userLogs = mockAuditLogs.filter(log => log.userId === session.user.id)
+          const userLogs = mockAuditLogs.filter(log => log.userId === token.sub)
           const today = new Date().toDateString()
           const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
           const monthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
@@ -293,7 +292,7 @@ export async function GET(request: NextRequest) {
         let exportLogs: any[]
 
         if (useDatabase && prisma) {
-          const whereClause: any = { userId: session.user.id }
+          const whereClause: any = { userId: token.sub }
           if (workspaceId) whereClause.workspaceId = workspaceId
 
           exportLogs = await prisma.auditLog.findMany({
@@ -314,7 +313,7 @@ export async function GET(request: NextRequest) {
             }
           })
         } else {
-          exportLogs = mockAuditLogs.filter(log => log.userId === session.user.id)
+          exportLogs = mockAuditLogs.filter(log => log.userId === token.sub)
         }
 
         // Generar CSV
@@ -347,9 +346,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const token = await getToken({ req: request })
     
-    if (!session?.user?.id) {
+    if (!token || !token.sub) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
 
@@ -369,7 +368,7 @@ export async function POST(request: NextRequest) {
     const userAgent = request.headers.get('user-agent') || 'unknown'
 
     const auditLog = {
-      userId: session.user.id,
+      userId: token.sub,
       workspaceId: workspaceId || null,
       action,
       resource,
@@ -388,7 +387,7 @@ export async function POST(request: NextRequest) {
     } else {
       // Simulación - solo loggear
       console.log(`📋 Audit Log: ${action}`, {
-        userId: session.user.id,
+        userId: token.sub,
         workspaceId,
         resource,
         resourceId,

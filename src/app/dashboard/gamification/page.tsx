@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { DashboardLayout } from '@/components/layout/dashboard-layout'
@@ -121,29 +121,7 @@ export default function GamificationPage() {
   const [rewards, setRewards] = useState<any[]>([])
   const [recentEvents, setRecentEvents] = useState<any[]>([])
 
-  if (status === 'unauthenticated') {
-    router.push('/auth/signin')
-    return null
-  }
-
-  if (status === 'loading') {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Cargando...</p>
-        </div>
-      </div>
-    )
-  }
-
-  useEffect(() => {
-    if (currentWorkspace) {
-      fetchGamificationData()
-    }
-  }, [currentWorkspace])
-
-  const fetchGamificationData = async () => {
+  const fetchGamificationData = useCallback(async () => {
     if (!currentWorkspace) return
 
     setLoading(true)
@@ -196,6 +174,28 @@ export default function GamificationPage() {
     } finally {
       setLoading(false)
     }
+  }, [currentWorkspace])
+
+  useEffect(() => {
+    if (currentWorkspace) {
+      fetchGamificationData()
+    }
+  }, [currentWorkspace, fetchGamificationData])
+
+  if (status === 'unauthenticated') {
+    router.push('/auth/signin')
+    return null
+  }
+
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Cargando...</p>
+        </div>
+      </div>
+    )
   }
 
   const checkAchievements = async () => {

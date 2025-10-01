@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { DashboardLayout } from '@/components/layout/dashboard-layout'
@@ -37,11 +37,27 @@ export default function ABTestingPage() {
   const [testResults, setTestResults] = useState<{[testId: string]: {[variant: string]: TestResult}}>({})
   const [loading, setLoading] = useState(true)
 
-  if (status === 'unauthenticated') {
-    router.push('/auth/signin')
-    return null
-  }
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/auth/signin')
+    }
+  }, [status, router])
 
+  const loadTestResults = useCallback(() => {
+    setLoading(true)
+    const activeTests = abTesting.getActiveTests()
+    const results: {[testId: string]: {[variant: string]: TestResult}} = {}
+    activeTests.forEach(test => {
+      results[test.id] = abTesting.getTestResults(test.id)
+    })
+    setTestResults(results)
+    setLoading(false)
+  }, [])
+
+  useEffect(() => {
+    loadTestResults()
+  }, [loadTestResults])
+  
   if (status === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -53,21 +69,8 @@ export default function ABTestingPage() {
     )
   }
 
-  useEffect(() => {
-    loadTestResults()
-  }, [])
-
-  const loadTestResults = () => {
-    setLoading(true)
-    const activeTests = abTesting.getActiveTests()
-    const results: {[testId: string]: {[variant: string]: TestResult}} = {}
-    
-    activeTests.forEach(test => {
-      results[test.id] = abTesting.getTestResults(test.id)
-    })
-    
-    setTestResults(results)
-    setLoading(false)
+  if (status === 'unauthenticated') {
+    return null
   }
 
   const getConversionColor = (rate: number) => {

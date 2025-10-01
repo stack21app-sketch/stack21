@@ -14,12 +14,14 @@ export async function POST(_: Request, { params }: Params) {
     if (!workflow) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
     const startedAt = new Date()
+    const definition = workflow.definitionJson as any;
+    
     // Crear log RUNNING
     const log = await prisma.runLog.create({
       data: {
         workflowId: workflow.id,
         status: 'RUNNING',
-        input: { trigger: workflow.triggerType },
+        input: { trigger: definition?.triggerType || 'manual' },
         startedAt,
       },
     })
@@ -78,10 +80,11 @@ export async function POST(_: Request, { params }: Params) {
 
     // Aprender de la ejecución del workflow
     try {
+      const definitionForLearning = workflow.definitionJson as any;
       await aiLearning.learnFromWorkflowExecution({
-        userId: workflow.userId,
+        userId: workflow.userId || 'anonymous',
         workflowId: workflow.id,
-        input: { trigger: workflow.triggerType },
+        input: { trigger: definitionForLearning?.triggerType || 'manual' },
         output,
         context: 'workflow_execution'
       })

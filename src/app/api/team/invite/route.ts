@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { getToken } from 'next-auth/jwt'
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const token = await getToken({ req: request })
     
-    if (!session?.user?.id) {
+    if (!token || !token.sub) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
 
@@ -35,7 +34,7 @@ export async function POST(request: NextRequest) {
       role,
       status: 'pending',
       invitedAt: new Date().toISOString(),
-      invitedBy: session.user.name || session.user.email,
+      invitedBy: 'User',
       workspaceId: 'current-workspace', // En producción, obtener del contexto
       token: `inv_${Math.random().toString(36).substr(2, 9)}`,
       expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // 7 días
@@ -53,7 +52,7 @@ export async function POST(request: NextRequest) {
         email,
         role,
         workspaceId: workspaceId,
-        invitedBy: session.user.id,
+        invitedBy: token.sub,
         token: generateInvitationToken(),
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
       }

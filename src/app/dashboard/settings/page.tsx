@@ -1,628 +1,411 @@
 'use client'
 
-import { useState, useEffect, useContext } from 'react'
-import { I18nContext } from '@/lib/i18n'
-import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
-import { useWorkspace } from '@/hooks/use-workspace'
-import { DashboardLayout } from '@/components/layout/dashboard-layout'
+import { useState } from 'react'
+import { motion } from 'framer-motion'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { Separator } from '@/components/ui/separator'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
 import { 
-  Settings, 
-  User,
-  Bell,
-  Shield,
-  CreditCard,
+  User, 
+  Bell, 
+  Shield, 
+  Palette, 
+  Globe, 
   Database,
   Key,
-  Save,
-  CheckCircle,
-  Download,
-  Trash2,
-  AlertTriangle,
-  RefreshCw,
-  AlertCircle
+  Mail,
+  Smartphone,
+  Monitor
 } from 'lucide-react'
+import { ConfigStatus } from '@/components/ConfigStatus'
+import { TestPanel } from '@/components/TestPanel'
+import { PerformanceMonitorComponent } from '@/components/PerformanceMonitor'
+import { SEOOptimizer } from '@/components/SEOOptimizer'
 
 export default function SettingsPage() {
-  const { t } = useContext(I18nContext)
-  const { data: session, status } = useSession()
-  const router = useRouter()
-  const { currentWorkspace } = useWorkspace()
-  const [loading, setLoading] = useState(false)
-  const [saved, setSaved] = useState(false)
-  const [settings, setSettings] = useState<any>(null)
-  const [formData, setFormData] = useState({
-    theme: 'dark',
-    language: 'es',
-    timezone: 'UTC',
+  const [settings, setSettings] = useState({
+    profile: {
+      name: 'Kevin Santiago Villa',
+      email: 'kesafavil19@gmail.com',
+      avatar: 'https://lh3.googleusercontent.com/a/ACg8ocLUoTFF2NRWVdA4lpnrDx6vVVvrD99c8TAiSP130skHRu8-dQM=s96-c'
+    },
     notifications: {
       email: true,
-      projectUpdates: true,
-      workflowAlerts: false
+      push: true,
+      sms: false,
+      marketing: false
     },
     security: {
       twoFactor: false,
-      sessionTimeout: true
+      sessionTimeout: 30,
+      loginAlerts: true
+    },
+    appearance: {
+      theme: 'light',
+      language: 'es',
+      fontSize: 'medium'
+    },
+    integrations: {
+      google: true,
+      github: true,
+      slack: false,
+      discord: false
     }
   })
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
-  if (status === 'unauthenticated') {
-    router.push('/auth/signin')
-    return null
-  }
-
-  useEffect(() => {
-    if (status === 'authenticated') {
-      fetchSettings()
-    }
-  }, [status])
-
-  const fetchSettings = async () => {
-    setLoading(true)
-    try {
-      const response = await fetch('/api/settings')
-      const data = await response.json()
-
-      if (response.ok) {
-        setSettings(data)
-        if (data.preferences) {
-          setFormData({
-            theme: data.preferences.theme || 'dark',
-            language: data.preferences.language || 'es',
-            timezone: data.preferences.timezone || 'UTC',
-            notifications: {
-              email: data.preferences.notifications?.email ?? true,
-              projectUpdates: data.preferences.notifications?.projectUpdates ?? true,
-              workflowAlerts: data.preferences.notifications?.workflowAlerts ?? false
-            },
-            security: {
-              twoFactor: data.preferences.security?.twoFactor ?? false,
-              sessionTimeout: data.preferences.security?.sessionTimeout ?? true
-            }
-          })
-        }
+  const updateSetting = (category: string, key: string, value: any) => {
+    setSettings(prev => ({
+      ...prev,
+      [category]: {
+        ...prev[category as keyof typeof prev],
+        [key]: value
       }
-    } catch (error) {
-      console.error('Error al cargar configuración:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  if (status === 'loading' || loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Cargando...</p>
-        </div>
-      </div>
-    )
-  }
-
-  const handleSave = async () => {
-    setLoading(true)
-    setSaved(false)
-
-    try {
-      const response = await fetch('/api/settings', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Error al guardar configuración')
-      }
-
-      setSettings(data)
-      setSaved(true)
-      setTimeout(() => setSaved(false), 3000)
-    } catch (error) {
-      console.error('Error al guardar configuración:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleReset = async () => {
-    if (!confirm('¿Estás seguro de que quieres resetear todas las preferencias a los valores por defecto?')) {
-      return
-    }
-
-    setLoading(true)
-    try {
-      const response = await fetch('/api/settings', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ action: 'reset_preferences' }),
-      })
-
-      const data = await response.json()
-
-      if (response.ok) {
-        fetchSettings() // Recargar configuración
-        setSaved(true)
-        setTimeout(() => setSaved(false), 3000)
-      }
-    } catch (error) {
-      console.error('Error al resetear configuración:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleExportData = async () => {
-    setLoading(true)
-    try {
-      const response = await fetch('/api/settings', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ action: 'export_data' }),
-      })
-
-      const data = await response.json()
-
-      if (response.ok) {
-        // Descargar archivo JSON
-        const blob = new Blob([JSON.stringify(data.data, null, 2)], { type: 'application/json' })
-        const url = URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = `datos-usuario-${new Date().toISOString().split('T')[0]}.json`
-        document.body.appendChild(a)
-        a.click()
-        document.body.removeChild(a)
-        URL.revokeObjectURL(url)
-      }
-    } catch (error) {
-      console.error('Error al exportar datos:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleDeleteAccount = async () => {
-    if (!confirm('¿Estás SEGURO de que quieres eliminar tu cuenta? Esta acción no se puede deshacer.')) {
-      return
-    }
-
-    setLoading(true)
-    try {
-      const response = await fetch('/api/settings', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ action: 'delete_account' }),
-      })
-
-      const data = await response.json()
-
-      if (response.ok) {
-        // Redirigir al login
-        window.location.href = '/auth/signin'
-      }
-    } catch (error) {
-      console.error('Error al eliminar cuenta:', error)
-    } finally {
-      setLoading(false)
-    }
+    }))
   }
 
   return (
-    <DashboardLayout>
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">{t('settings')}</h1>
-        <p className="text-gray-600 mt-2">
-          Personaliza tu experiencia de automatización y configura las preferencias de tu workspace.
-        </p>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 p-6">
+      <div className="max-w-4xl mx-auto space-y-6">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Configuración</h1>
+          <p className="text-gray-600">Personaliza tu experiencia en Stack21</p>
+        </motion.div>
 
-      {/* Success Alert */}
-      {saved && (
-        <Alert className="mb-6 border-green-200 bg-green-50">
-          <CheckCircle className="h-4 w-4 text-green-600" />
-          <AlertDescription className="text-green-800">
-            Configuración guardada exitosamente
-          </AlertDescription>
-        </Alert>
-      )}
+        {/* Estado de Configuración */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.05 }}
+        >
+          <ConfigStatus />
+        </motion.div>
 
-      <div className="space-y-6">
-        {/* Profile Settings */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <User className="mr-2 h-5 w-5" />
-              Perfil de Usuario
-            </CardTitle>
-            <CardDescription>
-              Información personal y preferencias de cuenta
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Nombre completo</Label>
-                <Input
-                  id="name"
-                  value={session?.user?.name || ''}
-                  placeholder="Tu nombre completo"
-                  disabled
-                />
-                <p className="text-xs text-gray-500">
-                  El nombre se actualiza automáticamente desde tu proveedor de autenticación
-                </p>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Correo electrónico</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={session?.user?.email || ''}
-                  disabled
-                />
-                <p className="text-xs text-gray-500">
-                  El correo no se puede cambiar
-                </p>
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="bio">Biografía</Label>
-              <Textarea
-                id="bio"
-                placeholder="Cuéntanos un poco sobre ti..."
-                rows={3}
-              />
-            </div>
-          </CardContent>
-        </Card>
+        {/* Panel de Pruebas */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+        >
+          <TestPanel />
+        </motion.div>
 
-        {/* Workspace Settings */}
-        {currentWorkspace && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Settings className="mr-2 h-5 w-5" />
-                Configuración del Workspace
-              </CardTitle>
-              <CardDescription>
-                Configuración específica de {currentWorkspace.name}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="workspace-name">Nombre del workspace</Label>
-                  <Input
-                    id="workspace-name"
-                    defaultValue={currentWorkspace.name}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="workspace-slug">Slug (URL)</Label>
-                  <Input
-                    id="workspace-slug"
-                    defaultValue={currentWorkspace.slug}
-                  />
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="workspace-description">Descripción</Label>
-                <Textarea
-                  id="workspace-description"
-                  placeholder="Describe tu workspace..."
-                  rows={3}
-                />
-              </div>
-            </CardContent>
-          </Card>
-        )}
+        {/* Monitor de Rendimiento */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.15 }}
+        >
+          <PerformanceMonitorComponent />
+        </motion.div>
 
-        {/* Notifications */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Bell className="mr-2 h-5 w-5" />
-              Notificaciones
-            </CardTitle>
-            <CardDescription>
-              Configura cómo y cuándo recibir notificaciones
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="email-notifications">Notificaciones por correo</Label>
-                <p className="text-sm text-gray-500">
-                  Recibe notificaciones importantes por correo electrónico
-                </p>
-              </div>
-              <Switch id="email-notifications" defaultChecked />
-            </div>
-            
-            <Separator />
-            
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="project-updates">Actualizaciones de proyectos</Label>
-                <p className="text-sm text-gray-500">
-                  Notificaciones cuando hay cambios en tus proyectos
-                </p>
-              </div>
-              <Switch id="project-updates" defaultChecked />
-            </div>
-            
-            <Separator />
-            
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="workflow-alerts">Alertas de workflows</Label>
-                <p className="text-sm text-gray-500">
-                  Notificaciones cuando los workflows fallan o completan
-                </p>
-              </div>
-              <Switch id="workflow-alerts" />
-            </div>
-          </CardContent>
-        </Card>
+        {/* Optimizador SEO */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <SEOOptimizer />
+        </motion.div>
 
-        {/* Security */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Shield className="mr-2 h-5 w-5" />
-              Seguridad
-            </CardTitle>
-            <CardDescription>
-              Configuración de seguridad y privacidad
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="two-factor">Autenticación de dos factores</Label>
-                <p className="text-sm text-gray-500">
-                  Añade una capa extra de seguridad a tu cuenta
-                </p>
-              </div>
-              <Switch id="two-factor" />
-            </div>
-            
-            <Separator />
-            
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="session-timeout">Cerrar sesión automática</Label>
-                <p className="text-sm text-gray-500">
-                  Cierra la sesión después de 30 minutos de inactividad
-                </p>
-              </div>
-              <Switch id="session-timeout" defaultChecked />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* API Keys */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Key className="mr-2 h-5 w-5" />
-              Claves API
-            </CardTitle>
-            <CardDescription>
-              Gestiona tus claves de API para integraciones
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center py-8">
-              <Key className="h-12 w-12 mx-auto text-gray-300 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                No tienes claves API
-              </h3>
-              <p className="text-gray-500 mb-4">
-                Crea claves API para integrar tu aplicación con servicios externos
-              </p>
-              <Button variant="outline">
-                Crear Clave API
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Advanced Settings */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Settings className="mr-2 h-5 w-5" />
-              Configuración Avanzada
-            </CardTitle>
-            <CardDescription>
-              Opciones adicionales y herramientas de administración
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="theme">Tema</Label>
-                <Select
-                  value={formData.theme}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, theme: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="light">Claro</SelectItem>
-                    <SelectItem value="dark">Oscuro</SelectItem>
-                    <SelectItem value="system">Sistema</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="language">Idioma</Label>
-                <Select
-                  value={formData.language}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, language: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="es">Español</SelectItem>
-                    <SelectItem value="en">English</SelectItem>
-                    <SelectItem value="fr">Français</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="timezone">Zona Horaria</Label>
-              <Select
-                value={formData.timezone}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, timezone: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="UTC">UTC</SelectItem>
-                  <SelectItem value="America/Mexico_City">México (GMT-6)</SelectItem>
-                  <SelectItem value="America/New_York">Nueva York (GMT-5)</SelectItem>
-                  <SelectItem value="Europe/Madrid">Madrid (GMT+1)</SelectItem>
-                  <SelectItem value="Europe/London">Londres (GMT+0)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Data Management */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Database className="mr-2 h-5 w-5" />
-              Gestión de Datos
-            </CardTitle>
-            <CardDescription>
-              Exportar, resetear o eliminar tus datos
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button variant="outline" onClick={handleExportData} disabled={loading}>
-                <Download className="mr-2 h-4 w-4" />
-                Exportar Datos
-              </Button>
-              
-              <Button variant="outline" onClick={handleReset} disabled={loading}>
-                <RefreshCw className="mr-2 h-4 w-4" />
-                Resetear Preferencias
-              </Button>
-            </div>
-            
-            <Separator />
-            
-            <div className="space-y-2">
-              <h4 className="text-sm font-medium text-red-600">Zona Peligrosa</h4>
-              <p className="text-sm text-gray-500">
-                Estas acciones son irreversibles. Ten cuidado.
-              </p>
-              <Button 
-                variant="destructive" 
-                onClick={() => setShowDeleteConfirm(true)}
-                disabled={loading}
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Eliminar Cuenta
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Save Button */}
-        <div className="flex justify-end">
-          <Button onClick={handleSave} disabled={loading}>
-            <Save className="mr-2 h-4 w-4" />
-            {loading ? 'Guardando...' : 'Guardar Cambios'}
-          </Button>
-        </div>
-
-        {/* Delete Confirmation Modal */}
-        {showDeleteConfirm && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <Card className="w-full max-w-md mx-4">
+        <div className="grid gap-6">
+          {/* Profile Settings */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
+            <Card>
               <CardHeader>
-                <CardTitle className="text-red-600 flex items-center">
-                  <AlertTriangle className="mr-2 h-5 w-5" />
-                  Eliminar Cuenta
+                <CardTitle className="flex items-center gap-2">
+                  <User className="h-5 w-5" />
+                  Perfil
                 </CardTitle>
                 <CardDescription>
-                  Esta acción es irreversible. Se eliminarán todos tus datos permanentemente.
+                  Información personal y preferencias de cuenta
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <Alert variant="destructive">
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertDescription>
-                      <strong>Advertencia:</strong> Esta acción eliminará:
-                      <ul className="list-disc list-inside mt-2 space-y-1">
-                        <li>Tu cuenta de usuario</li>
-                        <li>Todos tus workspaces</li>
-                        <li>Todos tus proyectos</li>
-                        <li>Todos tus datos personales</li>
-                      </ul>
-                    </AlertDescription>
-                  </Alert>
-                  
-                  <div className="flex space-x-2">
-                    <Button 
-                      variant="destructive" 
-                      onClick={handleDeleteAccount}
-                      disabled={loading}
-                      className="flex-1"
+              <CardContent className="space-y-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white text-xl font-bold">
+                    {settings.profile.name.charAt(0)}
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">{settings.profile.name}</h3>
+                    <p className="text-sm text-gray-600">{settings.profile.email}</p>
+                  </div>
+                </div>
+                <Separator />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="name">Nombre</Label>
+                    <Input
+                      id="name"
+                      value={settings.profile.name}
+                      onChange={(e) => updateSetting('profile', 'name', e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={settings.profile.email}
+                      onChange={(e) => updateSetting('profile', 'email', e.target.value)}
+                    />
+                  </div>
+                </div>
+                <Button className="w-full">Guardar Cambios</Button>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Notifications */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Bell className="h-5 w-5" />
+                  Notificaciones
+                </CardTitle>
+                <CardDescription>
+                  Configura cómo y cuándo recibir notificaciones
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Mail className="h-4 w-4 text-gray-600" />
+                    <div>
+                      <Label>Notificaciones por Email</Label>
+                      <p className="text-sm text-gray-600">Recibir notificaciones importantes por email</p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={settings.notifications.email}
+                    onCheckedChange={(checked) => updateSetting('notifications', 'email', checked)}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Smartphone className="h-4 w-4 text-gray-600" />
+                    <div>
+                      <Label>Notificaciones Push</Label>
+                      <p className="text-sm text-gray-600">Recibir notificaciones en tiempo real</p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={settings.notifications.push}
+                    onCheckedChange={(checked) => updateSetting('notifications', 'push', checked)}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Bell className="h-4 w-4 text-gray-600" />
+                    <div>
+                      <Label>Marketing</Label>
+                      <p className="text-sm text-gray-600">Recibir ofertas y actualizaciones de productos</p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={settings.notifications.marketing}
+                    onCheckedChange={(checked) => updateSetting('notifications', 'marketing', checked)}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Security */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+          >
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="h-5 w-5" />
+                  Seguridad
+                </CardTitle>
+                <CardDescription>
+                  Configuración de seguridad y privacidad
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Key className="h-4 w-4 text-gray-600" />
+                    <div>
+                      <Label>Autenticación de Dos Factores</Label>
+                      <p className="text-sm text-gray-600">Añade una capa extra de seguridad</p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={settings.security.twoFactor}
+                    onCheckedChange={(checked) => updateSetting('security', 'twoFactor', checked)}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Bell className="h-4 w-4 text-gray-600" />
+                    <div>
+                      <Label>Alertas de Inicio de Sesión</Label>
+                      <p className="text-sm text-gray-600">Recibir notificaciones de nuevos inicios de sesión</p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={settings.security.loginAlerts}
+                    onCheckedChange={(checked) => updateSetting('security', 'loginAlerts', checked)}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="timeout">Tiempo de Sesión (minutos)</Label>
+                  <Input
+                    id="timeout"
+                    type="number"
+                    value={settings.security.sessionTimeout}
+                    onChange={(e) => updateSetting('security', 'sessionTimeout', parseInt(e.target.value))}
+                    className="mt-2"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Appearance */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+          >
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Palette className="h-5 w-5" />
+                  Apariencia
+                </CardTitle>
+                <CardDescription>
+                  Personaliza la apariencia de la interfaz
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label>Tema</Label>
+                  <div className="flex gap-2 mt-2">
+                    <Button
+                      variant={settings.appearance.theme === 'light' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => updateSetting('appearance', 'theme', 'light')}
                     >
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      {loading ? 'Eliminando...' : 'Sí, Eliminar Cuenta'}
+                      <Monitor className="h-4 w-4 mr-2" />
+                      Claro
                     </Button>
-                    <Button 
-                      variant="outline" 
-                      onClick={() => setShowDeleteConfirm(false)}
+                    <Button
+                      variant={settings.appearance.theme === 'dark' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => updateSetting('appearance', 'theme', 'dark')}
                     >
-                      Cancelar
+                      <Monitor className="h-4 w-4 mr-2" />
+                      Oscuro
+                    </Button>
+                  </div>
+                </div>
+                <div>
+                  <Label>Idioma</Label>
+                  <div className="flex gap-2 mt-2">
+                    <Button
+                      variant={settings.appearance.language === 'es' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => updateSetting('appearance', 'language', 'es')}
+                    >
+                      <Globe className="h-4 w-4 mr-2" />
+                      Español
+                    </Button>
+                    <Button
+                      variant={settings.appearance.language === 'en' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => updateSetting('appearance', 'language', 'en')}
+                    >
+                      <Globe className="h-4 w-4 mr-2" />
+                      English
                     </Button>
                   </div>
                 </div>
               </CardContent>
             </Card>
-          </div>
-        )}
+          </motion.div>
+
+          {/* Integrations */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.5 }}
+          >
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Database className="h-5 w-5" />
+                  Integraciones
+                </CardTitle>
+                <CardDescription>
+                  Conecta con otros servicios y plataformas
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-blue-500 rounded flex items-center justify-center">
+                      <span className="text-white text-xs font-bold">G</span>
+                    </div>
+                    <div>
+                      <Label>Google</Label>
+                      <p className="text-sm text-gray-600">Conectar con Google Workspace</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary">Conectado</Badge>
+                    <Switch
+                      checked={settings.integrations.google}
+                      onCheckedChange={(checked) => updateSetting('integrations', 'google', checked)}
+                    />
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-gray-800 rounded flex items-center justify-center">
+                      <span className="text-white text-xs font-bold">GH</span>
+                    </div>
+                    <div>
+                      <Label>GitHub</Label>
+                      <p className="text-sm text-gray-600">Conectar con GitHub</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary">Conectado</Badge>
+                    <Switch
+                      checked={settings.integrations.github}
+                      onCheckedChange={(checked) => updateSetting('integrations', 'github', checked)}
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
       </div>
-    </DashboardLayout>
+    </div>
   )
 }

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { getToken } from 'next-auth/jwt'
 import { PrismaClient, DeletionStatus } from '@prisma/client'
 
 const prisma = new PrismaClient()
@@ -21,9 +20,9 @@ const deletionRequests: DeletionRequest[] = []
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const token = await getToken({ req: request })
     
-    if (!session?.user?.id) {
+    if (!token || !token.sub) {
       return NextResponse.json(
         { error: 'No autorizado' },
         { status: 401 }
@@ -43,7 +42,7 @@ export async function POST(request: NextRequest) {
 
     // Verificar si ya existe una solicitud pendiente (DB)
     const existingRequest = await prisma.dataDeletionRequest.findFirst({
-      where: { userId: session.user.id, status: DeletionStatus.PENDING },
+      where: { userId: token.sub, status: DeletionStatus.PENDING },
     })
 
     if (existingRequest) {
@@ -56,7 +55,7 @@ export async function POST(request: NextRequest) {
     // Crear nueva solicitud de eliminación
     const deletionRequest = await prisma.dataDeletionRequest.create({
       data: {
-        userId: session.user.id,
+        userId: token.sub,
         status: DeletionStatus.PENDING,
         reason: reason || 'Solicitud del usuario',
         dataCategories: [
@@ -78,7 +77,7 @@ export async function POST(request: NextRequest) {
     })
 
     // Log de auditoría
-    console.log(`Solicitud de eliminación creada para usuario ${session.user.id}:`, {
+    console.log(`Solicitud de eliminación creada para usuario ${token.sub}:`, {
       request_id: deletionRequest.id,
       reason: deletionRequest.reason,
       timestamp: new Date().toISOString(),
@@ -114,9 +113,9 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const token = await getToken({ req: request })
     
-    if (!session?.user?.id) {
+    if (!token || !token.sub) {
       return NextResponse.json(
         { error: 'No autorizado' },
         { status: 401 }
@@ -125,7 +124,7 @@ export async function GET(request: NextRequest) {
 
     // Buscar solicitudes del usuario (DB)
     const userRequests = await prisma.dataDeletionRequest.findMany({
-      where: { userId: session.user.id },
+      where: { userId: token.sub },
       orderBy: { requestedAt: 'desc' },
     })
 
@@ -152,9 +151,9 @@ export async function GET(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const token = await getToken({ req: request })
     
-    if (!session?.user?.id) {
+    if (!token || !token.sub) {
       return NextResponse.json(
         { error: 'No autorizado' },
         { status: 401 }
@@ -173,7 +172,7 @@ export async function DELETE(request: NextRequest) {
 
     // Buscar la solicitud (DB)
     const existing = await prisma.dataDeletionRequest.findFirst({
-      where: { id: requestId, userId: session.user.id },
+      where: { id: requestId, userId: token.sub },
     })
 
     if (!existing) {
@@ -196,7 +195,7 @@ export async function DELETE(request: NextRequest) {
     await prisma.dataDeletionRequest.delete({ where: { id: requestId } })
 
     // Log de auditoría
-    console.log(`Solicitud de eliminación cancelada por usuario ${session.user.id}:`, {
+    console.log(`Solicitud de eliminación cancelada por usuario ${token.sub}:`, {
       request_id: requestId,
       timestamp: new Date().toISOString()
     })

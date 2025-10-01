@@ -1,265 +1,138 @@
-'use client'
+import { useState, useEffect, useCallback } from 'react';
+import { toast } from 'react-hot-toast';
 
-import { useState, useEffect, useCallback } from 'react'
-import { 
-  getNotificationsByUser,
-  getUnreadCount,
-  getNotificationStats,
-  getNotificationSettings,
-  updateNotificationSettings,
-  markNotificationAsRead,
-  markNotificationAsArchived,
-  markAllAsRead as markAllAsReadAPI,
-  createNotification,
-  type Notification,
-  type NotificationSettings
-} from '@/lib/notifications'
-
-interface UseNotificationsOptions {
-  userId: string
-  autoRefresh?: boolean
-  refreshInterval?: number
+export interface Notification {
+  id: string;
+  title: string;
+  message: string;
+  type: 'success' | 'error' | 'warning' | 'info';
+  timestamp: Date;
+  read: boolean;
+  action?: {
+    label: string;
+    onClick: () => void;
+  };
 }
 
-export function useNotifications({ 
-  userId, 
-  autoRefresh = true, 
-  refreshInterval = 30000 
-}: UseNotificationsOptions) {
-  const [notifications, setNotifications] = useState<Notification[]>([])
-  const [unreadCount, setUnreadCount] = useState(0)
-  const [stats, setStats] = useState<any>(null)
-  const [settings, setSettings] = useState<NotificationSettings | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+export function useNotifications() {
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [permission, setPermission] = useState<NotificationPermission>('default');
 
-  const loadNotifications = useCallback(async (filters?: {
-    isRead?: boolean
-    isArchived?: boolean
-    category?: string
-    type?: string
-    priority?: string
-    limit?: number
-    offset?: number
-  }) => {
-    try {
-      setLoading(true)
-      setError(null)
-      
-      const userNotifications = getNotificationsByUser(userId, filters)
-      setNotifications(userNotifications)
-      
-      const count = getUnreadCount(userId)
-      setUnreadCount(count)
-      
-      const userStats = getNotificationStats(userId)
-      setStats(userStats)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error loading notifications')
-    } finally {
-      setLoading(false)
+  // Solicitar permisos de notificaciones
+  const requestPermission = useCallback(async () => {
+    if ('Notification' in window) {
+      const permission = await Notification.requestPermission();
+      setPermission(permission);
+      return permission;
     }
-  }, [userId])
+    return 'denied';
+  }, []);
 
-  const loadSettings = useCallback(async () => {
-    try {
-      const userSettings = getNotificationSettings(userId)
-      setSettings(userSettings)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error loading settings')
+  // Crear notificación
+  const createNotification = useCallback((notification: Omit<Notification, 'id' | 'timestamp' | 'read'>) => {
+    const newNotification: Notification = {
+      ...notification,
+      id: Math.random().toString(36).substr(2, 9),
+      timestamp: new Date(),
+      read: false,
+    };
+
+    setNotifications(prev => [newNotification, ...prev]);
+
+    // Mostrar toast
+    switch (notification.type) {
+      case 'success':
+        toast.success(notification.message, { duration: 4000 });
+        break;
+      case 'error':
+        toast.error(notification.message, { duration: 6000 });
+        break;
+      case 'warning':
+        toast(notification.message, { 
+          icon: '⚠️',
+          duration: 5000,
+          style: {
+            background: '#fbbf24',
+            color: '#1f2937',
+          }
+        });
+        break;
+      case 'info':
+        toast(notification.message, { 
+          icon: 'ℹ️',
+          duration: 4000,
+        });
+        break;
     }
-  }, [userId])
 
-  const markAsRead = useCallback(async (notificationId: string) => {
-    try {
-      const success = markNotificationAsRead(notificationId)
-      if (success) {
-        setNotifications(prev => 
-          prev.map(n => n.id === notificationId ? { ...n, isRead: true, readAt: new Date() } : n)
-        )
-        setUnreadCount(prev => Math.max(0, prev - 1))
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error marking notification as read')
+    // Mostrar notificación del navegador si está permitido
+    if (permission === 'granted') {
+      new Notification(notification.title, {
+        body: notification.message,
+        icon: '/favicon.ico',
+        tag: newNotification.id,
+      });
     }
-  }, [])
 
-  const markAsArchived = useCallback(async (notificationId: string) => {
-    try {
-      const success = markNotificationAsArchived(notificationId)
-      if (success) {
-        setNotifications(prev => prev.filter(n => n.id !== notificationId))
-        // Recalcular estadísticas
-        const userStats = getNotificationStats(userId)
-        setStats(userStats)
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error archiving notification')
-    }
-  }, [userId])
+    return newNotification.id;
+  }, [permission]);
 
-  const markAllAsRead = useCallback(async () => {
-    try {
-      const count = await markAllAsReadAPI(userId)
-      if (count > 0) {
-        setNotifications(prev => 
-          prev.map(n => ({ ...n, isRead: true, readAt: new Date() }))
-        )
-        setUnreadCount(0)
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error marking all as read')
-    }
-  }, [userId])
+  // Marcar como leída
+  const markAsRead = useCallback((id: string) => {
+    setNotifications(prev => 
+      prev.map(notification => 
+        notification.id === id 
+          ? { ...notification, read: true }
+          : notification
+      )
+    );
+  }, []);
 
-  const updateSettings = useCallback(async (newSettings: Partial<NotificationSettings>) => {
-    try {
-      const updatedSettings = updateNotificationSettings(userId, newSettings)
-      setSettings(updatedSettings)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error updating settings')
-    }
-  }, [userId])
+  // Marcar todas como leídas
+  const markAllAsRead = useCallback(() => {
+    setNotifications(prev => 
+      prev.map(notification => ({ ...notification, read: true }))
+    );
+  }, []);
 
-  const createNewNotification = useCallback(async (
-    templateId: string,
-    variables: Record<string, any> = {},
-    overrides: Partial<Notification> = {}
-  ) => {
-    try {
-      const notification = createNotification(userId, templateId, variables, overrides)
-      setNotifications(prev => [notification, ...prev])
-      setUnreadCount(prev => prev + 1)
-      
-      // Actualizar estadísticas
-      const userStats = getNotificationStats(userId)
-      setStats(userStats)
-      
-      return notification
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error creating notification')
-      throw err
-    }
-  }, [userId])
+  // Eliminar notificación
+  const removeNotification = useCallback((id: string) => {
+    setNotifications(prev => prev.filter(notification => notification.id !== id));
+  }, []);
 
-  const refresh = useCallback(() => {
-    loadNotifications()
-  }, [loadNotifications])
+  // Limpiar notificaciones leídas
+  const clearRead = useCallback(() => {
+    setNotifications(prev => prev.filter(notification => !notification.read));
+  }, []);
 
-  // Auto-refresh
+  // Notificaciones no leídas
+  const unreadCount = notifications.filter(n => !n.read).length;
+
+  // Efectos
   useEffect(() => {
-    if (autoRefresh && refreshInterval > 0) {
-      const interval = setInterval(refresh, refreshInterval)
-      return () => clearInterval(interval)
-    }
-  }, [autoRefresh, refreshInterval, refresh])
+    requestPermission();
+  }, [requestPermission]);
 
-  // Cargar datos iniciales
+  // Notificaciones de ejemplo para desarrollo
   useEffect(() => {
-    loadNotifications()
-    loadSettings()
-  }, [loadNotifications, loadSettings])
+    if (notifications.length === 0) {
+      createNotification({
+        title: '¡Bienvenido a Stack21!',
+        message: 'Tu plataforma de automatización está lista para usar.',
+        type: 'success',
+      });
+    }
+  }, [notifications.length, createNotification]);
 
   return {
-    // Data
     notifications,
     unreadCount,
-    stats,
-    settings,
-    loading,
-    error,
-    
-    // Actions
-    loadNotifications,
+    permission,
+    createNotification,
     markAsRead,
-    markAsArchived,
     markAllAsRead,
-    updateSettings,
-    createNewNotification,
-    refresh,
-    
-    // Utils
-    clearError: () => setError(null)
-  }
-}
-
-// Hook para notificaciones en tiempo real (simulado)
-export function useRealtimeNotifications(userId: string) {
-  const [isConnected, setIsConnected] = useState(false)
-  const [lastNotification, setLastNotification] = useState<Notification | null>(null)
-
-  useEffect(() => {
-    // Simular conexión WebSocket
-    const connect = () => {
-      setIsConnected(true)
-      
-      // Simular notificaciones en tiempo real cada 30 segundos
-      const interval = setInterval(() => {
-        // Solo para demostración - en producción esto vendría del WebSocket
-        if (Math.random() > 0.7) { // 30% de probabilidad
-          const templates = [
-            'workflow-completed',
-            'integration-connected',
-            'achievement-unlocked',
-            'team-invitation'
-          ]
-          const randomTemplate = templates[Math.floor(Math.random() * templates.length)]
-          
-          try {
-            const notification = createNotification(userId, randomTemplate, {
-              workflowName: 'Mi Workflow',
-              integrationName: 'Mailchimp',
-              achievementName: 'Nuevo Logro',
-              workspaceName: 'Mi Equipo'
-            })
-            setLastNotification(notification)
-          } catch (error) {
-            console.error('Error creating realtime notification:', error)
-          }
-        }
-      }, 30000)
-
-      return () => {
-        clearInterval(interval)
-        setIsConnected(false)
-      }
-    }
-
-    const cleanup = connect()
-    return cleanup
-  }, [userId])
-
-  return {
-    isConnected,
-    lastNotification
-  }
-}
-
-// Hook para notificaciones toast
-export function useNotificationToasts() {
-  const [toasts, setToasts] = useState<Notification[]>([])
-
-  const addToast = useCallback((notification: Notification) => {
-    setToasts(prev => [...prev, notification])
-    
-    // Auto-remove después de 5 segundos
-    setTimeout(() => {
-      setToasts(prev => prev.filter(n => n.id !== notification.id))
-    }, 5000)
-  }, [])
-
-  const removeToast = useCallback((notificationId: string) => {
-    setToasts(prev => prev.filter(n => n.id !== notificationId))
-  }, [])
-
-  const clearAllToasts = useCallback(() => {
-    setToasts([])
-  }, [])
-
-  return {
-    toasts,
-    addToast,
-    removeToast,
-    clearAllToasts
-  }
+    removeNotification,
+    clearRead,
+    requestPermission,
+  };
 }

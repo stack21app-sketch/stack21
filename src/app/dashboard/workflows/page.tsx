@@ -1,367 +1,200 @@
-'use client'
+'use client';
 
-import { useEffect, useState, useContext } from 'react'
-import { I18nContext } from '@/lib/i18n'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { 
-  Plus, 
-  Play, 
-  Pause, 
-  Settings, 
-  MoreVertical,
-  Zap,
-  Brain,
-  Clock,
-  CheckCircle,
-  AlertCircle,
-  BarChart3,
-  Users,
-  Globe,
-  Mail,
-  Calendar,
-  FileText,
-  Image,
-  Music,
-  Video,
-  Database,
-  MessageSquare,
-  CreditCard,
-  Smartphone,
-  Workflow,
-  Sparkles
-} from 'lucide-react'
-
-interface WorkflowItem {
-  id: string
-  name: string
-  description?: string
-  status: 'DRAFT' | 'ACTIVE' | 'PAUSED' | 'ARCHIVED'
-  isActive: boolean
-  nodes: any
-  connections: any
-  createdAt: string
-  updatedAt: string
-}
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Plus, Search, Filter, Grid, List, Play, Pause, Settings, Trash2, Copy, Workflow, Code, Eye } from 'lucide-react';
+import { AdvancedWorkflowBuilder } from '@/components/workflows/AdvancedWorkflowBuilder';
+import { AdvancedWorkflow, AdvancedWorkflowExecution } from '@/lib/advanced-workflow-engine';
 
 export default function WorkflowsPage() {
-  const { t } = useContext(I18nContext)
-  const [workflows, setWorkflows] = useState<WorkflowItem[]>([])
-  const [loading, setLoading] = useState<boolean>(true)
-  const [showCreateModal, setShowCreateModal] = useState(false)
-  const [newName, setNewName] = useState('')
-  const [newDescription, setNewDescription] = useState('')
+  const [viewMode, setViewMode] = useState<'list' | 'builder'>('list');
+  const [selectedWorkflow, setSelectedWorkflow] = useState<string | null>(null);
 
-  const fetchWorkflows = async () => {
-    try {
-      setLoading(true)
-      const res = await fetch('/api/workflows', { cache: 'no-store' })
-      const data = await res.json()
-      setWorkflows(data.workflows || [])
-    } catch (e) {
-      console.error('Error cargando workflows', e)
-    } finally {
-      setLoading(false)
-    }
-  }
+  const handleSaveWorkflow = (workflow: AdvancedWorkflow) => {
+    console.log('Workflow guardado:', workflow);
+    // Aquí se podría actualizar la lista de workflows
+  };
 
-  useEffect(() => {
-    fetchWorkflows()
-  }, [])
+  const handleExecuteWorkflow = (execution: AdvancedWorkflowExecution) => {
+    console.log('Workflow ejecutado:', execution);
+    // Aquí se podría mostrar los resultados
+  };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'ACTIVE': return 'bg-green-100 text-green-800 border-green-200'
-      case 'PAUSED': return 'bg-yellow-100 text-yellow-800 border-yellow-200'
-      case 'DRAFT': return 'bg-gray-100 text-gray-800 border-gray-200'
-      default: return 'bg-gray-100 text-gray-800 border-gray-200'
-    }
-  }
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'ACTIVE': return 'Activo'
-      case 'PAUSED': return 'Pausado'
-      case 'DRAFT': return 'Borrador'
-      default: return 'Desconocido'
-    }
-  }
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('es-ES', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    })
-  }
-
-  const handleCreate = async () => {
-    try {
-      const res = await fetch('/api/workflows', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ name: newName, description: newDescription, nodes: [], connections: [] })
-      })
-      if (!res.ok) {
-        const msg = await res.text()
-        if (res.status === 401) {
-          alert('Tu sesión expiró. Por favor inicia sesión de nuevo.')
-          window.location.assign('/auth/signin')
-          return
-        }
-        throw new Error(msg || 'Error creando workflow')
-      }
-      setShowCreateModal(false)
-      setNewName('')
-      setNewDescription('')
-      await fetchWorkflows()
-    } catch (e) {
-      console.error(e)
-      alert('No se pudo crear el workflow')
-    }
-  }
-
-  const handleRun = async (id: string) => {
-    try {
-      const res = await fetch(`/api/workflows/${id}/run`, { method: 'POST' })
-      if (!res.ok) throw new Error('Error ejecutando workflow')
-      const data = await res.json()
-      alert('Ejecución iniciada. Duración: ' + (data.run?.duration ?? 'N/A') + 'ms')
-    } catch (e) {
-      console.error(e)
-      alert('No se pudo ejecutar el workflow')
-    }
+  if (viewMode === 'builder') {
+    return (
+      <div className="h-screen">
+        <AdvancedWorkflowBuilder
+          workflowId={selectedWorkflow || undefined}
+          onSave={handleSaveWorkflow}
+          onExecute={handleExecuteWorkflow}
+        />
+      </div>
+    );
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">{t('workflows')}</h1>
-          <p className="text-gray-600 mt-2">
-            Automatiza tu negocio con workflows inteligentes impulsados por IA
-          </p>
-        </div>
-        <Button
-          onClick={() => setShowCreateModal(true)}
-          className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="mb-8"
         >
-          <Plus className="h-4 w-4 mr-2" />
-          Crear Workflow
-        </Button>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Workflow className="h-6 w-6 text-blue-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Workflows</p>
-                <p className="text-2xl font-bold text-gray-900">{workflows.length}</p>
-              </div>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                Mis Workflows
+              </h1>
+              <p className="text-gray-600">
+                Gestiona y automatiza tus procesos de negocio
+              </p>
             </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <Play className="h-6 w-6 text-green-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Activos</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {workflows.filter(w => w.status === 'ACTIVE').length}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <Brain className="h-6 w-6 text-purple-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Con IA</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {workflows.filter(w => Array.isArray(w.nodes) && w.nodes.length > 0).length}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-orange-100 rounded-lg">
-                <Zap className="h-6 w-6 text-orange-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Ejecuciones</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {workflows.length.toLocaleString()}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Workflows List */}
-      <div className="space-y-4">
-        {workflows.map((workflow) => (
-          <Card key={workflow.id} className="hover:shadow-lg transition-shadow">
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center space-x-3 mb-2">
-                    <h3 className="text-lg font-semibold text-gray-900">{workflow.name}</h3>
-                    <Badge className={getStatusColor(workflow.status)}>
-                      {getStatusText(workflow.status)}
-                    </Badge>
-                    {Array.isArray(workflow.nodes) && workflow.nodes.length > 0 && (
-                      <Badge className="bg-purple-100 text-purple-800 border-purple-200">
-                        <Brain className="h-3 w-3 mr-1" />
-                        IA
-                      </Badge>
-                    )}
-                  </div>
-                  
-                  <p className="text-gray-600 mb-4">{workflow.description}</p>
-                  
-                  <div className="flex items-center space-x-6 text-sm text-gray-500">
-                    <div className="flex items-center">
-                      <BarChart3 className="h-4 w-4 mr-1" />
-                      {Array.isArray(workflow.nodes) ? workflow.nodes.length : 0} nodos
-                    </div>
-                    <div className="flex items-center">
-                      <Workflow className="h-4 w-4 mr-1" />
-                      Creado: {formatDate(workflow.createdAt)}
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <Button variant="outline" size="sm" onClick={() => handleRun(workflow.id)}>
-                    <Play className="h-4 w-4 mr-1" />
-                    Ejecutar
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => location.assign(`/dashboard/workflows/builder?id=${workflow.id}`)}>
-                    <Settings className="h-4 w-4 mr-1" />
-                    Editar
-                  </Button>
-                  <Button variant="ghost" size="sm">
-                    <MoreVertical className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Empty State */}
-      {workflows.length === 0 && (
-        <Card className="text-center py-12">
-          <CardContent>
-            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Workflow className="h-8 w-8 text-gray-400" />
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              No tienes workflows aún
-            </h3>
-            <p className="text-gray-600 mb-6">
-              Crea tu primer workflow para automatizar tu negocio con IA
-            </p>
-            <Button
-              onClick={() => setShowCreateModal(true)}
-              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Crear mi primer workflow
-            </Button>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Create Modal */}
-      {showCreateModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-8">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">Crear Nuevo Workflow</h2>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowCreateModal(false)}
-                >
-                  ✕
-                </Button>
-              </div>
-              
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Nombre del Workflow
-                  </label>
-                  <input
-                    type="text"
-                    value={newName}
-                    onChange={(e) => setNewName(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder="Ej: Procesamiento de Leads con IA"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Descripción
-                  </label>
-                  <textarea
-                    value={newDescription}
-                    onChange={(e) => setNewDescription(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    rows={3}
-                    placeholder="Describe qué hace este workflow..."
-                  />
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <Button
-                    variant="outline"
-                    onClick={() => setShowCreateModal(false)}
-                  >
-                    Cancelar
-                  </Button>
-                  <Button
-                    disabled={!newName.trim()}
-                    className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
-                    onClick={handleCreate}
-                  >
-                    <Sparkles className="h-4 w-4 mr-2" />
-                    Crear con IA
-                  </Button>
-                </div>
-              </div>
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={() => setViewMode('builder')}
+                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center gap-2 shadow-sm"
+              >
+                <Workflow className="w-5 h-5" />
+                Constructor Avanzado
+              </button>
+              <button className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center gap-2 shadow-sm">
+                <Plus className="w-5 h-5" />
+                Crear Workflow
+              </button>
             </div>
           </div>
-        </div>
-      )}
+        </motion.div>
+
+        {/* Filtros y Búsqueda */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className="bg-white/80 backdrop-blur-xl rounded-xl shadow-lg border border-white/20 p-6 mb-8"
+        >
+          <div className="flex items-center gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" />
+              <input
+                type="text"
+                placeholder="Buscar workflows..."
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              />
+            </div>
+            <button className="px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2">
+              <Filter className="w-4 h-4" />
+              Filtros
+            </button>
+            <div className="flex border border-gray-300 rounded-lg">
+              <button className="px-3 py-2 bg-blue-600 text-white rounded-l-lg">
+                <Grid className="w-4 h-4" />
+              </button>
+              <button className="px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-r-lg">
+                <List className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Grid de Workflows */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+        >
+          {/* Workflow Card 1 */}
+          <div className="bg-white rounded-xl shadow-sm border border-[var(--border)] p-6 hover:shadow-lg transition-shadow">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <Play className="w-5 h-5 text-blue-600" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-[var(--text)]">Automatización de Leads</h3>
+                  <p className="text-sm text-[var(--muted)]">Marketing</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span className="text-xs text-green-600">Activo</span>
+              </div>
+            </div>
+            <p className="text-sm text-[var(--muted)] mb-4">
+              Captura y procesa automáticamente nuevos leads desde el formulario web.
+            </p>
+            <div className="flex items-center justify-between text-xs text-[var(--muted)] mb-4">
+              <span>Última ejecución: hace 2 min</span>
+              <span>1,247 ejecuciones</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <button className="flex-1 px-3 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors flex items-center justify-center gap-2">
+                <Pause className="w-4 h-4" />
+                Pausar
+              </button>
+              <button className="px-3 py-2 border border-[var(--border)] rounded-lg hover:bg-gray-50 transition-colors">
+                <Settings className="w-4 h-4" />
+              </button>
+              <button className="px-3 py-2 border border-[var(--border)] rounded-lg hover:bg-gray-50 transition-colors">
+                <Copy className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* Workflow Card 2 */}
+          <div className="bg-white rounded-xl shadow-sm border border-[var(--border)] p-6 hover:shadow-lg transition-shadow">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <Play className="w-5 h-5 text-purple-600" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-[var(--text)]">Notificaciones de Ventas</h3>
+                  <p className="text-sm text-[var(--muted)]">Ventas</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                <span className="text-xs text-yellow-600">Pausado</span>
+              </div>
+            </div>
+            <p className="text-sm text-[var(--muted)] mb-4">
+              Envía notificaciones automáticas al equipo cuando se cierra una venta.
+            </p>
+            <div className="flex items-center justify-between text-xs text-[var(--muted)] mb-4">
+              <span>Última ejecución: hace 1 hora</span>
+              <span>89 ejecuciones</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <button className="flex-1 px-3 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors flex items-center justify-center gap-2">
+                <Play className="w-4 h-4" />
+                Activar
+              </button>
+              <button className="px-3 py-2 border border-[var(--border)] rounded-lg hover:bg-gray-50 transition-colors">
+                <Settings className="w-4 h-4" />
+              </button>
+              <button className="px-3 py-2 border border-[var(--border)] rounded-lg hover:bg-gray-50 transition-colors">
+                <Copy className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* Workflow Card 3 - Nuevo */}
+          <div className="bg-white rounded-xl shadow-sm border-2 border-dashed border-[var(--border)] p-6 hover:border-[var(--brand)] transition-colors cursor-pointer">
+            <div className="flex flex-col items-center justify-center h-full text-center">
+              <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mb-4">
+                <Plus className="w-6 h-6 text-gray-400" />
+              </div>
+              <h3 className="font-semibold text-[var(--text)] mb-2">Crear Nuevo Workflow</h3>
+              <p className="text-sm text-[var(--muted)]">
+                Comienza desde cero o usa una plantilla
+              </p>
+            </div>
+          </div>
+        </motion.div>
+      </div>
     </div>
-  )
+  );
 }

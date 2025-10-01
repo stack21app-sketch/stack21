@@ -1,0 +1,145 @@
+import { 
+  findCachedAnswer, 
+  saveCacheAnswer, 
+  shouldCache
+} from '@/lib/faq-cache';
+
+// Mock de Supabase
+jest.mock('@/lib/supabase/server', () => ({
+  createClient: jest.fn(() => ({
+    from: jest.fn(() => ({
+      select: jest.fn(() => ({
+        eq: jest.fn(() => ({
+          eq: jest.fn(() => ({
+            single: jest.fn(() => ({
+              data: null,
+              error: { code: 'PGRST116' }
+            }))
+          }))
+        }))
+      })),
+      update: jest.fn(() => ({
+        eq: jest.fn(() => ({ data: null, error: null }))
+      })),
+      insert: jest.fn(() => ({ data: null, error: null })),
+      upsert: jest.fn(() => ({ data: null, error: null }))
+    }))
+  }))
+}));
+
+describe('FAQ Cache', () => {
+  describe('calculateSimilarity', () => {
+    it('should return 1.0 for identical strings', () => {
+      const similarity = calculateSimilarity('¿Cuáles son sus horarios?', '¿Cuáles son sus horarios?');
+      expect(similarity).toBe(1.0);
+    });
+
+    it('should return high similarity for similar strings', () => {
+      const similarity = calculateSimilarity(
+        '¿Cuáles son sus horarios de atención?',
+        '¿Cuáles son los horarios de atención?'
+      );
+      expect(similarity).toBeGreaterThan(0.8);
+    });
+
+    it('should return low similarity for different strings', () => {
+      const similarity = calculateSimilarity(
+        '¿Cuáles son sus horarios?',
+        '¿Cómo puedo hacer un pedido?'
+      );
+      expect(similarity).toBeLessThan(0.5);
+    });
+
+    it('should handle empty strings', () => {
+      const similarity = calculateSimilarity('', '');
+      expect(similarity).toBe(1.0);
+    });
+
+    it('should be case insensitive', () => {
+      const similarity1 = calculateSimilarity('HORARIOS', 'horarios');
+      const similarity2 = calculateSimilarity('horarios', 'horarios');
+      expect(similarity1).toBe(similarity2);
+    });
+  });
+
+  describe('generateKeywords', () => {
+    it('should extract meaningful keywords', () => {
+      const keywords = generateKeywords('¿Cuáles son los horarios de atención al cliente?');
+      expect(keywords).toContain('horarios');
+      expect(keywords).toContain('atención');
+      expect(keywords).toContain('cliente');
+      expect(keywords).not.toContain('cuáles');
+      expect(keywords).not.toContain('son');
+    });
+
+    it('should filter out stop words', () => {
+      const keywords = generateKeywords('¿Cómo puedo hacer un pedido en línea?');
+      expect(keywords).not.toContain('cómo');
+      expect(keywords).not.toContain('puedo');
+      expect(keywords).not.toContain('hacer');
+      expect(keywords).not.toContain('un');
+      expect(keywords).toContain('pedido');
+      expect(keywords).toContain('línea');
+    });
+
+    it('should limit keywords to 10', () => {
+      const longQuestion = '¿Cómo puedo hacer un pedido en línea con descuento especial para clientes frecuentes con envío gratis?';
+      const keywords = generateKeywords(longQuestion);
+      expect(keywords.length).toBeLessThanOrEqual(10);
+    });
+
+    it('should filter out short words', () => {
+      const keywords = generateKeywords('¿Es posible?');
+      expect(keywords).not.toContain('es');
+      expect(keywords).toContain('posible');
+    });
+  });
+
+  describe('shouldCache', () => {
+    it('should cache meaningful answers', () => {
+      expect(shouldCache('Nuestros horarios son de lunes a viernes de 9:00 a 18:00 horas.')).toBe(true);
+      expect(shouldCache('Puedes hacer tu pedido directamente desde nuestro catálogo online.')).toBe(true);
+      expect(shouldCache('El envío tarda entre 2-3 días hábiles dependiendo de la ubicación.')).toBe(true);
+    });
+
+    it('should not cache short answers', () => {
+      expect(shouldCache('Sí')).toBe(false);
+      expect(shouldCache('No')).toBe(false);
+      expect(shouldCache('OK')).toBe(false);
+      expect(shouldCache('Gracias')).toBe(false);
+    });
+
+    it('should not cache error messages', () => {
+      expect(shouldCache('No puedo ayudarte con eso')).toBe(false);
+      expect(shouldCache('Error en el procesamiento')).toBe(false);
+      expect(shouldCache('No tengo acceso a esa información')).toBe(false);
+    });
+
+    it('should not cache answers containing error keywords', () => {
+      expect(shouldCache('Lo siento, hay un error en el sistema')).toBe(false);
+      expect(shouldCache('No puedo procesar tu solicitud en este momento')).toBe(false);
+    });
+  });
+
+  describe('findCachedAnswer', () => {
+    it('should return null when no cache match found', async () => {
+      const result = await findCachedAnswer('test-org', '¿Cuál es el precio?');
+      expect(result).toBeNull();
+    });
+
+    it('should handle organization not found gracefully', async () => {
+      const result = await findCachedAnswer('non-existent-org', '¿Cuál es el precio?');
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('saveCacheAnswer', () => {
+    it('should save cache entry without errors', async () => {
+      await expect(saveCacheAnswer('test-org', '¿Cuál es el precio?', 'El precio es €50')).resolves.not.toThrow();
+    });
+
+    it('should handle organization not found gracefully', async () => {
+      await expect(saveCacheAnswer('non-existent-org', '¿Cuál es el precio?', 'El precio es €50')).resolves.not.toThrow();
+    });
+  });
+});

@@ -1,718 +1,423 @@
-'use client'
+'use client';
 
-import { useRouter } from 'next/navigation'
-import { useEffect, useState, useContext } from 'react'
-import { I18nContext } from '@/lib/i18n'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Building2, Users, FolderOpen, Workflow, Plus, ExternalLink, CheckCircle, AlertCircle, TrendingUp, Zap, Brain, Target, Sparkles, ArrowRight, Play, BarChart3, Activity, Clock, DollarSign, Menu, X, Home, Settings, CreditCard, Store, Puzzle, Palette, LogOut, Trophy, Gamepad2, Bell, UserPlus, BookOpen, LayoutDashboard, Webhook, Database } from 'lucide-react'
-import ComplianceMonitor from '@/components/legal/compliance-monitor'
+import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { motion } from 'framer-motion';
+import { 
+  Play, 
+  Zap, 
+  CheckCircle, 
+  XCircle, 
+  Clock,
+  TrendingUp,
+  Activity,
+  Users,
+  Database,
+  BarChart3,
+  Calendar,
+  ArrowUpRight,
+  ArrowDownRight
+} from 'lucide-react';
+
+interface DashboardStats {
+  totalWorkflows: number;
+  activeWorkflows: number;
+  totalRuns: number;
+  successfulRuns: number;
+  failedRuns: number;
+  totalConnections: number;
+  recentRuns: any[];
+  workflowsByStatus: { [key: string]: number };
+  runsByDay: { date: string; count: number }[];
+}
 
 export default function DashboardPage() {
-  const { t } = useContext(I18nContext)
-  const router = useRouter()
-  const [session, setSession] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [notificationCenterOpen, setNotificationCenterOpen] = useState(false)
-  const [unreadCount, setUnreadCount] = useState(0)
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Verificar sesión temporal del localStorage
-    const checkSession = () => {
-      try {
-        const devSession = localStorage.getItem('dev-session')
-        if (devSession) {
-          const userData = JSON.parse(devSession)
-          setSession({ user: userData })
-        } else {
-          router.push('/auth/signin')
-        }
-      } catch (error) {
-        console.error('Error checking session:', error)
-        router.push('/auth/signin')
-      } finally {
-        setLoading(false)
-      }
+    loadDashboardData();
+  }, []);
+
+  const loadDashboardData = async () => {
+    setLoading(true);
+    try {
+      // Simular carga de datos del dashboard
+      const mockStats: DashboardStats = {
+        totalWorkflows: 12,
+        activeWorkflows: 8,
+        totalRuns: 156,
+        successfulRuns: 142,
+        failedRuns: 14,
+        totalConnections: 24,
+        recentRuns: [
+          {
+            id: 'run_1',
+            workflowName: 'Procesar Datos de Formulario',
+            status: 'completed',
+            startedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+            duration: 3000
+          },
+          {
+            id: 'run_2',
+            workflowName: 'Sincronizar Datos CRM',
+            status: 'completed',
+            startedAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
+            duration: 15000
+          },
+          {
+            id: 'run_3',
+            workflowName: 'Backup Automático',
+            status: 'running',
+            startedAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+            duration: null
+          }
+        ],
+        workflowsByStatus: {
+          active: 8,
+          inactive: 3,
+          draft: 1
+        },
+        runsByDay: [
+          { date: '2024-01-15', count: 12 },
+          { date: '2024-01-16', count: 18 },
+          { date: '2024-01-17', count: 15 },
+          { date: '2024-01-18', count: 22 },
+          { date: '2024-01-19', count: 19 },
+          { date: '2024-01-20', count: 25 },
+          { date: '2024-01-21', count: 21 }
+        ]
+      };
+      
+      setStats(mockStats);
+    } catch (error) {
+      console.error('Error cargando dashboard:', error);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    checkSession()
-  }, [router])
-
-  // Cargar notificaciones
-  useEffect(() => {
-    const loadNotifications = async () => {
-      try {
-        const response = await fetch(`/api/notifications?userId=user-1&type=unread-count`)
-        const data = await response.json()
-        if (data.success) {
-          setUnreadCount(data.data.unreadCount)
-        }
-      } catch (error) {
-        console.error('Error loading notifications:', error)
-      }
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'completed': return <CheckCircle className="w-4 h-4 text-green-500" />;
+      case 'failed': return <XCircle className="w-4 h-4 text-red-500" />;
+      case 'running': return <Clock className="w-4 h-4 text-blue-500" />;
+      default: return <Clock className="w-4 h-4 text-gray-500" />;
     }
+  };
 
-    if (session) {
-      loadNotifications()
-      // Actualizar cada 30 segundos
-      const interval = setInterval(loadNotifications, 30000)
-      return () => clearInterval(interval)
-    }
-  }, [session])
+  const formatDuration = (ms: number) => {
+    if (ms < 1000) return `${ms}ms`;
+    if (ms < 60000) return `${(ms / 1000).toFixed(1)}s`;
+    return `${(ms / 60000).toFixed(1)}m`;
+  };
 
-  const handleLogout = () => {
-    localStorage.removeItem('dev-session')
-    setSession(null)
-    router.push('/auth/signin')
-  }
-
-  const menuItems = [
-    { name: t('dashboard'), icon: Home, href: '/dashboard', active: true },
-    { name: 'Workflows', icon: Workflow, href: '/workflow-builder' },
-    { name: 'AI Assistant', icon: Brain, href: '/ai-assistant' },
-    { name: 'Analytics', icon: BarChart3, href: '/analytics' },
-    { name: 'Integrations', icon: Puzzle, href: '/integrations' },
-    { name: 'Marketplace', icon: Store, href: '/marketplace' },
-    { name: 'Smart Dashboard', icon: LayoutDashboard, href: '/smart-dashboard' },
-    { name: 'Team', icon: UserPlus, href: '/team' },
-    { name: 'Gamification', icon: Gamepad2, href: '/gamification' },
-    { name: 'Webhooks', icon: Webhook, href: '/webhooks' },
-    { name: 'API Docs', icon: BookOpen, href: '/api-docs' },
-    { name: 'Pricing', icon: CreditCard, href: '/pricing' },
-    { name: t('settings') ?? 'Settings', icon: Settings, href: '/dashboard/settings' },
-  ]
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleString('es-ES', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50">
-        <div className="text-center">
-          <div className="relative">
-            <div className="animate-spin rounded-full h-32 w-32 border-4 border-blue-200 mx-auto"></div>
-            <div className="animate-spin rounded-full h-32 w-32 border-4 border-blue-600 border-t-transparent mx-auto absolute top-0 left-0"></div>
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-200 rounded w-1/3 mb-8"></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="h-32 bg-gray-200 rounded"></div>
+              ))}
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="h-96 bg-gray-200 rounded"></div>
+              <div className="h-96 bg-gray-200 rounded"></div>
+            </div>
           </div>
-          <p className="mt-6 text-gray-600 text-lg font-medium">Cargando tu dashboard...</p>
         </div>
       </div>
-    )
+    );
   }
 
-  if (!session) {
-    return null
+  if (!stats) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Error</h1>
+          <p className="text-gray-600 mb-6">No se pudieron cargar los datos del dashboard</p>
+          <button
+            onClick={loadDashboardData}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Reintentar
+          </button>
+        </div>
+      </div>
+    );
   }
+
+  const successRate = stats.totalRuns > 0 ? ((stats.successfulRuns / stats.totalRuns) * 100).toFixed(1) : '0';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex">
-      {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-xl transform transition-transform duration-300 ease-in-out ${
-        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      } lg:translate-x-0 lg:static lg:inset-0`}>
-        <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
-          <div className="flex items-center">
-            <div className="h-8 w-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
-              <Zap className="h-5 w-5 text-white" />
-            </div>
-              <span className="ml-2 text-xl font-bold text-gray-900">{t('app_title')}</span>
-          </div>
-          <button
-            onClick={() => setSidebarOpen(false)}
-            className="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100"
-          >
-            <X className="h-6 w-6" />
-          </button>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Dashboard
+          </h1>
+          <p className="text-gray-600">
+            Resumen de tu plataforma de automatización
+          </p>
         </div>
 
-        <nav className="mt-6 px-3">
-          <div className="space-y-1">
-            {menuItems.map((item) => {
-              const Icon = item.icon
-              return (
-                <button
-                  key={item.name}
-                  onClick={() => {
-                    router.push(item.href)
-                    setSidebarOpen(false)
-                  }}
-                  className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200 ${
-                    item.active
-                      ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                  }`}
-                >
-                  <Icon className="h-5 w-5 mr-3" />
-                  {item.name}
-                </button>
-              )
-            })}
-          </div>
-
-          <div className="mt-8 pt-6 border-t border-gray-200">
-            <div className="px-3">
-              <div className="flex items-center">
-                <div className="h-8 w-8 bg-gray-200 rounded-full flex items-center justify-center">
-                  <Users className="h-4 w-4 text-gray-600" />
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm font-medium text-gray-900">{session?.user?.name || 'Usuario'}</p>
-                  <p className="text-xs text-gray-500">{session?.user?.email || 'usuario@ejemplo.com'}</p>
-                </div>
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white rounded-lg border border-gray-200 p-6"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Workflows Activos</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.activeWorkflows}</p>
+                <p className="text-sm text-gray-500">de {stats.totalWorkflows} total</p>
               </div>
-              <button
-                onClick={handleLogout}
-                className="mt-4 w-full flex items-center px-3 py-2 text-sm font-medium text-red-600 rounded-lg hover:bg-red-50 transition-colors duration-200"
+              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                <Zap className="w-6 h-6 text-blue-600" />
+              </div>
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="bg-white rounded-lg border border-gray-200 p-6"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Ejecuciones Totales</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.totalRuns}</p>
+                <p className="text-sm text-green-600 flex items-center gap-1">
+                  <TrendingUp className="w-4 h-4" />
+                  +12% vs mes anterior
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                <Play className="w-6 h-6 text-green-600" />
+              </div>
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="bg-white rounded-lg border border-gray-200 p-6"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Tasa de Éxito</p>
+                <p className="text-2xl font-bold text-gray-900">{successRate}%</p>
+                <p className="text-sm text-gray-500">{stats.successfulRuns} exitosas</p>
+              </div>
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                <CheckCircle className="w-6 h-6 text-green-600" />
+              </div>
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="bg-white rounded-lg border border-gray-200 p-6"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Conexiones</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.totalConnections}</p>
+                <p className="text-sm text-gray-500">apps conectadas</p>
+              </div>
+              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                <Database className="w-6 h-6 text-purple-600" />
+              </div>
+            </div>
+          </motion.div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Recent Runs */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="bg-white rounded-lg border border-gray-200 p-6"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                <Activity className="w-5 h-5" />
+                Ejecuciones Recientes
+              </h2>
+              <Link
+                href="/runs"
+                className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
               >
-                <LogOut className="h-4 w-4 mr-3" />
-                {t('logout') ?? 'Logout'}
-              </button>
+                Ver todas
+                <ArrowUpRight className="w-4 h-4" />
+              </Link>
             </div>
-          </div>
-        </nav>
-      </div>
 
-      {/* Overlay para móvil */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden transition-opacity duration-300"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
-      {/* Contenido principal */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header móvil */}
-        <div className="lg:hidden flex items-center justify-between h-16 px-4 bg-white border-b border-gray-200">
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100"
-          >
-            <Menu className="h-6 w-6" />
-          </button>
-          <div className="flex items-center">
-            <div className="h-8 w-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
-              <Zap className="h-5 w-5 text-white" />
-            </div>
-            <span className="ml-2 text-xl font-bold text-gray-900">{t('app_title')}</span>
-          </div>
-          <div className="w-10"></div>
-        </div>
-
-        {/* Contenido del dashboard */}
-        <div className="flex-1 overflow-y-auto">
-          <div className="container mx-auto px-4 py-8">
-            <div className="space-y-8">
-              {/* Header */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                    {t('welcome_title')}, {session?.user?.name || 'Usuario'}
-                  </h1>
-                  <p className="text-gray-600 mt-1 text-sm sm:text-base">
-                    {t('dashboard_subtitle')}
-                  </p>
-                </div>
-                <div className="flex items-center space-x-4">
-                  <Button
-                    onClick={() => setNotificationCenterOpen(true)}
-                    variant="outline"
-                    className="relative"
-                  >
-                    <Bell className="h-4 w-4 mr-2" />
-                    {t('notifications')}
-                    {unreadCount > 0 && (
-                      <Badge className="absolute -top-2 -right-2 bg-red-500 text-white text-xs">
-                        {unreadCount}
-                      </Badge>
+            <div className="space-y-4">
+              {stats.recentRuns.map((run) => (
+                <div key={run.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    {getStatusIcon(run.status)}
+                    <div>
+                      <p className="font-medium text-gray-900">{run.workflowName}</p>
+                      <p className="text-sm text-gray-500">{formatDate(run.startedAt)}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    {run.duration && (
+                      <p className="text-sm text-gray-600">{formatDuration(run.duration)}</p>
                     )}
-                  </Button>
-                  <Button
-                    onClick={() => router.push('/dashboard/workflows/builder')}
-                    className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    {t('new_workflow')}
-                  </Button>
-                </div>
-              </div>
-
-          {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">{t('active_workflows')}</p>
-                    <p className="text-2xl font-bold text-gray-900">12</p>
-                  </div>
-                  <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <Workflow className="h-6 w-6 text-blue-600" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">{t('runs_today')}</p>
-                    <p className="text-2xl font-bold text-gray-900">1,234</p>
-                  </div>
-                  <div className="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
-                    <Activity className="h-6 w-6 text-green-600" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">{t('time_saved')}</p>
-                    <p className="text-2xl font-bold text-gray-900">45h</p>
-                  </div>
-                  <div className="h-12 w-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                    <Clock className="h-6 w-6 text-purple-600" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">{t('estimated_saving')}</p>
-                    <p className="text-2xl font-bold text-gray-900">$2,340</p>
-                  </div>
-                  <div className="h-12 w-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-                    <DollarSign className="h-6 w-6 text-yellow-600" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Legal Compliance Monitor */}
-          <ComplianceMonitor />
-
-          {/* Gamification Section */}
-          <Card className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 backdrop-blur-sm border border-yellow-500/20 shadow-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center text-yellow-600">
-                <Trophy className="h-6 w-6 mr-2" />
-                {t('gamification_progress')}
-              </CardTitle>
-              <CardDescription className="text-yellow-700">
-                {t('keep_earning')}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-yellow-600 mb-1">15</div>
-                  <div className="text-sm text-yellow-700">{t('level')}</div>
-                  <Badge className="mt-1 bg-yellow-500 text-white">Platinum</Badge>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-yellow-600 mb-1">12,500</div>
-                  <div className="text-sm text-yellow-700">{t('points')}</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-yellow-600 mb-1">12</div>
-                  <div className="text-sm text-yellow-700">{t('current_streak')}</div>
-                  <div className="text-xs text-yellow-600">{t('on_fire')}</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-yellow-600 mb-1">8</div>
-                  <div className="text-sm text-yellow-700">{t('badges_label')}</div>
-                </div>
-              </div>
-              <div className="mt-4 flex justify-center">
-                <Button 
-                  onClick={() => router.push('/gamification')}
-                  className="bg-yellow-500 hover:bg-yellow-600 text-white"
-                >
-                  <Gamepad2 className="h-4 w-4 mr-2" />
-                  {t('view_full_gamification')}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Quick Actions */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Zap className="h-5 w-5 mr-2 text-yellow-500" />
-                  {t('quick_actions')}
-                </CardTitle>
-                <CardDescription>
-                  {t('manage_automation_tools')}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start"
-                  onClick={() => router.push('/workflow-builder')}
-                >
-                  <Workflow className="h-4 w-4 mr-2" />
-                  {t('workflow_builder_label')}
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start"
-                  onClick={() => router.push('/ai-assistant')}
-                >
-                  <Brain className="h-4 w-4 mr-2" />
-                  {t('ai_assistant_label')}
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start"
-                  onClick={() => router.push('/analytics')}
-                >
-                  <BarChart3 className="h-4 w-4 mr-2" />
-                  {t('analytics_label')}
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start"
-                  onClick={() => router.push('/integrations')}
-                >
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  {t('integrations_label')}
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Brain className="h-5 w-5 mr-2 text-purple-500" />
-                  {t('ai_assistant_title')}
-                </CardTitle>
-                <CardDescription>
-                  {t('ai_assistant_subtitle')}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="p-3 bg-purple-50 rounded-lg">
-                    <p className="text-sm text-purple-800">
-                      💡 <strong>Sugerencia:</strong> Puedes optimizar tu workflow de email marketing para aumentar la conversión en un 23%.
+                    <p className={`text-xs px-2 py-1 rounded-full ${
+                      run.status === 'completed' ? 'bg-green-100 text-green-800' :
+                      run.status === 'failed' ? 'bg-red-100 text-red-800' :
+                      'bg-blue-100 text-blue-800'
+                    }`}>
+                      {run.status === 'completed' ? 'Completado' :
+                       run.status === 'failed' ? 'Fallido' : 'Ejecutando'}
                     </p>
                   </div>
-                  <Button 
-                    className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white"
-                    onClick={() => router.push('/ai-assistant')}
-                  >
-                    <Brain className="h-4 w-4 mr-2" />
-                    {t('open_ai_assistant')}
-                  </Button>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+              ))}
+            </div>
+          </motion.div>
 
-          {/* Team Management Section */}
-          <Card className="bg-gradient-to-r from-blue-500/10 to-indigo-500/10 backdrop-blur-sm border border-blue-500/20 shadow-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center text-blue-600">
-                <UserPlus className="h-6 w-6 mr-2" />
-                {t('team_management')}
-              </CardTitle>
-              <CardDescription className="text-blue-700">
-                {t('manage_team_subtitle')}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-blue-600 mb-1">8</div>
-                  <div className="text-sm text-blue-700">{t('active_members')}</div>
-                  <Badge className="mt-1 bg-blue-500 text-white">{t('company_label')}</Badge>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-blue-600 mb-1">3</div>
-                  <div className="text-sm text-blue-700">{t('admins')}</div>
-                  <div className="text-xs text-blue-600">{t('full_permissions')}</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-blue-600 mb-1">2</div>
-                  <div className="text-sm text-blue-700">{t('pending_invites')}</div>
-                </div>
-              </div>
-              <div className="mt-4 flex justify-center">
-                <Button
-                  onClick={() => router.push('/team')}
-                  className="bg-blue-500 hover:bg-blue-600 text-white"
-                >
-                  <UserPlus className="h-4 w-4 mr-2" />
-                  {t('manage_team')}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Workflow Status */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="bg-white rounded-lg border border-gray-200 p-6"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                <BarChart3 className="w-5 h-5" />
+                Estado de Workflows
+              </h2>
+              <Link
+                href="/workflows"
+                className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
+              >
+                Gestionar
+                <ArrowUpRight className="w-4 h-4" />
+              </Link>
+            </div>
 
-          {/* API Documentation Section */}
-          <Card className="bg-gradient-to-r from-green-500/10 to-teal-500/10 backdrop-blur-sm border border-green-500/20 shadow-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center text-green-600">
-                <BookOpen className="h-6 w-6 mr-2" />
-                {t('api_docs')}
-              </CardTitle>
-              <CardDescription className="text-green-700">
-                {t('api_docs_subtitle')}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-green-600 mb-1">15+</div>
-                  <div className="text-sm text-green-700">Endpoints</div>
-                  <div className="text-xs text-green-600">REST API completa</div>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                  <span className="text-sm text-gray-600">Activos</span>
                 </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-green-600 mb-1">3</div>
-                  <div className="text-sm text-green-700">Lenguajes</div>
-                  <div className="text-xs text-green-600">JS, Python, cURL</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-green-600 mb-1">OpenAPI</div>
-                  <div className="text-sm text-green-700">Especificación</div>
-                  <div className="text-xs text-green-600">Swagger compatible</div>
-                </div>
+                <span className="font-semibold text-gray-900">{stats.workflowsByStatus.active}</span>
               </div>
-              <div className="mt-4 flex justify-center space-x-3">
-                <Button
-                  onClick={() => router.push('/api-docs')}
-                  className="bg-green-500 hover:bg-green-600 text-white"
-                >
-                  <BookOpen className="h-4 w-4 mr-2" />
-                  {t('view_docs')}
-                </Button>
-                <Button
-                  onClick={() => window.open('/api/docs', '_blank')}
-                  variant="outline"
-                  className="border-green-500 text-green-600 hover:bg-green-50"
-                >
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  {t('swagger_ui')}
-                </Button>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
+                  <span className="text-sm text-gray-600">Inactivos</span>
+                </div>
+                <span className="font-semibold text-gray-900">{stats.workflowsByStatus.inactive}</span>
               </div>
-            </CardContent>
-          </Card>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
+                  <span className="text-sm text-gray-600">Borradores</span>
+                </div>
+                <span className="font-semibold text-gray-900">{stats.workflowsByStatus.draft}</span>
+              </div>
+            </div>
 
-          {/* Webhooks Section */}
-          <Card className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 backdrop-blur-sm border border-purple-500/20 shadow-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center text-purple-600">
-                <Webhook className="h-6 w-6 mr-2" />
-                {t('webhooks_system')}
-              </CardTitle>
-              <CardDescription className="text-purple-700">
-                {t('webhooks_subtitle')}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-purple-600 mb-1">3</div>
-                  <div className="text-sm text-purple-700">{t('active_webhooks')}</div>
-                  <div className="text-xs text-purple-600">Configurados</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-purple-600 mb-1">57</div>
-                  <div className="text-sm text-purple-700">{t('events_sent')}</div>
-                  <div className="text-xs text-purple-600">Esta semana</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-purple-600 mb-1">98%</div>
-                  <div className="text-sm text-purple-700">{t('success_rate')}</div>
-                  <div className="text-xs text-purple-600">Entregas exitosas</div>
-                </div>
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-gray-600">Ejecuciones por día</span>
+                <span className="text-sm text-gray-500">Últimos 7 días</span>
               </div>
-              <div className="mt-4 flex justify-center">
-                <Button
-                  onClick={() => router.push('/webhooks')}
-                  className="bg-purple-500 hover:bg-purple-600 text-white"
-                >
-                  <Webhook className="h-4 w-4 mr-2" />
-                  {t('manage_webhooks')}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Backup & Restore Section */}
-          <Card className="bg-gradient-to-r from-green-500/10 to-blue-500/10 backdrop-blur-sm border border-green-500/20 shadow-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center text-green-600">
-                <Database className="h-6 w-6 mr-2" />
-                {t('backup_restore')}
-              </CardTitle>
-              <CardDescription className="text-green-700">
-                {t('backup_subtitle')}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-green-600 mb-1">12</div>
-                  <div className="text-sm text-green-700">{t('total_backups')}</div>
-                  <div className="text-xs text-green-600">Completados</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-green-600 mb-1">2.4GB</div>
-                  <div className="text-sm text-green-700">{t('backed_data')}</div>
-                  <div className="text-xs text-green-600">Comprimidos</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-green-600 mb-1">98%</div>
-                  <div className="text-sm text-green-700">{t('success_rate')}</div>
-                  <div className="text-xs text-green-600">{t('backups_success_rate')}</div>
-                </div>
-              </div>
-              <div className="mt-4 flex justify-center">
-                <Button
-                  onClick={() => router.push('/backups')}
-                  className="bg-green-500 hover:bg-green-600 text-white"
-                >
-                  <Database className="h-4 w-4 mr-2" />
-                  {t('manage_backups')}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Recent Activity */}
-          <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <BarChart3 className="h-5 w-5 mr-2 text-blue-500" />
-                {t('recent_activity')}
-              </CardTitle>
-              <CardDescription>
-                {t('latest_runs')}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {[
-                  { action: 'Workflow "Email Marketing" ejecutado', time: 'Hace 5 minutos', status: 'success' },
-                  { action: 'Nueva integración con Slack configurada', time: 'Hace 1 hora', status: 'success' },
-                  { action: 'Workflow "Lead Scoring" actualizado', time: 'Hace 2 horas', status: 'info' },
-                  { action: 'Backup de datos completado', time: 'Hace 3 horas', status: 'success' }
-                ].map((item, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div className="flex items-center">
-                      <div className={`h-2 w-2 rounded-full mr-3 ${
-                        item.status === 'success' ? 'bg-green-500' : 
-                        item.status === 'info' ? 'bg-blue-500' : 'bg-yellow-500'
-                      }`}></div>
-                      <span className="text-sm text-gray-700">{item.action}</span>
-                    </div>
-                    <span className="text-xs text-gray-500">{item.time}</span>
+              <div className="flex items-end gap-2 h-20">
+                {stats.runsByDay.map((day, index) => (
+                  <div key={day.date} className="flex-1 flex flex-col items-center">
+                    <div
+                      className="w-full bg-blue-500 rounded-t"
+                      style={{ height: `${(day.count / 25) * 100}%` }}
+                    ></div>
+                    <span className="text-xs text-gray-500 mt-1">
+                      {new Date(day.date).getDate()}
+                    </span>
                   </div>
                 ))}
               </div>
-            </CardContent>
-          </Card>
             </div>
-          </div>
+          </motion.div>
         </div>
-      </div>
 
-      {/* Notification Center */}
-      {notificationCenterOpen && (
-        <div className="fixed inset-0 z-50 overflow-hidden">
-          <div 
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-            onClick={() => setNotificationCenterOpen(false)}
-          />
-          <div className="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl transform transition-transform duration-300 ease-in-out">
-            <div className="flex flex-col h-full">
-              <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gray-50">
-                <div className="flex items-center space-x-3">
-                  <div className="relative">
-                    <Bell className="w-6 h-6 text-gray-700" />
-                    {unreadCount > 0 && (
-                      <Badge className="absolute -top-2 -right-2 bg-red-500 text-white text-xs">
-                        {unreadCount}
-                      </Badge>
-                    )}
-                  </div>
-                  <div>
-                    <h2 className="text-lg font-semibold text-gray-900">Notificaciones</h2>
-                    <p className="text-sm text-gray-500">
-                      {unreadCount} no leídas
-                    </p>
-                  </div>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setNotificationCenterOpen(false)}
-                >
-                  <X className="w-4 h-4" />
-                </Button>
+        {/* Quick Actions */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+          className="mt-8 bg-white rounded-lg border border-gray-200 p-6"
+        >
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Acciones Rápidas</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Link
+              href="/workflows/new"
+              className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                <Zap className="w-5 h-5 text-blue-600" />
               </div>
-              
-              <div className="flex-1 overflow-y-auto p-6">
-                <div className="space-y-4">
-                  <div className="text-center text-gray-500">
-                    <Bell className="w-12 h-12 mx-auto mb-2" />
-                    <p className="text-sm">Centro de notificaciones</p>
-                    <p className="text-xs">Las notificaciones aparecerán aquí</p>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Button
-                      onClick={() => {
-                        setNotificationCenterOpen(false)
-                        router.push('/notifications')
-                      }}
-                      className="w-full"
-                    >
-                      Ver todas las notificaciones
-                    </Button>
-                    <Button
-                      onClick={() => {
-                        // Simular crear notificación de prueba
-                        fetch('/api/notifications', {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({
-                            action: 'test',
-                            userId: 'user-1'
-                          })
-                        }).then(() => {
-                          // Recargar contador
-                          fetch(`/api/notifications?userId=user-1&type=unread-count`)
-                            .then(res => res.json())
-                            .then(data => {
-                              if (data.success) {
-                                setUnreadCount(data.data.unreadCount)
-                              }
-                            })
-                        })
-                      }}
-                      variant="outline"
-                      className="w-full"
-                    >
-                      Crear notificación de prueba
-                    </Button>
-                  </div>
-                </div>
+              <div>
+                <p className="font-medium text-gray-900">Crear Workflow</p>
+                <p className="text-sm text-gray-500">Automatiza tus procesos</p>
               </div>
-            </div>
+            </Link>
+
+            <Link
+              href="/templates"
+              className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                <Database className="w-5 h-5 text-green-600" />
+              </div>
+              <div>
+                <p className="font-medium text-gray-900">Usar Plantilla</p>
+                <p className="text-sm text-gray-500">Comienza con plantillas</p>
+              </div>
+            </Link>
+
+            <Link
+              href="/apps"
+              className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                <Users className="w-5 h-5 text-purple-600" />
+              </div>
+              <div>
+                <p className="font-medium text-gray-900">Conectar Apps</p>
+                <p className="text-sm text-gray-500">Integra tus servicios</p>
+              </div>
+            </Link>
           </div>
-        </div>
-      )}
+        </motion.div>
+      </div>
     </div>
-  )
+  );
 }

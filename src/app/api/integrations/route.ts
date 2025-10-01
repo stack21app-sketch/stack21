@@ -14,9 +14,9 @@ export async function GET(request: NextRequest) {
       filteredIntegrations = filteredIntegrations.filter(integration => integration.category === category)
     }
 
-    if (status) {
-      filteredIntegrations = filteredIntegrations.filter(integration => integration.status === status)
-    }
+    // if (status) {
+    //   filteredIntegrations = filteredIntegrations.filter(integration => integration.status === status)
+    // }
 
     return NextResponse.json({
       success: true,

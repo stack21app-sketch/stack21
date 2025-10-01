@@ -469,20 +469,20 @@ export function BackupManager() {
                   <div>
                     <Label>Módulos</Label>
                     <div className="grid grid-cols-2 gap-2 mt-2 max-h-40 overflow-y-auto">
-                      {availableModules.map(module => (
-                        <label key={module.id} className="flex items-center space-x-2">
+                      {availableModules.map(moduleItem => (
+                        <label key={moduleItem.id} className="flex items-center space-x-2">
                           <input
                             type="checkbox"
-                            checked={newBackup.modules.includes(module.id)}
+                            checked={newBackup.modules.includes(moduleItem.id)}
                             onChange={(e) => {
                               if (e.target.checked) {
-                                setNewBackup(prev => ({ ...prev, modules: [...prev.modules, module.id] }));
+                                setNewBackup(prev => ({ ...prev, modules: [...prev.modules, moduleItem.id] }));
                               } else {
-                                setNewBackup(prev => ({ ...prev, modules: prev.modules.filter(m => m !== module.id) }));
+                                setNewBackup(prev => ({ ...prev, modules: prev.modules.filter(m => m !== moduleItem.id) }));
                               }
                             }}
                           />
-                          <span className="text-sm">{module.name}</span>
+                          <span className="text-sm">{moduleItem.name}</span>
                         </label>
                       ))}
                     </div>
@@ -569,10 +569,10 @@ export function BackupManager() {
                         <span className="font-medium text-sm">Módulos:</span>
                         <div className="flex flex-wrap gap-1 mt-1">
                           {backup.modules.map(moduleId => {
-                            const module = availableModules.find(m => m.id === moduleId);
+                            const moduleItem = availableModules.find(m => m.id === moduleId);
                             return (
                               <Badge key={moduleId} variant="outline" className="text-xs">
-                                {module?.name || moduleId}
+                                {moduleItem?.name || moduleId}
                               </Badge>
                             );
                           })}
@@ -652,7 +652,7 @@ export function BackupManager() {
                     <Label>Módulos a Restaurar</Label>
                     <div className="grid grid-cols-2 gap-2 mt-2 max-h-40 overflow-y-auto">
                       {newRestore.backupId && backups.find(b => b.id === newRestore.backupId)?.modules.map(moduleId => {
-                        const module = availableModules.find(m => m.id === moduleId);
+                        const moduleItem = availableModules.find(m => m.id === moduleId);
                         return (
                           <label key={moduleId} className="flex items-center space-x-2">
                             <input
@@ -666,7 +666,7 @@ export function BackupManager() {
                                 }
                               }}
                             />
-                            <span className="text-sm">{module?.name || moduleId}</span>
+                            <span className="text-sm">{moduleItem?.name || moduleId}</span>
                           </label>
                         );
                       })}
@@ -851,20 +851,20 @@ export function BackupManager() {
                   <div>
                     <Label>Módulos</Label>
                     <div className="grid grid-cols-2 gap-2 mt-2 max-h-40 overflow-y-auto">
-                      {availableModules.map(module => (
-                        <label key={module.id} className="flex items-center space-x-2">
+                      {availableModules.map(moduleItem => (
+                        <label key={moduleItem.id} className="flex items-center space-x-2">
                           <input
                             type="checkbox"
-                            checked={newSchedule.modules.includes(module.id)}
+                            checked={newSchedule.modules.includes(moduleItem.id)}
                             onChange={(e) => {
                               if (e.target.checked) {
-                                setNewSchedule(prev => ({ ...prev, modules: [...prev.modules, module.id] }));
+                                setNewSchedule(prev => ({ ...prev, modules: [...prev.modules, moduleItem.id] }));
                               } else {
-                                setNewSchedule(prev => ({ ...prev, modules: prev.modules.filter(m => m !== module.id) }));
+                                setNewSchedule(prev => ({ ...prev, modules: prev.modules.filter(m => m !== moduleItem.id) }));
                               }
                             }}
                           />
-                          <span className="text-sm">{module.name}</span>
+                          <span className="text-sm">{moduleItem.name}</span>
                         </label>
                       ))}
                     </div>
@@ -972,10 +972,10 @@ export function BackupManager() {
                         <span className="font-medium text-sm">Módulos:</span>
                         <div className="flex flex-wrap gap-1 mt-1">
                           {schedule.modules.map(moduleId => {
-                            const module = availableModules.find(m => m.id === moduleId);
+                            const moduleItem = availableModules.find(m => m.id === moduleId);
                             return (
                               <Badge key={moduleId} variant="outline" className="text-xs">
-                                {module?.name || moduleId}
+                                {moduleItem?.name || moduleId}
                               </Badge>
                             );
                           })}
@@ -1002,16 +1002,16 @@ export function BackupManager() {
           <h2 className="text-2xl font-bold">Módulos Disponibles</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {availableModules.map(module => {
-              const moduleStats = stats?.moduleStats[module.id];
+            {availableModules.map(moduleItem => {
+              const moduleStats = stats?.moduleStats[moduleItem.id];
               return (
-                <Card key={module.id}>
+                <Card key={moduleItem.id}>
                   <CardHeader>
                     <CardTitle className="flex items-center">
                       <Database className="h-5 w-5 mr-2" />
-                      {module.name}
+                      {moduleItem.name}
                     </CardTitle>
-                    <CardDescription>{module.description}</CardDescription>
+                    <CardDescription>{moduleItem.description}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2 text-sm">

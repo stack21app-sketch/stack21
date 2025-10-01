@@ -1,0 +1,59 @@
+[
+  {
+    "id": "conn_onfi2htc",
+    "userId": "dev-user",
+    "name": "GitHub OAuth Connection",
+    "appSlug": "github",
+    "authType": "oauth2",
+    "credentialsEnc": "{\"accessToken\":\"mock\",\"refreshToken\":\"mock\",\"expiresIn\":3600}",
+    "isActive": true,
+    "createdAt": "2025-09-30T12:09:49.152Z",
+    "updatedAt": "2025-09-30T12:09:49.152Z"
+  },
+  {
+    "id": "conn_jeue7w0v",
+    "userId": "dev-user",
+    "name": "GitHub OAuth Connection",
+    "appSlug": "github",
+    "authType": "oauth2",
+    "credentialsEnc": "{\"accessToken\":\"mock_access_token_1759234599909\",\"refreshToken\":\"mock_refresh_token_1759234599909\",\"expiresIn\":3600,\"scope\":\"read,write\"}",
+    "isActive": true,
+    "createdAt": "2025-09-30T12:16:40.244Z",
+    "updatedAt": "2025-09-30T12:16:40.244Z"
+  },
+  {
+    "id": "conn_7nirazsj",
+    "userId": "dev-user",
+    "name": "GitHub OAuth Connection",
+    "appSlug": "github",
+    "authType": "oauth2",
+    "credentialsEnc": "{\"accessToken\":\"mock_access_token_1759234606784\",\"refreshToken\":\"mock_refresh_token_1759234606784\",\"expiresIn\":3600,\"scope\":\"read,write\"}",
+    "isActive": true,
+    "createdAt": "2025-09-30T12:16:46.813Z",
+    "updatedAt": "2025-09-30T12:16:46.813Z"
+  },
+  {
+    "id": "conn_n3xtgwoc",
+    "userId": "dev-user",
+    "name": "GitHub OAuth Connection",
+    "appSlug": "github",
+    "authType": "oauth2",
+    "credentialsEnc": "{\"accessToken\":\"mock_access_token_1759234609379\",\"refreshToken\":\"mock_refresh_token_1759234609379\",\"expiresIn\":3600,\"scope\":\"read,write\"}",
+    "isActive": true,
+    "createdAt": "2025-09-30T12:16:49.407Z",
+    "updatedAt": "2025-09-30T12:16:49.407Z"
+  },
+  {
+    "id": "conn_1759281942409_5fa4",
+    "userId": "dev-user",
+    "name": "Test Connection",
+    "appSlug": "github",
+    "authType": "oauth2",
+    "credentials": {
+      "token": "test123"
+    },
+    "isActive": true,
+    "createdAt": "2025-10-01T01:25:42.409Z",
+    "updatedAt": "2025-10-01T01:25:42.409Z"
+  }
+]

@@ -1,12 +1,12 @@
 {
-  "timestamp": "2025-09-22T08:57:52.882Z",
+  "timestamp": "2025-09-27T03:19:50.542Z",
   "project": "Stack21 - SaaS Platform with AI Agents",
   "summary": {
     "total": 37,
-    "passed": 36,
-    "failed": 1,
-    "duration": 154904,
-    "successRate": 97.2972972972973,
+    "passed": 37,
+    "failed": 0,
+    "duration": 192386,
+    "successRate": 100,
     "criticalTests": {
       "total": 11,
       "passed": 11,
@@ -61,8 +61,8 @@
     },
     "Workspace API": {
       "total": 2,
-      "passed": 1,
-      "failed": 1
+      "passed": 2,
+      "failed": 0
     },
     "Analytics API": {
       "total": 2,
@@ -91,7 +91,7 @@
       "category": "Authentication",
       "priority": "Critical",
       "status": "PASSED",
-      "duration": 668.615475549577,
+      "duration": 802.4861509716424,
       "error": null
     },
     {
@@ -99,7 +99,7 @@
       "category": "Authentication",
       "priority": "Critical",
       "status": "PASSED",
-      "duration": 2249.7573538391807,
+      "duration": 1110.883163231756,
       "error": null
     },
     {
@@ -107,7 +107,7 @@
       "category": "AI Agents",
       "priority": "Critical",
       "status": "PASSED",
-      "duration": 1444.975344946446,
+      "duration": 1510.8898487522174,
       "error": null
     },
     {
@@ -115,7 +115,7 @@
       "category": "AI Agents",
       "priority": "Critical",
       "status": "PASSED",
-      "duration": 1622.8719254349792,
+      "duration": 832.002508260155,
       "error": null
     },
     {
@@ -123,7 +123,7 @@
       "category": "AI Agents",
       "priority": "High",
       "status": "PASSED",
-      "duration": 1310.6308883365427,
+      "duration": 2101.8062938579124,
       "error": null
     },
     {
@@ -131,7 +131,7 @@
       "category": "AI Agents",
       "priority": "High",
       "status": "PASSED",
-      "duration": 1533.4944037364262,
+      "duration": 1010.2958034991118,
       "error": null
     },
     {
@@ -139,7 +139,7 @@
       "category": "Dashboard",
       "priority": "High",
       "status": "PASSED",
-      "duration": 730.5207334897182,
+      "duration": 560.6014524464316,
       "error": null
     },
     {
@@ -147,7 +147,7 @@
       "category": "Dashboard",
       "priority": "High",
       "status": "PASSED",
-      "duration": 2402.2016877842657,
+      "duration": 1398.0096210209626,
       "error": null
     },
     {
@@ -155,7 +155,7 @@
       "category": "Workflow Builder",
       "priority": "High",
       "status": "PASSED",
-      "duration": 1270.7782076405056,
+      "duration": 672.5629155087925,
       "error": null
     },
     {
@@ -163,7 +163,7 @@
       "category": "Responsive Design",
       "priority": "Medium",
       "status": "PASSED",
-      "duration": 1287.0083705859092,
+      "duration": 701.5261045914318,
       "error": null
     },
     {
@@ -171,7 +171,7 @@
       "category": "Error Handling",
       "priority": "High",
       "status": "PASSED",
-      "duration": 1377.9976102594437,
+      "duration": 2447.6613372674938,
       "error": null
     },
     {
@@ -179,7 +179,7 @@
       "category": "Error Handling",
       "priority": "High",
       "status": "PASSED",
-      "duration": 1260.3517171013082,
+      "duration": 1220.3449132816484,
       "error": null
     },
     {
@@ -187,7 +187,7 @@
       "category": "AI Agents API",
       "priority": "Critical",
       "status": "PASSED",
-      "duration": 2493.484614805073,
+      "duration": 842.1027600986699,
       "error": null
     },
     {
@@ -195,7 +195,7 @@
       "category": "AI Agents API",
       "priority": "Critical",
       "status": "PASSED",
-      "duration": 2408.6950925768056,
+      "duration": 1991.9314133534617,
       "error": null
     },
     {
@@ -203,7 +203,7 @@
       "category": "AI Agents API",
       "priority": "High",
       "status": "PASSED",
-      "duration": 2193.802385025648,
+      "duration": 1468.275843746956,
       "error": null
     },
     {
@@ -211,7 +211,7 @@
       "category": "AI Agents API",
       "priority": "High",
       "status": "PASSED",
-      "duration": 535.6326407396419,
+      "duration": 894.2557431103708,
       "error": null
     },
     {
@@ -219,7 +219,7 @@
       "category": "AI Agents API",
       "priority": "High",
       "status": "PASSED",
-      "duration": 532.9045740572437,
+      "duration": 953.2683388291274,
       "error": null
     },
     {
@@ -227,7 +227,7 @@
       "category": "Authentication API",
       "priority": "Critical",
       "status": "PASSED",
-      "duration": 502.7188187078568,
+      "duration": 2431.4030553864213,
       "error": null
     },
     {
@@ -235,7 +235,7 @@
       "category": "Authentication API",
       "priority": "Critical",
       "status": "PASSED",
-      "duration": 1095.0536854245506,
+      "duration": 2313.275411806051,
       "error": null
     },
     {
@@ -243,7 +243,7 @@
       "category": "Authentication API",
       "priority": "High",
       "status": "PASSED",
-      "duration": 611.7309895545282,
+      "duration": 518.4812144377902,
       "error": null
     },
     {
@@ -251,7 +251,7 @@
       "category": "Billing API",
       "priority": "High",
       "status": "PASSED",
-      "duration": 2131.8265702703957,
+      "duration": 2388.065136987888,
       "error": null
     },
     {
@@ -259,23 +259,23 @@
       "category": "Billing API",
       "priority": "High",
       "status": "PASSED",
-      "duration": 2349.492911797659,
+      "duration": 986.0492892632577,
       "error": null
     },
     {
       "name": "GET /api/workspaces",
       "category": "Workspace API",
       "priority": "High",
-      "status": "FAILED",
-      "duration": 804.9881636526673,
-      "error": "Simulated test failure"
+      "status": "PASSED",
+      "duration": 1827.0793169912904,
+      "error": null
     },
     {
       "name": "POST /api/workspaces - Create Workspace",
       "category": "Workspace API",
       "priority": "High",
       "status": "PASSED",
-      "duration": 2195.6443578489543,
+      "duration": 1935.0798051671688,
       "error": null
     },
     {
@@ -283,7 +283,7 @@
       "category": "Analytics API",
       "priority": "Medium",
       "status": "PASSED",
-      "duration": 690.6303688849121,
+      "duration": 1278.6058115631408,
       "error": null
     },
     {
@@ -291,7 +291,7 @@
       "category": "Analytics API",
       "priority": "Medium",
       "status": "PASSED",
-      "duration": 2377.197607254701,
+      "duration": 1370.8827038357686,
       "error": null
     },
     {
@@ -299,7 +299,7 @@
       "category": "Database Operations",
       "priority": "Critical",
       "status": "PASSED",
-      "duration": 2127.528889058859,
+      "duration": 2132.174673158296,
       "error": null
     },
     {
@@ -307,7 +307,7 @@
       "category": "Database Operations",
       "priority": "Critical",
       "status": "PASSED",
-      "duration": 694.4104318353079,
+      "duration": 1166.160145800125,
       "error": null
     },
     {
@@ -315,7 +315,7 @@
       "category": "Error Handling",
       "priority": "High",
       "status": "PASSED",
-      "duration": 984.3465322466222,
+      "duration": 2248.9960316909483,
       "error": null
     },
     {
@@ -323,7 +323,7 @@
       "category": "Error Handling",
       "priority": "High",
       "status": "PASSED",
-      "duration": 1792.058424454681,
+      "duration": 970.3159600883725,
       "error": null
     },
     {
@@ -331,7 +331,7 @@
       "category": "Performance Testing",
       "priority": "Medium",
       "status": "PASSED",
-      "duration": 1761.5760479303008,
+      "duration": 1721.9931719165581,
       "error": null
     },
     {
@@ -339,7 +339,7 @@
       "category": "Performance Testing",
       "priority": "Medium",
       "status": "PASSED",
-      "duration": 1617.9882874822513,
+      "duration": 1806.5405085085295,
       "error": null
     },
     {
@@ -347,7 +347,7 @@
       "category": "E2E",
       "priority": "Critical",
       "status": "PASSED",
-      "duration": 14647.036658092635,
+      "duration": 18129.11522484892,
       "steps": 8,
       "error": null
     },
@@ -356,7 +356,7 @@
       "category": "E2E",
       "priority": "High",
       "status": "PASSED",
-      "duration": 30472.005778384235,
+      "duration": 36766.13687971451,
       "steps": 7,
       "error": null
     },
@@ -365,7 +365,7 @@
       "category": "E2E",
       "priority": "High",
       "status": "PASSED",
-      "duration": 15570.668683234517,
+      "duration": 26419.122144781613,
       "steps": 7,
       "error": null
     },
@@ -374,7 +374,7 @@
       "category": "E2E",
       "priority": "High",
       "status": "PASSED",
-      "duration": 36668.311673827855,
+      "duration": 31296.152339267006,
       "steps": 7,
       "error": null
     },
@@ -383,7 +383,7 @@
       "category": "E2E",
       "priority": "Medium",
       "status": "PASSED",
-      "duration": 10448.864337051595,
+      "duration": 34067.71142571322,
       "steps": 6,
       "error": null
     }
